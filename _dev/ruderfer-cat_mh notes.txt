@@ -1,0 +1,24 @@
+There's basically 3 parts to this project
+1 - have a thing that sends api request to cat-mh server when DR ruderfer wants (in survey? as project link?)
+2 - have a thing that receives survey results from cat-mh server and stores on redcap
+3 - poll cat-mh server occasionally to collect dropped results
+
+cat-mh:
+CAT is computer adaptive testing?
+fun stuff about depression screener asking variable number of questions based on statistical stuff like variances to get a more helpful number that measures depression
+
+1/25 skype call 11 am:
+What is RDSD?
+e-consent through REDCap
+distribute survey
+collect info
+eventually have enough data to push to RDSD
+he will send me credentials so I can start developing a module to get people taking tests
+goal is to have it as broadly available (vumc-wide) as possible
+eventually be collecting people who volunteer via MyResearch
+
+Project ID: 71999
+Project Title: Consumer-Grade Devices and OSA Treatment
+
+terms accepted:
+https://www.cat-mh.com/panel/secure/common/terms.html

@@ -1,0 +1,11 @@
+this folder to be removed before 1.0/release
+
+module roadmap:
+develop interface
+	for showing user the interview questions and sending answers to catmh
+	for telling the user the interview is complete, thanks for participating
+integrate to cat-mh servers via api w applicationid and organizationID
+save interview results for participant in redcap project
+php/redcap version testing and config update
+remove and archive dev folder
+publish to redcap module repo
