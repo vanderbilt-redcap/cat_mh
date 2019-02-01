@@ -21,21 +21,51 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	
 	# provide button for user to click to send them to interview page after they've read the last page of the survey submission document
 	public function redcap_survey_complete(int $project_id, string $record = NULL, string $instrument, int $event_id, int $group_id = NULL, string $survey_hash, int $response_id = NULL, int $repeat_instance = 1) {
-		$this->fromSurvey = [
-			"pid" => $project_id,
-			"record" => $record,
-			"eid" => $event_id
-		];
-		$page = $this->getUrl("interview.php");
-		echo "Click below to begin your CAT-MH screening interview.<br />";
+		// append css to end of survey document so our loader works
+		$cssPath = $this->getUrl('css/surveyComplete.css');
 		echo "
-		<button id='catmh_button'>Begin Interview</button>
-		<script>
-			var btn = document.getElementById('catmh_button')
-			btn.addEventListener('click', function() {
-				window.location.assign('$page')
-			})
+		<script type='text/javascript'>
+			$.get('$cssPath', function(css) {
+				$('<style type=\'text/css\'></style>')
+					.html(css)
+					.appendTo('head');
+			});
 		</script>";
+		
+		// add javascript file that will handle contacting the API
+		$jsPath = $this->getUrl('js/surveyComplete.js');
+		echo "
+		<script type='text/javascript' src='$jsPath'></script>";
+		
+		// add loader html
+		echo "
+		<div class='loader'></div>";
+		// if ($mockInterview) {
+			// # spin loader for 1s to simulate waiting for cat-mh
+			// $html = "<span>Please wait while REDCap prepares your interview.</span>
+			// <br />
+			// <div class='loader'></div>";
+			
+		// } else {
+			// # spin loader until we establish interview with cat-mh server and get first question/answers
+			// $html = "<span>Please wait while REDCap contacts the CAT-MH server to prepare your interview.</span>
+			// <br />
+			// <div class='loader'></div>";
+			// # start cat-mh api interview creation/authentication/first question process
+		// }
+		
+		
+		// $page = $this->getUrl("interview.php");
+		// echo "Click to begin your CAT-MH screening interview.<br />";
+		// echo "
+		// <button id='catmh_button'>Begin Interview</button>
+		// <script>
+			// var btn = document.getElementById('catmh_button')
+			// btn.addEventListener('click', function() {
+				// window.location.assign('$page' + '&record=' + $record + '&eid=' + $event_id)
+			// })
+		// </script>";
+		// echo "<div class='loader'></div>";
 	}
 	
 	# this function will get interview json string from CAT-MH server via CAT-MH API
@@ -54,9 +84,10 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	#	array($jSessionId, $awsElb)
 	public function getNextQuestion($args = NULL) {
 		# for testing
-		return $this->getNextMockQuestion();
+		return $this->startMockInterview();
 		
-		# zf questionID == -1, test over
+		# use API
+		// ...
 	}
 	
 	# after interview is started, get questions one at a time
@@ -64,7 +95,10 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	#	array($jSessionId, $awsElb)
 	public function retrieveResults($args = NULL) {
 		# for testing
-		return $this->retrieveMockResults();
+		return $this->startMockInterview();
+		
+		# use API
+		// ...
 	}
 	
 	# start interview is what the API docs refer to as administering the interview
@@ -82,7 +116,11 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	# arguments:
 	#	array($jSessionId, $awsElb)
 	public function submitAnswer() {
+		# for testing
+		return $this->startMockInterview();
 		
+		# use API
+		// ...
 	}
 	
 	# end current interview session
@@ -100,6 +138,9 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	# arguments:
 	#	array($jSessionId, $awsElb)
 	public function unlockInterview($args = NULL) {
+		# for testing
+		return $this->startMockInterview();
+		
 		# use API
 		// ...
 	}

@@ -1,0 +1,139 @@
+// recompile command (in git bash folder):
+//sass.bat css/base.scss css/base.css
+
+@import "C:/xampp/htdocs/redcap/modules/cat_mh_v0.1/css/_normalize.scss";
+
+// variables
+$gradDarkBlue: #00426d;
+$gradLightBlue: #0077be;
+$divDarkBlue: #003a59;
+$divLightBlue: #0073b1;
+$divHoverBlue: #0095e6;
+$divBorderBlue: #005381;
+$rowDarkBlue: #cbd5e4;
+$rowLightBlue: #e7ebf2;
+$divRed: #7d3c4a;
+$divBorderRed: #5a2934;
+$textRed: #ff0000;
+
+#header {
+	top: 0px;
+	position: fixed;
+	width: 100%;
+	background-image: linear-gradient($gradLightBlue, $gradDarkBlue);
+	padding: 16px;
+	z-index: 1030;
+}
+
+nav {
+	position: fixed;
+	margin-top: 175px;
+	width: 334px;
+	div {
+		background-color: $divLightBlue;
+		border: 1.5px solid $divBorderBlue;
+		
+		color: #fff;
+		font-size: 20px;
+		font-weight: 550;
+		text-align: center;
+		
+		margin: 12px;
+		padding: 8px 12px;
+		
+		cursor: pointer;
+	}
+	div:hover {
+		background-color: $divHoverBlue;
+	}
+	div.selected {
+		background-color: $divDarkBlue;
+	}
+}
+
+#content {
+	margin-top: 175px;
+	width: calc(100% - 350px);
+	float: right;
+}
+
+.redHeader {
+	background-color: $divRed;
+	border: 1.5px solid $divBorderRed;
+	color: #fff;
+	font: 20px bold, sans-serif;
+	padding: 4px;
+	text-align: center;
+	margin-right: 7.5%;
+}
+
+.blueHeader {
+	background-color: $divLightBlue;
+	border: 1.5px solid $divBorderBlue;
+	color: #fff;
+	font: 20px bold, sans-serif;
+	padding: 4px;
+	text-align: center;
+	margin-right: 7.5%;
+}
+
+// tables
+.dataTables_wrapper {
+	margin-right: 7.5%;
+}
+
+.dataTable {
+	border-bottom: 0 !important;
+	width: calc(100% - 350px);
+	margin-right: 7.5%;
+	thead {
+		text-align: left;
+		font-family: sans-serif;
+		font-size: 18px;
+		th {
+			padding-left: 10px !important;
+		}
+		th:not(:first-child) {
+			border-left: 1px solid black;
+		}
+	}
+	td + td {
+		border-left: 1px solid black;
+	}
+	tr + tr td {
+		border-top: 1px solid black;
+	}
+}
+
+.summaryTable {
+	border: 1px solid white;
+	table-layout: auto;
+	width: 92.5%;
+	text-align: left;
+	thead {
+		background-color: $divBorderBlue;
+		color: #fff;
+		font: 24px bold, sans-serif;
+		th {
+			padding: 12px;
+		}
+	}
+	tbody {
+		td, th {
+			padding: 12px;
+		}
+		td:last-child {
+			color: #f00;
+			font-weight: 600;
+		}
+		tr {
+			font: 18px normal, sans-serif;
+		}
+		.even {
+			background-color: $rowLightBlue;
+		}
+		.odd {
+			background-color: $rowDarkBlue;
+		}
+	}
+}
