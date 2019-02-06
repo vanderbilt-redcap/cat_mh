@@ -1,11 +1,34 @@
 this folder to be removed before 1.0/release
 
 module roadmap:
-develop interface
-	for showing user the interview questions and sending answers to catmh
-	for telling the user the interview is complete, thanks for participating
-integrate to cat-mh servers via api w applicationid and organizationID
-save interview results for participant in redcap project
-php/redcap version testing and config update
-remove and archive dev folder
-publish to redcap module repo
+
+	make mock api:
+		create interview - (POST) portal/secure/interview/createInterview
+			success - (JSON)
+		administer interview
+			authenticate - (POST) interview/siginin
+				success - (Set-Cookie + 302) + interview/secure/index.html
+			expire/locked - interview/secure/errorInProgress.html
+			breakLock - interview/secure/breakLock
+				success - (302) interview/secure/index.html
+			successful breakLock - interview/secure/index.html
+		init interview - (GET) interview/rest/interview
+			success - (JSON)
+		retrieve question - (GET) interview/rest/interview/test/question
+			success - (JSON)
+		submit answer - (POST) interview/rest/interview/test/question
+			success - (JSON)
+		get results - (GET) interview/rest/interview/results
+			success - (JSON)
+		terminate interview - (GET) interview/signout
+			success - (302) (hostname)
+	
+
+	develop interface
+		for showing user the interview questions and sending answers to catmh
+		for telling the user the interview is complete, thanks for participating
+	integrate to cat-mh servers via api w applicationid and organizationID
+	save interview results for participant in redcap project
+	php/redcap version testing and config update
+	remove and archive dev folder
+	publish to redcap module repo

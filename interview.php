@@ -5,31 +5,22 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 		
-		<link rel="stylesheet" href="<?php echo $module->getUrl("css/base.css");?>">
+		<link rel="stylesheet" href="<?php echo $module->getUrl("css/cat_mh.css");?>">
 		<title>CAT-MH Interview</title>
 	</head>
 	<body>
-		<?php
-		# fetch first and last name of the participant
-		$params = [
-			"project_id" => $_GET["pid"],
-			"return_format" => 'array',
-			"records" => $_GET["record"],
-			"fields" => ["firstname", "lastname"],
-			"events" => $_GET["eid"] or 1
-		];
-		$record = \REDCap::getData($params);
-		$firstname = ucfirst(current(current($record))['firstname']);
-		$lastname = ucfirst(current(current($record))['lastname']);
-		echo "<div id='userInfo' style='display:none'>
-			{
-				\"firstname\" : \"$firstname\",
-				\"lastname\" : \"$lastname\"
-			}
-		</div>"
-		?>
+		<!-- always hidden -->
+		<div class='apiDetails' style='display: none'>{"applicationid": "VU_Portal", "organizationID": 114}</div>
+		<div class='errorContainer'>
+			<span>There was an error :(<br><br>Please try again or contact your REDCap system administrator.</span>
+		</div>
+		<div class='loader'>
+			<span>Your interview is being created now.</span>
+			<div class='spinner'></div>
+		</div>
+		<div class='content'></div>
 		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-		<script src="<?php echo $module->getUrl("js/base.js");?>"></script>
+		<script src="<?php echo $module->getUrl("js/cat_mh.js");?>"></script>
 	</body>
 </html>
 
