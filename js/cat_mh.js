@@ -2,19 +2,57 @@ var catmh = {
 	debug: true,
 	apiDetails: JSON.parse($('div.apiDetails').html()),
 	subjectID: (Math.random().toString(36)+'00000000000000000').slice(2, 16+2)
-	// members from API: interviews
+	// members from API: interviews, currentInterview
 }
 
 // presentation functions
 
 
 // api related functions
-catmh.authInterview = function(which) {
-	
+catmh.authInterview = function() {
+	$.ajax({
+		method: "POST",
+		// url: "https://www.cat-mh.com/interview/signin",
+		url: "?prefix=cat_mh&page=test&pid=25&action=auth",
+		data: {
+			j_username: catmh.currentInterview.identifier,
+			j_password: catmh.currentInterview.signature,
+			interviewID: catmh.currentInterview.interviewID
+		},
+		dataType: 'json',
+		success: function(data) {
+			// debug check
+			$('.diagnostic').html('<pre>DATA:\n' + JSON.stringify(data, null, 2) + '</pre>')
+		},
+		error: function(request, status, thrown) {
+			
+		}
+	});
 }
 
 catmh.breakLock = function() {
-	
+	$.ajax({
+		method: "POST",
+		// url: "https://www.cat-mh.com/interview/secure/breakLock",
+		url: "?prefix=cat_mh&page=test&pid=25&action=break",
+		headers: {
+			Accept: 'application/json'
+		},
+		dataType: 'json',
+		beforeSend: function() {
+			catmh.currentInterview.JSESSIONID = 'abc123';
+			catmh.currentInterview.AWSELB = '456xyz';
+			document.cookie = `JSESSIONID=${catmh.currentInterview.JSESSIONID};`;
+			document.cookie = `AWSELB=${catmh.currentInterview.AWSELB};`;
+		},
+		success: function(data) {
+			// debug check
+			$('.diagnostic').html('<pre>DATA:\n' + JSON.stringify(data, null, 2) + '</pre>')
+		},
+		error: function(request, status, thrown) {
+			
+		}
+	});
 }
 
 catmh.createInterviews = function() {
@@ -23,6 +61,9 @@ catmh.createInterviews = function() {
 		method: "POST",
 		// url: "https://www.cat-mh.com/portal/secure/interview/createInterview",
 		url: "?prefix=cat_mh&page=test&pid=25&action=create",
+		headers: {
+			applicationid: catmh.apiDetails.applicationid
+		},
 		data: {
 			organizationID: catmh.apiDetails.organizationID,
 			userFirstName: "Automated",
@@ -32,23 +73,19 @@ catmh.createInterviews = function() {
 			language: 1,
 			tests: ['mdd']
 		},
-		headers: {
-			applicationid: catmh.apiDetails.applicationid
-		},
 		dataType: 'json',
 		success: function(data) {
-			$('div.loaderText').fadeOut(timeToFadeOut);
-			$('div.loader').fadeOut(timeToFadeOut, function() {
+			$('.loader').fadeOut(timeToFadeOut, function() {
 				// debug check
-				// $('.content').prepend('<pre>DOCUMENT:\n' + JSON.stringify(data.interviews) + '</pre>')
+				$('.diagnostic').html('<pre>DATA:\n' + JSON.stringify(data, null, 2) + '</pre>')
 				
 				// store received interview data in catmh object
 				catmh.interviews = data.interviews
-				catmh.authInterview(1);
+				catmh.currentInterview = catmh.interviews[0];
+				// catmh.authInterview();
 			});
 		},
 		error: function(request, status, thrown) {
-			$('div.loaderText').fadeOut(timeToFadeOut);
 			$('div.loader').fadeOut(timeToFadeOut, function() {
 				// $('.errorContainer').prepend("")
 				$('.errorContainer').css("display", "flex").hide().fadeIn(150);
@@ -58,59 +95,161 @@ catmh.createInterviews = function() {
 }
 
 catmh.initInterview = function() {
-	
+	$.ajax({
+		method: "GET",
+		// url: "https://www.cat-mh.com/interview/rest/interview",
+		url: "?prefix=cat_mh&page=test&pid=25&action=init",
+		headers: {
+			Accept: 'application/json'
+		},
+		dataType: 'json',
+		beforeSend: function() {
+			catmh.currentInterview.JSESSIONID = 'abc123';
+			catmh.currentInterview.AWSELB = '456xyz';
+			document.cookie = `JSESSIONID=${catmh.currentInterview.JSESSIONID};`;
+			document.cookie = `AWSELB=${catmh.currentInterview.AWSELB};`;
+		},
+		success: function(data) {
+			// debug check
+			$('.diagnostic').html('<pre>DATA:\n' + JSON.stringify(data, null, 2) + '</pre>')
+		},
+		error: function(request, status, thrown) {
+			
+		}
+	});
 }
 
-catmh.getInterviewStatus = function(which = 0) {
-	let interview = catmh.interviews[which];
-	
+catmh.getInterviewStatus = function() {
 	$.ajax({
 		method: "POST",
 		// url: "https://www.cat-mh.com/portal/secure/interview/status",
-		url: "?prefix=cat_mh&page=test&pid=25&action=status",
-		data: {
-			organizationID: catmh.apiDetails.organizationID,
-			interviewID: interview.interviewID,
-			identifier: interview.identifier,
-			signature: interview.signature
-		},
+		url: "?prefix=cat_mh&page=test&pid=25&action=getStatus",
 		headers: {
 			applicationid: catmh.apiDetails.applicationid
 		},
+		data: {
+			organizationID: catmh.apiDetails.organizationID,
+			interviewID: catmh.currentInterview.interviewID,
+			identifier: catmh.currentInterview.identifier,
+			signature: catmh.currentInterview.signature
+		},
 		dataType: 'json',
 		success: function(data) {
-			$('div.loaderText').fadeOut(timeToFadeOut);
-			$('div.loader').fadeOut(timeToFadeOut, function() {
-				// debug check
-				// $('.content').prepend('<pre>DOCUMENT:\n' + JSON.stringify(data.interviews) + '</pre>')
-				
-				// store received interview data in catmh object
-				catmh.interviews = data.interviews
-				catmh.authInterview(1);
-			});
+			// debug check
+			$('.diagnostic').html('<pre>DATA:\n' + JSON.stringify(data, null, 2) + '</pre>')
 		},
 		error: function(request, status, thrown) {
-			$('.content').fadeOut(150, function() {
-				$('.errorContainer').css("display", "flex").hide().fadeIn(150);
-			});
+			
 		}
 	});
 }
 
 catmh.getNextQuestion = function() {
-	
+	$.ajax({
+		method: "GET",
+		// url: "https://www.cat-mh.com/interview/rest/interview/test/question",
+		url: "?prefix=cat_mh&page=test&pid=25&action=getQuestion",
+		headers: {
+			Accept: 'application/json'
+		},
+		dataType: 'json',
+		beforeSend: function() {
+			catmh.currentInterview.JSESSIONID = 'abc123';
+			catmh.currentInterview.AWSELB = '456xyz';
+			document.cookie = `JSESSIONID=${catmh.currentInterview.JSESSIONID};`;
+			document.cookie = `AWSELB=${catmh.currentInterview.AWSELB};`;
+		},
+		success: function(data) {
+			// debug check
+			$('.diagnostic').html('<pre>DATA:\n' + JSON.stringify(data, null, 2) + '</pre>')
+		},
+		error: function(request, status, thrown) {
+			
+		}
+	});
 }
 
 catmh.retrieveResults = function() {
-	
+	$.ajax({
+		method: "GET",
+		// url: "https://www.cat-mh.com/interview/rest/interview/results?itemLevel=1",
+		url: "?prefix=cat_mh&page=test&pid=25&action=results",
+		headers: {
+			Accept: 'application/json'
+		},
+		dataType: 'json',
+		beforeSend: function() {
+			catmh.currentInterview.JSESSIONID = 'abc123';
+			catmh.currentInterview.AWSELB = '456xyz';
+			document.cookie = `JSESSIONID=${catmh.currentInterview.JSESSIONID};`;
+			document.cookie = `AWSELB=${catmh.currentInterview.AWSELB};`;
+		},
+		success: function(data) {
+			// debug check
+			$('.diagnostic').html('<pre>DATA:\n' + JSON.stringify(data, null, 2) + '</pre>')
+		},
+		error: function(request, status, thrown) {
+			
+		}
+	});
 }
 
 catmh.submitAnswer = function() {
-	
+	$.ajax({
+		method: "POST",
+		// url: "https://www.cat-mh.com/interview/rest/interview/test/question",
+		url: "?prefix=cat_mh&page=test&pid=25&action=submit",
+		headers: {
+			Accept: 'application/json'
+		},
+		dataType: 'json',
+		beforeSend: function() {
+			catmh.currentInterview.JSESSIONID = 'abc123';
+			catmh.currentInterview.AWSELB = '456xyz';
+			document.cookie = `JSESSIONID=${catmh.currentInterview.JSESSIONID};`;
+			document.cookie = `AWSELB=${catmh.currentInterview.AWSELB};`;
+		},
+		data: {
+			questionID: 1,
+			response: 1,
+			duration: 452,
+			curT1: 0,
+			curT2: 0,
+			curT3: 0
+		},
+		success: function(data) {
+			// debug check
+			$('.diagnostic').html('<pre>DATA:\n' + JSON.stringify(data, null, 2) + '</pre>')
+		},
+		error: function(request, status, thrown) {
+			
+		}
+	});
 }
 
 catmh.terminateInterview = function() {
-	
+	$.ajax({
+		method: "GET",
+		// url: "https://www.cat-mh.com/interview/signout",
+		url: "?prefix=cat_mh&page=test&pid=25&action=terminate",
+		headers: {
+			Accept: 'application/json'
+		},
+		dataType: 'json',
+		beforeSend: function() {
+			catmh.currentInterview.JSESSIONID = 'abc123';
+			catmh.currentInterview.AWSELB = '456xyz';
+			document.cookie = `JSESSIONID=${catmh.currentInterview.JSESSIONID};`;
+			document.cookie = `AWSELB=${catmh.currentInterview.AWSELB};`;
+		},
+		success: function(data) {
+			// debug check
+			$('.diagnostic').html('<pre>DATA:\n' + JSON.stringify(data, null, 2) + '</pre>')
+		},
+		error: function(request, status, thrown) {
+			
+		}
+	});
 }
 
 // module logic functions
@@ -132,8 +271,8 @@ catmh.findGetParameter = function(parameterName) {
 
 
 $(function() {
-	$('.loader').css("display", "flex").hide().fadeIn(1500);
+	// $('.loader').css("display", "flex").hide().fadeIn(1500);
 	
 	// call to CAT-MH API to create interview
-	catmh.createInterview();
+	// catmh.createInterviews();
 })

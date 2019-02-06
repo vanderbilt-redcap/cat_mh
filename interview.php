@@ -18,7 +18,18 @@
 			<span>Your interview is being created now.</span>
 			<div class='spinner'></div>
 		</div>
-		<div class='content'></div>
+		<pre class='diagnostic'></pre>
+		<div class='content'>
+			<button onclick="catmh.authInterview()">authInterview</button>
+			<button onclick="catmh.breakLock()">breakLock</button>
+			<button onclick="catmh.createInterviews()">createInterviews</button>
+			<button onclick="catmh.initInterview()">initInterview</button>
+			<button onclick="catmh.getInterviewStatus()">getInterviewStatus</button>
+			<button onclick="catmh.getNextQuestion()">getNextQuestion</button>
+			<button onclick="catmh.retrieveResults()">retrieveResults</button>
+			<button onclick="catmh.submitAnswer()">submitAnswer</button>
+			<button onclick="catmh.terminateInterview()">terminateInterview</button>
+		</div>
 		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 		<script src="<?php echo $module->getUrl("js/cat_mh.js");?>"></script>
 	</body>
