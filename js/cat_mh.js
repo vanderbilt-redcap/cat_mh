@@ -13,7 +13,7 @@ catmh.authInterview = function() {
 	$.ajax({
 		method: "POST",
 		// url: "https://www.cat-mh.com/interview/signin",
-		url: "?prefix=cat_mh&page=test&pid=25&action=auth",
+		url: "?prefix=cat_mh&page=test&pid=" + catmh.pid + "&action=auth",
 		data: {
 			j_username: catmh.currentInterview.identifier,
 			j_password: catmh.currentInterview.signature,
@@ -22,6 +22,7 @@ catmh.authInterview = function() {
 		dataType: 'json',
 		success: function(data) {
 			// debug check
+			// data.cookie = document.cookie;
 			$('.diagnostic').html('<pre>DATA:\n' + JSON.stringify(data, null, 2) + '</pre>')
 		},
 		error: function(request, status, thrown) {
@@ -34,7 +35,7 @@ catmh.breakLock = function() {
 	$.ajax({
 		method: "POST",
 		// url: "https://www.cat-mh.com/interview/secure/breakLock",
-		url: "?prefix=cat_mh&page=test&pid=25&action=break",
+		url: "?prefix=cat_mh&page=test&pid=" + catmh.pid + "&action=break",
 		headers: {
 			Accept: 'application/json'
 		},
@@ -60,7 +61,7 @@ catmh.createInterviews = function() {
 	$.ajax({
 		method: "POST",
 		// url: "https://www.cat-mh.com/portal/secure/interview/createInterview",
-		url: "?prefix=cat_mh&page=test&pid=25&action=create",
+		url: "?prefix=cat_mh&page=test&pid=" + catmh.pid + "&action=create",
 		headers: {
 			applicationid: catmh.apiDetails.applicationid
 		},
@@ -98,7 +99,7 @@ catmh.initInterview = function() {
 	$.ajax({
 		method: "GET",
 		// url: "https://www.cat-mh.com/interview/rest/interview",
-		url: "?prefix=cat_mh&page=test&pid=25&action=init",
+		url: "?prefix=cat_mh&page=test&pid=" + catmh.pid + "&action=init",
 		headers: {
 			Accept: 'application/json'
 		},
@@ -123,7 +124,7 @@ catmh.getInterviewStatus = function() {
 	$.ajax({
 		method: "POST",
 		// url: "https://www.cat-mh.com/portal/secure/interview/status",
-		url: "?prefix=cat_mh&page=test&pid=25&action=getStatus",
+		url: "?prefix=cat_mh&page=test&pid=" + catmh.pid + "&action=getStatus",
 		headers: {
 			applicationid: catmh.apiDetails.applicationid
 		},
@@ -148,7 +149,7 @@ catmh.getNextQuestion = function() {
 	$.ajax({
 		method: "GET",
 		// url: "https://www.cat-mh.com/interview/rest/interview/test/question",
-		url: "?prefix=cat_mh&page=test&pid=25&action=getQuestion",
+		url: "?prefix=cat_mh&page=test&pid=" + catmh.pid + "&action=getQuestion",
 		headers: {
 			Accept: 'application/json'
 		},
@@ -173,7 +174,7 @@ catmh.retrieveResults = function() {
 	$.ajax({
 		method: "GET",
 		// url: "https://www.cat-mh.com/interview/rest/interview/results?itemLevel=1",
-		url: "?prefix=cat_mh&page=test&pid=25&action=results",
+		url: "?prefix=cat_mh&page=test&pid=" + catmh.pid + "&action=results",
 		headers: {
 			Accept: 'application/json'
 		},
@@ -198,7 +199,7 @@ catmh.submitAnswer = function() {
 	$.ajax({
 		method: "POST",
 		// url: "https://www.cat-mh.com/interview/rest/interview/test/question",
-		url: "?prefix=cat_mh&page=test&pid=25&action=submit",
+		url: "?prefix=cat_mh&page=test&pid=" + catmh.pid + "&action=submit",
 		headers: {
 			Accept: 'application/json'
 		},
@@ -231,7 +232,7 @@ catmh.terminateInterview = function() {
 	$.ajax({
 		method: "GET",
 		// url: "https://www.cat-mh.com/interview/signout",
-		url: "?prefix=cat_mh&page=test&pid=25&action=terminate",
+		url: "?prefix=cat_mh&page=test&pid=" + catmh.pid + "&action=terminate",
 		headers: {
 			Accept: 'application/json'
 		},
@@ -271,6 +272,8 @@ catmh.findGetParameter = function(parameterName) {
 
 
 $(function() {
+	catmh.pid = catmh.findGetParameter("pid");
+	
 	// $('.loader').css("display", "flex").hide().fadeIn(1500);
 	
 	// call to CAT-MH API to create interview
