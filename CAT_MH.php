@@ -8,7 +8,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	# provide button for user to click to send them to interview page after they've read the last page of the survey submission document
-	public function redcap_survey_complete(int $project_id, string $record = NULL, string $instrument, int $event_id, int $group_id = NULL, string $survey_hash, int $response_id = NULL, int $repeat_instance = 1) {
+	public function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
 		$page = $this->getUrl("interview.php");
 		echo "Click to begin your CAT-MH screening interview.<br />";
 		echo "
