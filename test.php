@@ -9,7 +9,6 @@ if ($action === 'auth') {
 	// exit('{"msg": "hi2"}');
 } elseif ($action === 'break') {
 	http_response_code(302);
-	header("Location: " . "https://www.cat-mh.com/interview/secure/index.html");
 } elseif ($action == 'create') {
 	exit('{
 		"interviews": [
@@ -26,17 +25,24 @@ if ($action === 'auth') {
 		]
 	}');
 } elseif ($action === 'init') {
-	exit('{
-		"id":12345,
-		"startTime":null,
-		"endTime":null,
-		"iter":0,
-		"languageID":1,
-		"interviewTests":[1,5],
-		"conditionalTests":null,
-		"subjectID":null,
-		"displayResults":0
-	}');
+	$headers = getallheaders();
+	$cookie = $headers['Cookie'];
+	$jsess = "ymOPw72ci6jeBibjJq3ca3np.ip-172-31-24-54";
+	$awselb = "B3BD39AF16F0CF0B7377E928EC0A11EA291D20E9280654915BB0D2B0C64597CFFC8D11A03DDAA378D175FAFCC8D6F00508243C6EBB8818EFE4B8D60FA4409C8093B13010D6";
+	if (strpos($cookie, $jsess) !== false and strpos($cookie, $awselb) !== false) {
+		exit('{
+			"id":12345,
+			"startTime":null,
+			"endTime":null,
+			"iter":0,
+			"languageID":1,
+			"interviewTests":[1,5],
+			"conditionalTests":null,
+			"subjectID":null,
+			"displayResults":0
+		}');
+	}
+	exit('{}');
 } elseif ($action === 'getQuestion') {
 	exit('{
 		"questionID":14,
@@ -122,7 +128,6 @@ if ($action === 'auth') {
 	http_response_code(200);
 } elseif ($action === 'terminate') {
 	http_response_code(302);
-	header("Location: " . "https://www.cat-mh.com/");
 	setcookie('JSESSIONID', "ymOPw72ci6jeBibjJq3ca3np.ip-172-31-24-54; path=/interview; secure; HttpOnly; Max-Age=0; Expires=Thu, 01-Jan-1970 00:00:00 GMT");
 }
 exit('{}');

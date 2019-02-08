@@ -10,16 +10,16 @@
 	</head>
 	<body>
 		<!-- always hidden -->
-		<div class='apiDetails' style='display: none'>{"applicationid": "VU_Portal", "organizationID": 114}</div>
-		<div class='errorContainer'>
+		<div id='apiDetails'>{"applicationid": "VU_Portal", "organizationID": 114}</div>
+		<div id='error'>
 			<span>There was an error :(<br><br>Please try again or contact your REDCap system administrator.</span>
 		</div>
-		<div class='loader'>
+		<div id='loader'>
 			<span>Your interview is being created now.</span>
 			<div class='spinner'></div>
 		</div>
-		<pre class='diagnostic'></pre>
-		<div class='content'>
+		<pre id='diagnostic'></pre>
+		<div id='content'>
 			<button onclick="catmh.authInterview()">authInterview</button>
 			<button onclick="catmh.breakLock()">breakLock</button>
 			<button onclick="catmh.createInterviews()">createInterviews</button>
