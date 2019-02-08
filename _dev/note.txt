@@ -32,3 +32,6 @@ module roadmap:
 	php/redcap version testing and config update
 	remove and archive dev folder
 	publish to redcap module repo
+
+CAT-MH API server output:
+{"interviews":[{"organizationID":0,"interviewID":187492,"identifier":"ehps","signature":"ufd367"}]}
