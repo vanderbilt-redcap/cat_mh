@@ -1,7 +1,7 @@
 var catmh = {
 	debug: false,
-	apiDetails: JSON.parse($('#apiDetails').html()),
 	subjectID: (Math.random().toString(36)+'00000000000000000').slice(2, 16+2)
+	// apiDetails: JSON.parse($('#apiDetails').html()),
 	// members from API: interviews, currentInterview
 }
 
@@ -54,47 +54,13 @@ catmh.breakLock = function() {
 	});
 }
 catmh.createInterviews = function() {
-	let timeToFadeOut = 150;
-	let url = catmh.debug ? "?prefix=cat_mh&page=test&pid=" + catmh.pid + "&action=create" : "https://www.cat-mh.com/portal/secure/interview/createInterview";
-	$.ajax({
-		method: "POST",
-		url: url,
-		headers: {
-			applicationid: catmh.apiDetails.applicationid
-		},
-		data: {
-			organizationID: catmh.apiDetails.organizationID,
-			userFirstName: "Automated",
-			userLastName: "Creation",
-			subjectID: catmh.subjectID,
-			numberOfInterviews: 1,
-			language: 1,
-			tests: ['mdd']
-		},
-		dataType: 'json',
-		beforeSend: function(request, settings) {
-			request.withCredentials = true;
-		},
-		success: function(data) {
-			$('#loader').fadeOut(timeToFadeOut, function() {
-				// debug check
-				$('#diagnostic').html('<pre>DATA:\n' + JSON.stringify(data, null, 2) + '</pre>')
-				
-				// store received interview data in catmh object
-				catmh.interviews = data.interviews
-				catmh.currentInterview = catmh.interviews[0];
-				
-				// catmh.authInterview();
-			});
-		},
-		error: function(request, status, thrown) {
-			$('#loader').fadeOut(timeToFadeOut, function() {
-				// $('#content').hide();
-				$('#diagnostic').html('<pre>ERROR:\n' + JSON.stringify(request) + '</pre>')
-				// $('#error').css("display", "flex").hide().fadeIn(250);
-			});
-		}
-	});
+	$.get("?prefix=cat_mh&page=CAT_MH.php&pid=" + catmh.pid + "&action=create")
+		.done(function(data) {
+			$('#content').html("<pre>SUCCESS:\n" + data + "</pre>");
+		})
+		.fail(function(data) {
+			$('#content').html("<pre>FAIL:\n" + data + "</pre>");
+		});
 }
 catmh.initInterview = function() {
 	let url = catmh.debug ? "?prefix=cat_mh&page=test&pid=" + catmh.pid + "&action=init" : "https://www.cat-mh.com/interview/rest/interview";
@@ -243,12 +209,5 @@ catmh.findGetParameter = function(parameterName) {
 
 $(function() {
 	catmh.pid = catmh.findGetParameter("pid");
-	// if (catmh.debug) {
-		$('#diagnostic').show();
-	// } else {
-		
-	// }
-	
-	// call to CAT-MH API to create interview
 	// catmh.createInterviews();
 })

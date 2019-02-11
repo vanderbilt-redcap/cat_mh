@@ -346,6 +346,19 @@ body {
   color: #555;
 }
 
+#buttons {
+  height: 8%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+#content {
+  height: 92%;
+  display: flex;
+}
+
 #apiDetails, #error, #loader, #diagnostic {
   display: none;
 }

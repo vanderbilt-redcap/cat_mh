@@ -36,15 +36,46 @@
 
 	"project-settings": [
 		{
-			"key" : "applicationid",
-			"name" : "CAT-MH API value for applicationid",
-			"type" : "text"
-		},
-		{
-			"key" : "organizationid",
-			"name" : "CAT-MH API value for organizationID",
-			"type" : "text"
-		}
+         "key": "catmh_options",
+         "name": "CAT-MH Interview Options",
+         "required": false,
+         "type": "sub_settings",
+         "repeatable":true,
+         "sub_settings":[
+            {
+				"key": "survey_instrument",
+				"name": "Administer CAT-MH interview at the end of this survey instrument",
+				"required": true,
+				"type": "text"
+			},
+            {
+               "key": "language",
+               "name": "Interview language",
+               "required": true,
+               "type": "radio",
+			   "choices": [
+					{"value": "1", "name": "English"},
+					{"value": "2", "name": "Spanish"}
+			   ]
+            },
+            {
+			   "key": "tests",
+			   "name": "Tests included in interview",
+			   "type": "descriptive"
+            },
+			{"type": "checkbox", "key": "dep", "name": "Depression"},
+			{"type": "checkbox", "key": "mdd", "name": "Major Depressive Disorder"},
+			{"type": "checkbox", "key": "anx", "name": "Anxiety Disorder"},
+			{"type": "checkbox", "key": "mhm", "name": "Mania/Hypomania"},
+			{"type": "checkbox", "key": "pdep", "name": "Depression (Perinatal)"},
+			{"type": "checkbox", "key": "panx", "name": "Anxiety Disorder (Perinatal)"},
+			{"type": "checkbox", "key": "pmhm", "name": "Mania/Hypomania (Perinatal)"},
+			{"type": "checkbox", "key": "sa", "name": "Substance Abuse"},
+			{"type": "checkbox", "key": "ptsd", "name": "Post-Traumatic Stress Disorder"},
+			{"type": "checkbox", "key": "cssrs", "name": "C-SSRS Suicide Screen"},
+			{"type": "checkbox", "key": "ss", "name": "Suicide Scale"}
+         ]
+      }
 	],
 
 	"system-settings": [

@@ -20,4 +20,18 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			})
 		</script>";
 	}
+	
+	// CAT-MH API methods
+	public function createInterviews() {
+		// request creation of CAT-MH interviews according to external module settings
+		
+	}
+}
+
+if (!$catmh) {
+	$catmh = new CAT_MH();
+}
+
+if ($_GET['action'] == 'create') {
+	
 }

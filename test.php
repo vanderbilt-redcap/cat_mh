@@ -1,6 +1,6 @@
 <?php
 $action = $_REQUEST['action'];
-	
+$action = 'test2';
 if ($action === 'auth') {
 	http_response_code(302);
 	// header("Location: " . "https://www.cat-mh.com/interview/secure/index.html");
@@ -129,5 +129,54 @@ if ($action === 'auth') {
 } elseif ($action === 'terminate') {
 	http_response_code(302);
 	setcookie('JSESSIONID', "ymOPw72ci6jeBibjJq3ca3np.ip-172-31-24-54; path=/interview; secure; HttpOnly; Max-Age=0; Expires=Thu, 01-Jan-1970 00:00:00 GMT");
+} elseif ($action === 'test2') {
+	// exit('hi');
+	$ch = curl_init();
+	
+	$json = '{
+		"organizationID": 114,
+		"userFirstName": "Automated",
+		"userLastName": "Creation",
+		"subjectID": 1234,
+		"numberOfInterviews": 1,
+		"language": 1,
+		"tests": [{"type": "mdd"}]
+	}';
+	
+	$headers = [
+		"applicationid: VU_Portal",
+		"Accept: application/json",
+		"Content-Type: application/json"
+	];
+	// $data = [
+		// "organizationID" => 114,
+		// "userFirstName" => "Automated",
+		// "userLastName" => "Creation",
+		// "subjectID" => 1234,
+		// "numberOfInterviews" => 1,
+		// "language" => 1,
+		// "tests" => ["mdd"]
+	// ];
+	
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/portal/secure/interview/createInterview");
+	curl_setopt($ch, CURLINFO_HEADER_OUT, true);
+	curl_setopt($ch, CURLOPT_POST, true);
+	curl_setopt($ch, CURLOPT_VERBOSE, true);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+	$server_output = curl_exec($ch);
+	$err_status = curl_error($ch);
+	$err_no = curl_errno($ch);
+	$cInfo = curl_getinfo($ch);
+
+	curl_close ($ch);
+	
+	echo("<pre>" . print_r("SERVER OUTPUT:" . $server_output, true) . "</pre>");
+	echo("<pre>" . print_r("SERVER OUTPUT LENGTH:" . strlen($server_output), true) . "</pre>");
+	echo("<pre>" . print_r("ERRNO:" . $err_no, true) . "</pre>");
+	echo("<pre>INFO: . " . print_r($cInfo, true) . "</pre>");
+	exit("<pre>" . print_r("ERROR:" . $err_status, true) . "</pre>");
 }
 exit('{}');

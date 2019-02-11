@@ -9,8 +9,7 @@
 		<title>CAT-MH Interview</title>
 	</head>
 	<body>
-		<!-- always hidden -->
-		<div id='apiDetails'>{"applicationid": "VU_Portal", "organizationID": 114}</div>
+		<!--
 		<div id='error'>
 			<span>There was an error :(<br><br>Please try again or contact your REDCap system administrator.</span>
 		</div>
@@ -18,8 +17,9 @@
 			<span>Your interview is being created now.</span>
 			<div class='spinner'></div>
 		</div>
-		<pre id='diagnostic'></pre>
-		<div id='content'>
+		-->
+		<div id='content'></div>
+		<div id='buttons'>
 			<button onclick="catmh.authInterview()">authInterview</button>
 			<button onclick="catmh.breakLock()">breakLock</button>
 			<button onclick="catmh.createInterviews()">createInterviews</button>
