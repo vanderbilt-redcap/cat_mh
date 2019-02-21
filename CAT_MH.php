@@ -32,9 +32,16 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			<script>
 				var btn = document.getElementById('catmh_button')
 				btn.addEventListener('click', function() {
-					window.location.assign('$page' + '&record=' + $record + '&eid=' + $event_id)
+					window.location.assign('$page' + '&amp;record=' + $record + '&amp;eid=' + $event_id)
 				})
 			</script>";
+		} else {
+			echo("<pre>
+\$response_id: $response_id
+\$record: " . print_r($record, true) . "
+\$record['form_menu_description']: " . $record['form_menu_description'] . "
+\$targetInstrument: $targetInstrument
+			</pre>");
 		}
 		
 		// exit("<pre>" . print_r($record['form_menu_description'], true) . "</pre>");
