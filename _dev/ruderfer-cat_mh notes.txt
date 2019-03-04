@@ -22,3 +22,38 @@ Project Title: Consumer-Grade Devices and OSA Treatment
 
 terms accepted:
 https://www.cat-mh.com/panel/secure/common/terms.html
+
+instructions:
+install module on redcap server
+configure system-level external module settings
+	use the organizationid and applicationid provided by cat-mh API registration
+configure project-level external module settings
+	choose which CAT-MH tests to associate with which survey/instrument
+	choose a field in the instrument to hold cat-mh results -- you should probably make this field hidden so it does not appear on the user survey
+
+
+--------------------------_--------------------------_--------------------------_--------------------------_--------------------------
+
+How the module works:
+user ends survey ->
+	redcap_survey_complete(args) hook called
+module gets cat-mh config info via settings and sends user to ->
+
+interview.php which calls ->
+	cat_mh.createInterview(args)
+then immediately ->
+	cat_mh.authInterview(args)
+then ->
+	cat_mh.startInterview(args)
+then ->
+	cat_mh.getQuestion(args)
+
+.. wait for user answer then
+	cat_mh.submitAnswer(args) and immediately getQuestion(args)
+	
+finally
+	cat_mh.getResults(args)
+		put results in [catmh_results_field]
+
+then cat_mh.endInterview(args)?
+check for more tests to administer?

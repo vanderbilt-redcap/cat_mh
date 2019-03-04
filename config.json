@@ -79,7 +79,18 @@
 	],
 
 	"system-settings": [
-
+		{
+			"key": "applicationid",
+			"name": "Application ID received from CAT-MH API registration",
+			"required": true,
+			"type": "text"
+		},
+		{
+			"key": "organizationid",
+			"name": "Organization ID received from CAT-MH API registration",
+			"required": true,
+			"type": "text"
+		}
 	],
 
 	"crons": [
