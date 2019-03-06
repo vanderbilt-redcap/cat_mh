@@ -1,13 +1,16 @@
 <?php
-echo "<pre>";
-// $pid = $module->getProjectId();
-$input = [];
-// $input['questionID'] = 327;
-// $input['response'] = 3;
-// $input['duration'] = 2040;
-// $input['projectSettings'] = $module->getInterviewConfig($pid, 'my_first_instrument');
-// $input['subjectID'] = $input['projectSettings']['subjectID'];
-// $out = $module->submitAnswer($input);
-$out = $module->endInterview($input);
-print_r($out);
-echo "</pre>";
+// $result = $module->queryLogs("select interviews, timestamp, subjectID where abc='def'");
+$subjectID = $_GET['sid'];
+$result = $module->queryLogs("select interviews where subjectID='$subjectID' order by timestamp desc");
+print_r($result);
+echo("<br />");
+if (db_num_rows($result) > 0) {
+	$record = db_fetch_assoc($result);
+	print_r($record);
+	echo("<br />");
+	// echo("test interviews: " . $record['interviews']);
+	$interviews = json_decode($record['interviews'], true);
+	echo("identifier: " . $interviews[0]['identifier']);
+} else {
+	echo($subjectID);
+}

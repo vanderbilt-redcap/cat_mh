@@ -10,6 +10,7 @@ namespace VICTR\REDCAP\CAT_MH;
 class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	
 	public $logAPICalls = true;
+	public $testAPI = true;
 	
 	public function __construct() {
 		parent::__construct();
@@ -19,20 +20,31 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	
 	public function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
 		// provide button for user to click to send them to interview page after they've read the last page of the survey submission document
+		$pid = $this->getProjectId();
+		$input = [];
+		$input['projectSettings'] = $this->getInterviewConfig($pid, $instrument);
+		$subjectID = $input['projectSettings']['subjectID'];
+		$input['subjectID'] = $subjectID ;
+		$out = $this->createInterview($input);
 		
-		$interviewConfig = $this->getInterviewConfig($project_id, $instrument);
-		
-		if ($instrument == $interviewConfig['instrumentRealName']) {
-			$page = $this->getUrl("interview.php");
-			echo "Click to begin your CAT-MH screening interview.<br />";
-			echo "
-			<button id='catmh_button'>Begin Interview</button>
-			<script>
-				var btn = document.getElementById('catmh_button')
-				btn.addEventListener('click', function() {
-					window.location.assign('$page' + '&amp;rid=' + $record + '&amp;eid=' + $event_id)
-				})
-			</script>";
+		if ($instrument == $input['projectSettings']['instrumentRealName']) {
+			if (isset($out['success'])) {
+				$page = $this->getUrl("interview.php") . "&rid=" . $record . "&sid=" . $subjectID;
+				echo("Click to begin your CAT-MH screening interview.<br />");
+				echo("
+				<button id='catmh_button'>Begin Interview</button>
+				<script>
+					var btn = document.getElementById('catmh_button')
+					btn.addEventListener('click', function() {
+						window.location.assign('$page')
+					})
+				</script>");
+			} else {
+				echo("There was an error in creating your CAT-MH interview:<br />");
+				if (isset($out['moduleError'])) echo($out['moduleError']);
+				echo("<br />");
+				echo("Please contact the REDCap system administration.");
+			}
 		}
 	}
 	
@@ -71,7 +83,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			"organizationID" => intval($projectSettings['organizationid']),
 			"userFirstName" => "Automated",
 			"userLastName" => "Creation",
-			"subjectID" => "9489gjlsdkgj",
+			"subjectID" => $subjectID,
 			"numberOfInterviews" => 1,
 			"language" => intval($projectSettings['language']),
 			"tests" => []
@@ -79,17 +91,21 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		foreach ($projectSettings['tests'] as $testAbbreviation) {
 			$requestBody['tests'][] = ["type" => $testAbbreviation];
 		}
-		$requestBody = json_encode($requestBody);
 		
 		$out['requestHeaders'] = $requestHeaders;
-		$out['requestBody'] = $requestBody;
 		
 		// send request via curl
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/portal/secure/interview/createInterview");
-		// curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=apiFunctionsTestReceive&pid=25");
+		if ($this->testAPI) {
+			$requestBody['action'] = 'createInterview';
+			curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=" . $this->getProjectId());
+		} else {
+			curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/portal/secure/interview/createInterview");
+		}
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $requestHeaders);
 		curl_setopt($ch, CURLOPT_POST, true);
+		$out['requestBody'] = $requestBody;
+		$requestBody = json_encode($requestBody);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $requestBody);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_VERBOSE, true);
@@ -103,8 +119,15 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		$response = json_decode($out['response'], true);
 		try {
 			if ($response['interviews'][0]['interviewID'] > 0) {
-				$_SESSION['createdInterviews'] = json_encode($response['interviews']);
-				$out['success'] = true;
+				$json = json_encode($response['interviews']);
+				if ($json !== false) {
+					$this->log("createdInterviews", [
+						'subjectID' => $subjectID,
+						'timestamp' => time(),
+						'interviews' => $json
+					]);
+					$out['success'] = true;
+				}
 			}
 		} catch (Exception $e) {
 			$out['moduleError'] = true;
@@ -138,22 +161,19 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			"Content-Type: application/x-www-form-urlencoded"
 		];
 		
-		// $requestBody = [
-			// "j_username" => $_SESSION['identifier'],
-			// "j_password" => $_SESSION['signature']
-		// ];
-		// if (isset($_SESSION['interviewID'])) $requestBody['interviewID'] = $_SESSION['interviewID'];
-		// $requestBody = json_encode($requestBody);
-		
 		// curl request
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $requestHeaders);
-		curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/interview/signin");
-		// curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=apiFunctionsTestReceive&pid=25");
-		curl_setopt($ch, CURLINFO_HEADER_OUT, true);
+		if ($this->testAPI) {
+			$requestBody  .= "&action=" . __FUNCTION__;
+			curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=25");
+		} else {
+			curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/interview/signin");
+		}
+		// curl_setopt($ch, CURLINFO_HEADER_OUT, true);
 		curl_setopt($ch, CURLOPT_HEADER, true);
-		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_VERBOSE, true);
+		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $requestBody);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		$out['response'] = curl_exec($ch);
@@ -207,9 +227,11 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		
 		// curl request
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/interview/rest/interview");
-		// curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=apiFunctionsTestReceive&pid=25");
-		// curl_setopt($ch, CURLOPT_HEADER, true);
+		if ($this->testAPI) {
+			curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=25&action=startInterview");
+		} else {
+			curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/interview/rest/interview");
+		}
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $requestHeaders);
 		curl_setopt($ch, CURLOPT_VERBOSE, true);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -218,9 +240,6 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		$out['error'] = curl_error($ch);
 		$out['info'] = curl_getinfo($ch);
 		curl_close ($ch);
-		
-		// preg_match_all('/^Location:\s([^\n]*)$/m', $out['response'], $matches);
-		// $out['location'] = $matches[1][0];
 		
 		$response = json_decode($out['response'], true);
 		if ($response['id'] > 0) {
@@ -271,16 +290,19 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			"identifier" => $_SESSION['identifier'],
 			"signature" => $_SESSION['signature']
 		];
-		$requestBody = json_encode($requestBody);
 		
 		// curl request
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/portal/secure/interview/status");
-		// curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=apiFunctionsTestReceive&pid=25");
+		if ($this->testAPI) {
+			$requestBody['action'] = __FUNCTION__;
+			curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=25");
+		} else {
+			curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/portal/secure/interview/status");
+		}
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $requestHeaders);
-		// curl_setopt($ch, CURLOPT_HEADER, true);
-		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_VERBOSE, true);
+		$requestBody = json_encode($requestBody);
+		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $requestBody);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		$out['response'] = curl_exec($ch);
@@ -320,9 +342,11 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		
 		// curl request
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/interview/rest/interview/test/question");
-		// curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=apiFunctionsTestReceive&pid=25");
-		// curl_setopt($ch, CURLOPT_HEADER, true);
+		if ($this->testAPI) {
+			curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=25&action=getQuestion");
+		} else {
+			curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/interview/rest/interview/test/question");
+		}
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $requestHeaders);
 		curl_setopt($ch, CURLOPT_VERBOSE, true);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -374,16 +398,19 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			"curT2" => 0,
 			"curT3" => 0
 		];
-		$requestBody = json_encode($requestBody);
 		
 		// curl request
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/interview/rest/interview/test/question");
-		// curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=apiFunctionsTestReceive&pid=25");
-		// curl_setopt($ch, CURLOPT_HEADER, true);
+		if ($this->testAPI) {
+			$requestBody['action'] = __FUNCTION__;
+			curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=25");
+		} else {
+			curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/interview/rest/interview/test/question");
+		}
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $requestHeaders);
-		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_VERBOSE, true);
+		$requestBody = json_encode($requestBody);
+		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $requestBody);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		$out['response'] = curl_exec($ch);
@@ -422,9 +449,11 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		
 		// curl request
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/interview/rest/interview/results?itemLevel=1");
-		// curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=apiFunctionsTestReceive&pid=25");
-		// curl_setopt($ch, CURLOPT_HEADER, true);
+		if ($this->testAPI) {
+			curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=25&action=getResults");
+		} else {
+			curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/interview/rest/interview/results?itemLevel=1");
+		}
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $requestHeaders);
 		curl_setopt($ch, CURLOPT_VERBOSE, true);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -465,8 +494,11 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		
 		// curl request
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/interview/signout");
-		// curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=apiFunctionsTestReceive&pid=25");
+		if ($this->testAPI) {
+			curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=25&action=endInterview");
+		} else {
+			curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/interview/signout");
+		}
 		curl_setopt($ch, CURLOPT_HEADER, true);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $requestHeaders);
 		curl_setopt($ch, CURLOPT_VERBOSE, true);
@@ -512,16 +544,21 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		}
 		
 		// build request headers and body
+		$requestBody = [];
 		$requestHeaders = [
 			"Cookie: JSESSIONID=" . $_SESSION['JSESSIONID'] . "; AWSELB=" . $_SESSION['AWSELB']
 		];
 		
 		// curl request
 		$ch = curl_init();
-		// curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/interview/rest/interview/test/question");
-		curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=apiFunctionsTestReceive&pid=25");
-		// curl_setopt($ch, CURLOPT_HEADER, true);
+		if ($this->testAPI) {
+			$requestBody['action'] = __FUNCTION__;
+			curl_setopt($ch, CURLOPT_URL, "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=25");
+		} else {
+			curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/interview/secure/breakLock");
+		}
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $requestHeaders);
+		$requestBody = json_encode($requestBody);
 		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $requestBody);
 		curl_setopt($ch, CURLOPT_VERBOSE, true);
