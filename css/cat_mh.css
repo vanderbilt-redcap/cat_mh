@@ -337,40 +337,6 @@ template {
   display: none;
 }
 
-html, body {
-  height: 100%;
-}
-
-body {
-  font: 18px verdana, sans-serif;
-  color: #555;
-}
-
-#buttons {
-  height: 8%;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-}
-
-#content {
-  height: 92%;
-  display: flex;
-}
-
-#apiDetails, #error, #loader, #diagnostic {
-  display: none;
-}
-
-#error {
-  height: 100%;
-  text-align: center;
-  font-size: 24px;
-  align-items: center;
-  justify-content: center;
-}
-
 #loader {
   height: 100%;
   flex-direction: column;

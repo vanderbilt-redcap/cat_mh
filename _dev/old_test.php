@@ -148,15 +148,6 @@ if ($action === 'auth') {
 		"Accept: application/json",
 		"Content-Type: application/json"
 	];
-	// $data = [
-		// "organizationID" => 114,
-		// "userFirstName" => "Automated",
-		// "userLastName" => "Creation",
-		// "subjectID" => 1234,
-		// "numberOfInterviews" => 1,
-		// "language" => 1,
-		// "tests" => ["mdd"]
-	// ];
 	
 	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 	curl_setopt($ch, CURLOPT_URL, "https://www.cat-mh.com/portal/secure/interview/createInterview");

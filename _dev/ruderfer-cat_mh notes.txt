@@ -57,3 +57,13 @@ finally
 
 then cat_mh.endInterview(args)?
 check for more tests to administer?
+
+created 3/5 around 11:30
+{
+	"interviews": [{
+		"organizationID": 0,
+		"interviewID": 190702,
+		"identifier": "nct3",
+		"signature": "32kt5e"
+	}]
+}
