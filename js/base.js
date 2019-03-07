@@ -15,10 +15,12 @@ catmh.showError = function(message) {
 		$("#error").fadeIn(100);
 	});
 }
-catmh.showInterviews = function(interviews) {}
+catmh.showInterviews = function(interviews) {
+	$("body").empty().append("<span>" + interviews + "</span>");
+}
 catmh.showResults = function (results) {}
 catmh.startInterview = function (interview) {}
-catmh.submitAnswer = function() {}}
+catmh.submitAnswer = function() {}
 
 
 // on ready

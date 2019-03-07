@@ -11,19 +11,22 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		$input['instrument'] = $instrument;
 		$input['recordID'] = $record;
 		$out = $this->createInterviews($input);
+		echo("\$out:<br />" . print_r($out, true));
+		if (isset($out['moduleError'])) $this->log('catmhError', ['output' => $out]);
 		
 		if ($out !== false) {
 			if ($instrument == $out['config']['instrumentRealName']) {
 				echo("Click to begin your CAT-MH screening interview.<br />");
-				$page = $this->getUrl("interview.php") . "&rid=" . $record . "&sid=" . $subjectID;
+				$page = $this->getUrl("interview.php") . "&rid=" . $record . "&sid=" . $out['config']['subjectID'];
 				echo("
 				<button id='catmh_button'>Begin Interview</button>
 				<script>
 					var btn = document.getElementById('catmh_button')
 					btn.addEventListener('click', function() {
-						window.location.assign('$page')
+						window.location.assign('$page');
 					})
-				</script>");
+				</script>
+				");
 			} else {
 				echo("There was an error in creating your CAT-MH interview:<br />");
 				if (isset($out['moduleError'])) echo($out['moduleMessage'] . "<br />");
@@ -51,7 +54,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 				}
 				
 				// tests array
-				$tests = []
+				$tests = [];
 				$testTypes = ['mdd', 'dep', 'anx', 'mhm', 'pdep', 'panx', 'pmhm', 'sa', 'ptsd', 'cssrs', 'ss'];
 				foreach ($testTypes as $j => $testAbbreviation) {
 					if ($projectSettings[$testAbbreviation]['value'][$settingsIndex] == 1) {
@@ -195,10 +198,10 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 				$out['moduleError'] = true;
 				$out['moduleMessage'] = "REDCap couldn't read authorization details from CAT-MH API server response.";
 			}
-		} elseif($out['location'] == 'https://www.cat-mh.com/interview/secure/errorInProgress.html' {
+		} elseif($out['location'] == 'https://www.cat-mh.com/interview/secure/errorInProgress.html') {
 			$result = $this->breakLock($args);
 			if ($result['success'] == true) {
-				$out = $this->authInterview($args)
+				$out = $this->authInterview($args);
 				$out['lockBreakSuccess'] = true;
 				return $out;
 			} else {
@@ -279,7 +282,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			if ($response['questionID'] > 0) {
 				$out['success'] = true;
 				$out['question'] = $response;
-			} elseif {
+			} else {
 				// interview is over, retrieve results
 				$out['success'] = true;
 				$out['needResults'] = true;
