@@ -1,22 +1,3 @@
-<?php
-	$recordID = $_GET['rid'];
-	$projectID = $_GET['pid'];
-	$subjectID = $_GET['sid'];
-	$sql = "select interviews where subjectID='$subjectID' order by timestamp desc";
-	$result = $module->queryLogs($sql);
-	echo(print_r($result) . "<br />");
-	if (db_num_rows($result) > 0) {
-		$interviews = json_decode(db_fetch_assoc($result)['interviews'], true);
-	} else {
-		// todo: better error message when no interviews found
-		exit("CAT-MH didn't find any more interviews for you to take.");
-	}
-	$input = [];
-	$_SESSION['identifier'] = 'abc';
-	$_SESSION['signature'] = 'def';
-	$_SESSION['interviewID'] = 123;
-	$out = $module->authInterview($input);
-?>
 <!doctype html>
 <html lang="en">
 	<head>
@@ -28,6 +9,30 @@
 		<title>CAT-MH Interview</title>
 	</head>
 	<body>
+		<?php
+			// pull all interview records from logs
+			// $subjectID = $_GET['sid'];
+			// $result = $module->queryLogs("select interview, instrumentName, recordID, status where subjectID='$subjectID'");
+			// $interviews = [];
+			// while($row = db_fetch_assoc($result)) {
+				// $interview = json_decode($row['interview'], true);
+				// $interview['status'] = $row['status'];
+				// $interview['recordID'] = $row['recordID'];
+				// $interview['instrumentName'] = $row['instrumentName'];
+			// }
+			
+			// // if there's a test they started but not finished, try to open it back up
+			// foreach ($interviews as $interview) {
+				// if ($interview['status'] == 1) {
+					
+				// }
+			// }
+			// upon failure, or if none open, and interviews unstarted remain -> ask to pick from list of remaining tests (showing those completed)
+			
+			
+			// if they click to start a test, startInterview and getQuestion to begin
+			// upon ending test, show results (if config allows) and give back button
+		?>
 		<div id='loaderDiv'>
 			<small class='grayText' id="loadMessage">Creating your interview...</small>
 			<div id="loader"></div>

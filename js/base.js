@@ -8,11 +8,6 @@ catmh.setAnswerOptions = function(answers) {
 		</li>`);
 	});
 }
-
-catmh.submitAnswer = function() {
-	
-}
-
 catmh.showError = function(message) {
 	$("#error span").empty().append(message);
 	$("#loader").hide()
@@ -20,14 +15,19 @@ catmh.showError = function(message) {
 		$("#error").fadeIn(100);
 	});
 }
+catmh.showInterviews = function(interviews) {}
+catmh.showResults = function (results) {}
+catmh.startInterview = function (interview) {}
+catmh.submitAnswer = function() {}}
+
 
 // on ready
 $(function() {
 	$("#interview").css('display', 'flex').hide();
-	setTimeout(function() {
-		$("#loaderDiv").fadeOut(100, function() {
-			catmh.setAnswerOptions(['Never', 'Sometimes', 'Moderately', 'Very Much', 'Always']);
-			$("#interview").fadeIn(100);
-		});
-	}, 500);
+	// setTimeout(function() {
+		// $("#loaderDiv").fadeOut(100, function() {
+			// catmh.setAnswerOptions(['Never', 'Sometimes', 'Moderately', 'Very Much', 'Always']);
+			// $("#interview").fadeIn(100);
+		// });
+	// }, 500);
 });
