@@ -3,6 +3,19 @@ namespace VICTR\REDCAP\CAT_MH;
 
 class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	public $testAPI = true;
+	public $testTypes = [
+		'mdd' => "Major Depressive Disorder",
+		'dep' => "Depression",
+		'anx' => "Anxiety Disorder",
+		'mhm' => "Mania/Hypomania",
+		'pdep' => "Depression (Perinatal)",
+		'panx' => "Anxiety Disorder (Perinatal)",
+		'pmhm' => "Mania/Hypomania (Perinatal)",
+		'sa' => "Substance Abuse",
+		'ptsd' => "Post-Traumatic Stress Disorder",
+		'cssrs' => "C-SSRS Suicide Screen",
+		'ss' => "Suicide Scale"
+	];
 	
 	// hooks
 	public function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
@@ -11,7 +24,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		$input['instrument'] = $instrument;
 		$input['recordID'] = $record;
 		$out = $this->createInterviews($input);
-		echo("\$out:<br />" . print_r($out, true));
+		echo(json_encode($out));
 		if (isset($out['moduleError'])) $this->log('catmhError', ['output' => $out]);
 		
 		if ($out !== false) {
@@ -55,8 +68,8 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 				
 				// tests array
 				$tests = [];
-				$testTypes = ['mdd', 'dep', 'anx', 'mhm', 'pdep', 'panx', 'pmhm', 'sa', 'ptsd', 'cssrs', 'ss'];
-				foreach ($testTypes as $j => $testAbbreviation) {
+				$testTypeKeys = array_keys($this->testTypes);
+				foreach ($testTypeKeys as $j => $testAbbreviation) {
 					if ($projectSettings[$testAbbreviation]['value'][$settingsIndex] == 1) {
 						$tests[] = ["type" => $testAbbreviation];
 					}
@@ -118,7 +131,8 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		// handle response
 		$response = json_decode($out['response'], true);
 		try {
-			foreach ($response['interviews'] as $interview) {
+			foreach ($response['interviews'] as $i => $interview) {
+				$interview['type'] = $out['config']['tests'][$i]['type'];
 				$params = [
 					'subjectID' => $interviewConfig['subjectID'],
 					'timestamp' => time(),

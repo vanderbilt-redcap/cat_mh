@@ -15,21 +15,43 @@ catmh.showError = function(message) {
 		$("#error").fadeIn(100);
 	});
 }
-catmh.showInterviews = function(interviews) {
-	$("body").empty().append("<span>" + interviews + "</span>");
+catmh.showInterviews = function() {
+	let page = $("body");
+	page.empty();
+	// add header
+	page.append("<h3>Select an interview</h3>");
+	// add interview selector buttons and labels
+	page.append("<ul></ul>");
+	catmh.interviews.forEach(function(interview) {
+		let button = "<button></button>";
+	});
+	// add begin button
+	
 }
 catmh.showResults = function (results) {}
-catmh.startInterview = function (interview) {}
+catmh.startInterview = function () {
+	console.log('hiding');
+	// $("#showInterviewsPage").hide();
+}
 catmh.submitAnswer = function() {}
 
 
 // on ready
 $(function() {
-	$("#interview").css('display', 'flex').hide();
+	// $("#interview").css('display', 'flex').hide();
+	// console.log(catmh.interviews);
 	// setTimeout(function() {
 		// $("#loaderDiv").fadeOut(100, function() {
 			// catmh.setAnswerOptions(['Never', 'Sometimes', 'Moderately', 'Very Much', 'Always']);
 			// $("#interview").fadeIn(100);
 		// });
 	// }, 500);
+});
+
+$("button.interviewSelector").on('focus', function() {
+	$("#beginInterview").removeClass('disabled');
+	// $("#beginInterview").prop('disabled', false);
+}).on('blur', function() {
+	$("#beginInterview").addClass('disabled');
+	// $("#beginInterview").prop('disabled', true);
 });

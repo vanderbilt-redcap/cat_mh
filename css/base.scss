@@ -6,82 +6,56 @@
 // vars
 
 // elements
-body {
-	font: 18px verdana, sans-serif;
-	
+#showInterviewsPage {
+	* {
+		font-family: "Verdana", sans-serif;
+	}
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: space-between;
 	margin-top: 100px;
 	div, span, button, ul {
-		margin: 30px;
+		margin: 16px;
 	}
 }
 ul {
 	list-style: none;
+	li {
+		margin-bottom: 10px;
+	}
 }
-li {
-	margin-bottom: 10px;
+h1 {
+	font-size: 48px;
+	font-weight: 500;
+}
+span.interviewLabel {
+	color: #A8A8A8;
+	font-size: 18px;
+	font-weight: 400px;
 }
 button {
-	background-color: #2679ff; /* Green */
 	border: none;
-	color: #eee;
-	padding: 16px 32px;
+	padding: 16px 24px;
 	text-align: center;
-	text-decoration: none;
-	-webkit-transition-duration: 0.4s; /* Safari */
-	transition-duration: 0.4s;
-	box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
-}
-button:hover {
-	background-color: #1e62ce;
-	color: white;
-	box-shadow: 0 8px 16px 0 rgba(0,0,0,0.1), 0 6px 20px 0 rgba(0,0,0,0.15);
-}
-button:active {
-	background-color: #174fa8;
+	display: inline-block;
+	font-size: 20px;
+	background-color: #737373;
 	color: white;
 }
-
-// classes
-.answer {
-	margin-left: 35px;
+button.disabled {
+	opacity: 0.3;
 }
-.grayText {
-	font: 16px verdana, sans-serif;
-	color: #909090;
-	font-weight: 600;
+button:hover:not(.disabled) {
+	border: none;
+	background-color: #919191;
 }
-.bigText {
-	font-size: 24px;
-	font-weight: 400;
+button.interviewSelector {
+	border: none;
+	width: 12em;
 }
-
-// identified
-#error {
-	display: none;
-}
-#interview {
-	display: none;
-	flex-direction: column;
-	align-items: center;
-	justify-content: space-between;
-}
-#question {
-	font-size: 24px;
-	font-weight: 400;
-}
-#loader {
-	border: 16px solid #e3e3e3; /* Light grey */
-	border-top: 16px solid #3498db; /* Blue */
-	border-radius: 50%;
-	width: 120px;
-	height: 120px;
-	animation: spin 2s linear infinite;
-}
-@keyframes spin {
-	0% { transform: rotate(0deg); }
-	100% { transform: rotate(360deg); }
+button.interviewSelector:focus {
+	border: none;
+	background-color: #0086FF;
+	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
 }
