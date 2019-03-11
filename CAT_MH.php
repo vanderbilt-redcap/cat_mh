@@ -538,3 +538,9 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	}
 	
 }
+
+if (isset($_POST['action'])) {
+	exit('ab');
+} else {
+	// exit('no post action');
+}

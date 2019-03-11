@@ -10,7 +10,7 @@
 	</head>
 	<body>
 		<div id='interviewSelect'>
-			<h1>Select an interview</h1>
+			<h1>Select an interview to take:</h1>
 			
 			<ul>
 				<li>
@@ -23,8 +23,8 @@
 				</li>
 			</ul>
 			
-			<button id='beginInterview' type='button' class='disabled' onclick='catmh.startInterview()'>Begin</button>
-		<div>
+			<button id='beginInterview' type='button' class='disabled submit' onclick='catmh.startInterview()'>Begin</button>
+		</div>
 		<div id='interviewTest'>
 			<span class='question'>1 - In the last 2 weeks, have you felt in the dumps?</span>
 			<button class='answerSelector'>Never</button>
@@ -32,11 +32,11 @@
 			<button class='answerSelector'>Moderately</button>
 			<button class='answerSelector'>Frequently</button>
 			<button class='answerSelector'>Always</button>
-			<button type='button' onclick='catmh.showResults()'>Submit</button>
+			<button id='submitAnswer' type='button' class='disabled submit' onclick='catmh.showResults()'>Submit</button>
 		</div>
 		<div id='interviewResults'>
-			<h3>Your interview is complete.</h3>
-			<h5>Interview results:</h5>
+			<h2>Your interview is complete.</h2>
+			<h3>Interview results:</h3>
 			<div>
 				<!-- possible columns: label, diagnosis, confidence, severity, category, precision, prob, percentile -->
 				<table>
@@ -73,27 +73,29 @@
 		</div>
 		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 		<?php
-			// // pull all interview info from logs
-			// $subjectID = $_GET['sid'];
-			// $result = $module->queryLogs("select interview, instrument, recordID, status where subjectID='$subjectID' order by timestamp desc");
-			// $interviews = [];
-			// while($row = db_fetch_assoc($result)) {
-				// $interview = json_decode($row['interview'], true);
-				// $interview['status'] = $row['status'];
-				// $interview['recordID'] = $row['recordID'];
-				// $interview['instrument'] = $row['instrument'];
-				// $interviews[] = $interview;
-			// }
+			// pull all interview info from logs
+			$subjectID = $_GET['sid'];
+			$result = $module->queryLogs("select interview, instrument, recordID, status where subjectID='$subjectID' order by timestamp desc");
+			$interviews = [];
+			while($row = db_fetch_assoc($result)) {
+				$interview = json_decode($row['interview'], true);
+				$interview['status'] = $row['status'];
+				$interview['recordID'] = $row['recordID'];
+				$interview['instrument'] = $row['instrument'];
+				$interviews[] = $interview;
+			}
 			
-			// // give js this info
-			// echo "
-		// <script type='text/javascript'>
-			// $(function() {
-				// catmh.interviews = JSON.parse('" . json_encode($interviews) . "');
-				// catmh.showInterviews();
-			// })
-		// </script>
-// ";
+			// give js this info
+			echo "
+<script type='text/javascript'>
+	$(function() {
+		catmh.interviews = JSON.parse('" . json_encode($interviews) . "');
+		$('body > div').css('display', 'flex');
+		$('body > div:not(#interviewSelect').css('display', 'none');
+		catmh.setInterviewOptions();
+	})
+</script>
+			";
 		?>
 		<script src="<?php echo($module->getUrl('js/base.js')); ?>"></script>
 	</body>

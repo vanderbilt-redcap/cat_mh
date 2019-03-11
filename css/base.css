@@ -337,18 +337,39 @@ template {
   display: none;
 }
 
-#interviewSelect {
+body > div {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   margin-top: 100px;
+  color: #5A5A5A;
 }
-#interviewSelect * {
+body > div * {
   font-family: "Verdana", sans-serif;
 }
-#interviewSelect div, #interviewSelect span, #interviewSelect button, #interviewSelect ul {
+body > div div, body > div span, body > div button, body > div ul {
   margin: 16px;
+}
+
+#interviewTest, #interviewResults, #error {
+  display: none;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+table, th, td {
+  text-align: left;
+}
+
+th, td {
+  padding: 16px;
+}
+
+tr:not(:last-child) {
+  border-bottom: 1px solid #ddd;
 }
 
 ul {
@@ -359,14 +380,19 @@ ul li {
 }
 
 h1 {
-  font-size: 48px;
-  font-weight: 500;
+  font-size: 32px;
 }
 
 span.interviewLabel {
   color: #A8A8A8;
   font-size: 18px;
-  font-weight: 400px;
+}
+
+.question {
+  font-size: 32px;
+  text-align: center;
+  width: 66%;
+  margin-bottom: 50px;
 }
 
 button {
@@ -379,24 +405,27 @@ button {
   color: white;
 }
 
+button:hover:not(.disabled) {
+  background-color: #0066DF;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
 button.disabled {
   opacity: 0.3;
 }
 
-button:hover:not(.disabled) {
-  border: none;
-  background-color: #919191;
-}
-
-button.interviewSelector {
-  border: none;
+.interviewSelector, .answerSelector {
   width: 12em;
+  background-color: #888888;
 }
 
-button.interviewSelector:focus {
-  border: none;
+.interviewSelector:focus, .answerSelector:focus {
   background-color: #0086FF;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
+
+.submitAnswer, #interviewResults > button:last-child {
+  margin-top: 16px;
 }
 
 /*# sourceMappingURL=base.css.map */
