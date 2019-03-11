@@ -42,6 +42,7 @@ catmh.setInterviewOptions = function() {
 	});
 	$("button.interviewSelector").on('focus', function() {
 		$("#beginInterview").removeClass('disabled');
+		catmh.lastInterviewSelected = $('.interviewSelector').index(this);
 	}).on('blur', function() {
 		$("#beginInterview").addClass('disabled');
 	});
@@ -64,19 +65,18 @@ catmh.showResults = function (results) {
 }
 catmh.startInterview = function () {
 	let sid = getUrlParameter('sid');
-	let interview = $('.interviewSelector').each(function(i, button) {
-		if ($(button).is(":focus")) {
-			return catmh.interviews[i];
+	let interview = catmh.interviews[catmh.lastInterviewSelected]
+	let data = {
+		sid: sid,
+		action: 'startInterview',
+		args: {
+			
 		}
-	});
-	interview.sid = sid;
-	console.log(interview);
-	let interviewData = interview;
-	
+	};
 	$.ajax({
 		type: "POST",
 		url: window.location.href.replace('interview', 'CAT_MH'),
-		data: JSON.stringify(interviewData),
+		data: JSON.stringify(data),
 		contentType: 'application/json',
 		dataType: 'text',
 		complete: function(result) {

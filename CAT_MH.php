@@ -231,6 +231,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	
 	public function startInterview($args) {
 		// args required: JSESSIONID, AWSELB
+		return 'hi';
 		$out = [];
 		
 		$requestHeaders = [
@@ -539,8 +540,8 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	
 }
 
-if (isset($_POST['action'])) {
-	exit('ab');
-} else {
-	// exit('no post action');
+if ($_SERVER['REQUEST_METHOD'] == "POST") {
+	$catmh = new CAT_MH();
+	$json = json_decode(file_get_contents("php://input"), true);
+	return $catmh->{$json['action']}();
 }
