@@ -9,7 +9,7 @@
 		<title>CAT-MH Interview</title>
 	</head>
 	<body>
-		<div id='showInterviewsPage'>
+		<div id='interviewSelect'>
 			<h1>Select an interview</h1>
 			
 			<ul>
@@ -25,6 +25,52 @@
 			
 			<button id='beginInterview' type='button' class='disabled' onclick='catmh.startInterview()'>Begin</button>
 		<div>
+		<div id='interviewTest'>
+			<span class='question'>1 - In the last 2 weeks, have you felt in the dumps?</span>
+			<button class='answerSelector'>Never</button>
+			<button class='answerSelector'>Sometimes</button>
+			<button class='answerSelector'>Moderately</button>
+			<button class='answerSelector'>Frequently</button>
+			<button class='answerSelector'>Always</button>
+			<button type='button' onclick='catmh.showResults()'>Submit</button>
+		</div>
+		<div id='interviewResults'>
+			<h3>Your interview is complete.</h3>
+			<h5>Interview results:</h5>
+			<div>
+				<!-- possible columns: label, diagnosis, confidence, severity, category, precision, prob, percentile -->
+				<table>
+					<tr>
+						<th>Test Type</th>
+						<th>Diagnosis</th>
+						<th>Confidence</th>
+						<th>Category</th>
+						<th>Precision</th>
+						<th>Probability</th>
+					</tr>
+					<tr>
+						<td>Depression</td>
+						<td>Positive</td>
+						<td>99.3%</td>
+						<td>N/A</td>
+						<td>N/A</td>
+						<td>N/A</td>
+					</tr>
+					<tr>
+						<td>Anxiety Disorder (Perinatal)</td>
+						<td>N/A</td>
+						<td>N/A</td>
+						<td>58.3%</td>
+						<td>Mild</td>
+						<td>88.5%</td>
+					</tr>
+				</table>
+			</div>
+			<button type='button' onclick='catmh.showInterviews()'>Back</button>
+		</div>
+		<div id='error'>
+			<span></span>
+		</div>
 		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 		<?php
 			// // pull all interview info from logs

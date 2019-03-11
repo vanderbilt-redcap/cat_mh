@@ -337,17 +337,17 @@ template {
   display: none;
 }
 
-#showInterviewsPage {
+#interviewSelect {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   margin-top: 100px;
 }
-#showInterviewsPage * {
+#interviewSelect * {
   font-family: "Verdana", sans-serif;
 }
-#showInterviewsPage div, #showInterviewsPage span, #showInterviewsPage button, #showInterviewsPage ul {
+#interviewSelect div, #interviewSelect span, #interviewSelect button, #interviewSelect ul {
   margin: 16px;
 }
 

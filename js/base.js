@@ -9,35 +9,33 @@ catmh.setAnswerOptions = function(answers) {
 	});
 }
 catmh.showError = function(message) {
-	$("#error span").empty().append(message);
-	$("#loader").hide()
-	$("#interview").fadeOut(200, function() {
+	$("body div:not(#error)").fadeOut(150, function() {
+		$("#error span").empty().append(message);
 		$("#error").fadeIn(100);
 	});
 }
 catmh.showInterviews = function() {
-	let page = $("body");
-	page.empty();
-	// add header
-	page.append("<h3>Select an interview</h3>");
-	// add interview selector buttons and labels
-	page.append("<ul></ul>");
-	catmh.interviews.forEach(function(interview) {
-		let button = "<button></button>";
+	$("body div").fadeOut(150, function() {
+		$("#interviewSelect").fadeIn(100);
 	});
-	// add begin button
-	
 }
-catmh.showResults = function (results) {}
+catmh.showResults = function (results) {
+	$("body div").fadeOut(150, function() {
+		$("#interviewResults").fadeIn(100);
+	});
+}
 catmh.startInterview = function () {
-	console.log('hiding');
-	// $("#showInterviewsPage").hide();
+	$("#interviewSelect, #interviewResults, #error").fadeOut(150, function() {
+		$("#interviewTest").fadeIn(100);
+	});
 }
 catmh.submitAnswer = function() {}
 
 
 // on ready
 $(function() {
+	$("body div").css('display', 'flex');
+	$("#error, #interviewTest, #interviewResults").css('display', 'none');
 	// $("#interview").css('display', 'flex').hide();
 	// console.log(catmh.interviews);
 	// setTimeout(function() {
@@ -47,7 +45,6 @@ $(function() {
 		// });
 	// }, 500);
 });
-
 $("button.interviewSelector").on('focus', function() {
 	$("#beginInterview").removeClass('disabled');
 	// $("#beginInterview").prop('disabled', false);

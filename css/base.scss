@@ -6,7 +6,7 @@
 // vars
 
 // elements
-#showInterviewsPage {
+body div {
 	* {
 		font-family: "Verdana", sans-serif;
 	}
@@ -18,6 +18,9 @@
 	div, span, button, ul {
 		margin: 16px;
 	}
+}
+#interviewTest, #interviewResults, #error {
+	display: none;
 }
 ul {
 	list-style: none;
