@@ -388,6 +388,13 @@ span.interviewLabel {
   font-size: 18px;
 }
 
+span.loadText {
+  color: #A8A8A8;
+  font-weight: 450;
+  font-size: 36px;
+  margin-bottom: 50px;
+}
+
 .question {
   font-size: 32px;
   text-align: center;
@@ -414,8 +421,13 @@ button.disabled {
   opacity: 0.3;
 }
 
-.interviewSelector, .answerSelector {
+.interviewSelector {
   width: 12em;
+  background-color: #888888;
+}
+
+.answerSelector {
+  width: 24em;
   background-color: #888888;
 }
 
@@ -426,6 +438,26 @@ button.disabled {
 
 .submitAnswer, #interviewResults > button:last-child {
   margin-top: 16px;
+}
+
+.spinner {
+  border: 16px solid #f3f3f3;
+  /* Light grey */
+  border-top: 16px solid #3498db;
+  /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /*# sourceMappingURL=base.css.map */

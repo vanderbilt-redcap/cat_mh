@@ -13,6 +13,7 @@
 			<h1>Select an interview to take:</h1>
 			
 			<ul>
+			<!--	example:
 				<li>
 					<button type='button' class='interviewSelector'>Depression</button>
 					<span class='interviewLabel'>(incomplete)</span>
@@ -21,18 +22,21 @@
 					<button type='button' class='interviewSelector'>Anxiety Disorder (Perinatal)</button>
 					<span class='interviewLabel'>(incomplete)</span>
 				</li>
+			-->
 			</ul>
 			
-			<button id='beginInterview' type='button' class='disabled submit' onclick='catmh.startInterview()'>Begin</button>
+			<button id='beginInterview' type='button' class='disabled submit' onclick='catmh.authInterview()'>Begin</button>
 		</div>
 		<div id='interviewTest'>
 			<span class='question'>1 - In the last 2 weeks, have you felt in the dumps?</span>
+			<!--	example:
 			<button class='answerSelector'>Never</button>
 			<button class='answerSelector'>Sometimes</button>
 			<button class='answerSelector'>Moderately</button>
 			<button class='answerSelector'>Frequently</button>
 			<button class='answerSelector'>Always</button>
-			<button id='submitAnswer' type='button' class='disabled submit' onclick='catmh.showResults()'>Submit</button>
+			-->
+			<button id='submitAnswer' type='button' class='disabled submit' onclick='catmh.submitAnswer()'>Submit</button>
 		</div>
 		<div id='interviewResults'>
 			<h2>Your interview is complete.</h2>
@@ -71,18 +75,19 @@
 		<div id='error'>
 			<span></span>
 		</div>
+		<div id='loader'>
+			<span class='loadText'>Fetching the next question...</span>
+			<div class='spinner'></div>
+		</div>
 		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 		<?php
 			// pull all interview info from logs
 			$subjectID = $_GET['sid'];
-			$result = $module->queryLogs("select interview, instrument, recordID, status where subjectID='$subjectID' order by timestamp desc");
+			$result = $module->queryLogs("select subjectID, recordID, interviewID, status, timestamp, instrument, identifier, signature, type, label
+				where subjectID='$subjectID' order by timestamp desc");
 			$interviews = [];
 			while($row = db_fetch_assoc($result)) {
-				$interview = json_decode($row['interview'], true);
-				$interview['status'] = $row['status'];
-				$interview['recordID'] = $row['recordID'];
-				$interview['instrument'] = $row['instrument'];
-				$interviews[] = $interview;
+				$interviews[] = $row;
 			}
 			
 			// give js this info
