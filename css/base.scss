@@ -16,7 +16,7 @@ body > div {
 	align-items: center;
 	justify-content: space-between;
 	margin-top: 100px;
-	div, span, button, ul {
+	div, span, button, ol {
 		margin: 16px;
 	}
 	color: #5A5A5A;
@@ -36,7 +36,7 @@ th, td {
 tr:not(:last-child) {
 	border-bottom: 1px solid #ddd;
 }
-ul {
+ol {
 	list-style: none;
 	li {
 		margin-bottom: 10px;
@@ -63,6 +63,11 @@ span.loadText {
 	width: 66%;
 	margin-bottom: 50px;
 }
+#missingInterviewsNote {
+	margin-top: 40px;
+	padding: 20px 150px;
+	border: 1px dotted #A8A8A8;
+}
 
 // buttons
 button {
@@ -81,7 +86,10 @@ button:hover:not(.disabled) {
 button.disabled {
 	opacity: 0.3;
 }
-.interviewSelector {
+button.completed, button.completed:hover, button.completed:focus {
+	background-color: #00D626;
+}
+.interviewSelector:not(.completed) {
 	width: 12em;
 	background-color: #888888;
 }
@@ -89,7 +97,7 @@ button.disabled {
 	width: 24em;
 	background-color: #888888;
 }
-.interviewSelector:focus, .answerSelector:focus {
+.interviewSelector:focus:not(.completed), .answerSelector:focus {
 	background-color: #0086FF;
 	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
 }
