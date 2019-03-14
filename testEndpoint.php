@@ -43,7 +43,8 @@ switch($action) {
 	case "getQuestion":
 		header("Content-Type: application/json");
 		$data = [
-			"questionID" => 14,
+			// "questionID" => 14,
+			"questionID" => -1,
 			"questionNumber" => 2,
 			"questionDescription" => "In the past 2 weeks, how much of the time did you feel depressed?",
 			"questionAnswers" => [

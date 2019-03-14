@@ -89,6 +89,17 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		return false;
 	}
 	
+	public function getInterviews($args) {
+		$subjectID = $args['subjectID'];
+		$result = $this->queryLogs("select subjectID, recordID, interviewID, status, timestamp, instrument, identifier, signature, type, label
+			where subjectID='$subjectID' order by timestamp desc");
+		$interviews = [];
+		while($row = db_fetch_assoc($result)) {
+			$interviews[] = $row;
+		}
+		return $interviews;
+	}
+	
 	// CAT-MH API methods
 	public function createInterviews($args) {
 		// args needed: instrument, recordID
@@ -188,28 +199,26 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		
 		// get cookies and location from server response
 		preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $out['response'], $matches);
-		$out['cookies'] = array();
+		$cookies = array();
 		foreach($matches[1] as $item) {
 			parse_str($item, $cookie);
-			$out['cookies'] = array_merge($out['cookies'], $cookie);
+			$cookies = array_merge($cookies, $cookie);
 		}
 		preg_match_all('/^Location:\s([^\n]*)$/m', $out['response'], $matches);
 		$out['location'] = $matches[1][0];
 		
 		// handle response
-		if ($out['info']['http_code'] == 302) {
-			// exit($this->getQueryLogsSql
+		if ($out['info']['http_code'] == 302 and isset($cookies['JSESSIONID']) and isset($cookies['AWSELB'])) {
 			try {
-				$out['AWSELB'] = $cookies['AWSELB'];
-				$out['JSESSIONID'] = $cookies['JSESSIONID'];
-				
 				$this->removeLogs("subjectID='" . $args['subjectID'] . "' and interviewID=" . $args['interviewID']);
-				$args['JSESSIONID'] = $out['JSESSIONID'];
-				$args['AWSELB'] = $out['AWSELB'];
+				// JSESSIONID and AWSELB should not leave server to client/test taker. Only to API and to our db
+				$args['JSESSIONID'] = $cookies['JSESSIONID'];
+				$args['AWSELB'] = $cookies['AWSELB'];
 				$args['timestamp'] = time();
 				$args['status'] = 1;
-				$this->log("authInterview", $params);
+				$this->log("authInterview", $args);
 				$out['success'] = true;
+				$out['cookies_retrieved'] = true;
 			} catch (Exception $e) {
 				$out['moduleError'] = true;
 				$out['moduleMessage'] = "REDCap couldn't read authorization details from CAT-MH API server response.";
@@ -444,6 +453,13 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		try {
 			if ($response['interviewId'] > 0) {
 				$out['success'] = true;
+				
+				// update interview status in db/logs
+				$this->removeLogs("subjectID='" . $args['subjectID'] . "' and interviewID=" . $args['interviewID']);
+				$args['timestamp'] = time();
+				$args['status'] = 2;
+				$this->log("getResults", $args);
+				$out['success'] = true;
 			} else {
 				throw new Exception ('response malformed');
 			}
@@ -587,6 +603,10 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 			break;
 		case 'breakLock':
 			$out = $catmh->breakLock($json['args']);
+			echo json_encode($out);
+			break;
+		case 'getInterviews':
+			$out = $catmh->getInterviews($json['args']);
 			echo json_encode($out);
 			break;
 	}

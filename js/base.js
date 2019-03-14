@@ -15,7 +15,6 @@ catmh.testTypes = {
 catmh.testStatuses = [
 	'incomplete',
 	'in progress',
-	'complete',
 	'complete'
 ];
 
@@ -33,14 +32,21 @@ catmh.setAnswerOptions = function(answers) {
 	});
 }
 catmh.setInterviewOptions = function() {
-	$("ul").empty()
+	$("ol").empty();
+	$("#missingInterviewsNote").hide();
+	if (catmh.interviews.length <= 0) {
+		$("#missingInterviewsNote").show();
+		return;
+	}
+	
 	catmh.interviews.forEach(test => {
-		$("ul").append(`
+		$("ol").append(`
 				<li>
-					<button type='button' class='interviewSelector'>` + test['label'] + `</button>
+					<button type='button' class='interviewSelector${test.status == 2 ? ' completed' : ''}'>` + test['label'] + `</button>
 					<span class='interviewLabel'>(` + catmh.testStatuses[test['status']] + `)</span>
 				</li>`);
 	});
+	
 	$("button.interviewSelector").on('focus', function() {
 		$("#beginInterview").removeClass('disabled');
 		catmh.lastInterviewSelected = $('.interviewSelector').index(this);
@@ -49,7 +55,55 @@ catmh.setInterviewOptions = function() {
 	});
 }
 
+catmh.refreshInterviews = function() {
+	let data = {
+		action: "getInterviews",
+		args: catmh.currentInterview
+	};
+	$.ajax({
+		type: "POST",
+		url: window.location.href.replace('interview', 'CAT_MH'),
+		data: JSON.stringify(data),
+		contentType: 'application/json',
+		complete: function(xhr) {
+			catmh.lastXhr = xhr;
+			catmh.interviews = JSON.parse(xhr.responseText);
+			catmh.interviews.sort(function(a, b) {
+				if (parseInt(a.interviewID) < parseInt(b.interviewID)) {
+					return -1;
+				} else {
+					return 1;
+				}
+			});
+			catmh.setInterviewOptions();
+			$("#interviewSelect").fadeIn(100);
+		}
+	});
+	$("body > div:visible").fadeOut(100);
+}
+catmh.showResults = function() {
+	$("table > tr:not(first-child").remove();
+	catmh.testResults.tests.forEach(function(test) {
+		$("table").append(`
+					<tr>
+						<td>${test.label}</td>
+						<td>${test.diagnosis==null ? 'N/A' : test.diagnosis}</td>
+						<td>${test.confidence==null ? 'N/A' : test.confidence + '%'}</td>
+						<td>${test.severity==null ? 'N/A' : test.severity + '%'}</td>
+						<td>${test.category==null ? 'N/A' : test.category}</td>
+						<td>${test.precision==null ? 'N/A' : test.precision + '%'}</td>
+						<td>${test.prob==null ? 'N/A' : (test.prob*100) + '%'}</td>
+						<td>${test.percentile==null ? 'N/A' : test.percentile + '%'}</td>
+					</tr>
+`);
+	});
+	$("body > div:visible").fadeOut(100, function() {
+		$("#interviewResults").fadeIn(100);
+	});
+}
+
 catmh.authInterview = function() {
+	if (typeof catmh.lastInterviewSelected != 'number') return;
 	$("#loader span").text("Authorizing the interview...");
 	if (catmh.startingInterview) {
 		return;
@@ -57,6 +111,7 @@ catmh.authInterview = function() {
 		catmh.startingInterview = true
 	}
 	catmh.currentInterview = catmh.interviews[catmh.lastInterviewSelected];
+	catmh.lastInterviewSelected = null;
 	let data = {
 		action: 'authInterview',
 		args: catmh.currentInterview
@@ -78,7 +133,6 @@ catmh.authInterview = function() {
 			catmh.lastResponse = JSON.parse(xhr.responseText);
 			if (catmh.lastResponse.success == true) {
 				catmh.startingInterview = null;
-				catmh.currentInterview.status = 1;
 				catmh.startInterview(catmh.currentInterview);
 			}
 		}
@@ -97,11 +151,9 @@ catmh.startInterview = function () {
 		data: JSON.stringify(data),
 		contentType: 'application/json',
 		complete: function(xhr) {
-			let obj = JSON.parse(xhr.responseText);
-			if (obj.success == true) {
-				let obj2 = JSON.parse(obj.response);
-				catmh.currentInterview.JSESSIONID = obj2.JSESSIONID;
-				catmh.currentInterview.AWSELB = obj2.AWSELB;
+			catmh.lastXhr = xhr;
+			catmh.lastResponse = JSON.parse(xhr.responseText);
+			if (catmh.lastResponse.success == true) {
 				$("#loader span").text("Fetching the first question...");
 				catmh.getQuestion();
 			}
@@ -120,22 +172,25 @@ catmh.getQuestion = function() {
 		data: JSON.stringify(data),
 		contentType: 'application/json',
 		complete: function(xhr) {
-			let obj = JSON.parse(xhr.responseText);
-			if (obj.success == true) {
-				catmh.currentQuestion = JSON.parse(obj.response);
-				
-				// set question text
-				$(".question").text(catmh.currentQuestion.questionNumber + '. ' + catmh.currentQuestion.questionDescription);
-				
-				// set answer options
-				catmh.setAnswerOptions(catmh.currentQuestion.questionAnswers);
-				$("body > div:visible").fadeOut(100, function() {
-					$("#interviewTest").fadeIn(100);
-					catmh.questionDisplayTime = +new Date()
-				});
-			}
-			if (obj.needResults) {
-				// todo, fetch results and send user to results screen
+			catmh.lastXhr = xhr;
+			catmh.lastResponse = JSON.parse(xhr.responseText);
+			if (catmh.lastResponse.success == true) {
+				if (catmh.lastResponse.needResults) {
+					$("#loader span").text("Test complete. Retrieving results.");
+					catmh.getResults();
+				} else {
+					catmh.currentQuestion = JSON.parse(catmh.lastResponse.response);
+					
+					// set question text
+					$(".question").text(catmh.currentQuestion.questionNumber + '. ' + catmh.currentQuestion.questionDescription);
+					
+					// set answer options
+					catmh.setAnswerOptions(catmh.currentQuestion.questionAnswers);
+					catmh.questionDisplayTime = +new Date();
+					$("body > div:visible").fadeOut(100, function() {
+						$("#interviewTest").fadeIn(100);
+					});
+				}
 			}
 		}
 	});
@@ -156,11 +211,16 @@ catmh.submitAnswer = function() {
 		data: JSON.stringify(data),
 		contentType: 'application/json',
 		complete: function(xhr) {
-			let obj = JSON.parse(xhr.responseText);
-			if (obj.success == true) {
+			catmh.lastXhr = xhr;
+			catmh.lastResponse = JSON.parse(xhr.responseText);
+			if (catmh.lastResponse.success == true) {
 				catmh.getQuestion();
 			}
 		}
+	});
+	$("#loader span").text("Fetching the next question...");
+	$("body > div:visible").fadeOut(100, function() {
+		$("#loader").fadeIn(100);
 	});
 }
 catmh.getResults = function() {
@@ -175,9 +235,11 @@ catmh.getResults = function() {
 		data: JSON.stringify(data),
 		contentType: 'application/json',
 		complete: function(xhr) {
-			let obj = JSON.parse(xhr.responseText);
-			if (obj.success == true) {
-				let testResults = JSON.parse(obj.response);
+			catmh.lastXhr = xhr;
+			catmh.lastResponse = JSON.parse(xhr.responseText);
+			if (catmh.lastResponse.success == true) {
+				catmh.testResults = JSON.parse(catmh.lastResponse.response);
+				catmh.showResults();
 			}
 		}
 	});
@@ -196,7 +258,8 @@ var getUrlParameter = function getUrlParameter(sParam) {
             return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
         }
     }
-};
+}
+
 function getMicrotime() {
     var s,
         now = (Date.now ? Date.now() : new Date().getTime()) / 1000;

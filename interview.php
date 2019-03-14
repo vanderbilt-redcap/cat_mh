@@ -11,66 +11,34 @@
 	<body>
 		<div id='interviewSelect'>
 			<h1>Select an interview to take:</h1>
-			
-			<ul>
-			<!--	example:
-				<li>
-					<button type='button' class='interviewSelector'>Depression</button>
-					<span class='interviewLabel'>(incomplete)</span>
-				</li>
-				<li>
-					<button type='button' class='interviewSelector'>Anxiety Disorder (Perinatal)</button>
-					<span class='interviewLabel'>(incomplete)</span>
-				</li>
-			-->
-			</ul>
+			<h2 id='missingInterviewsNote'>REDCap didn't find any interviews for you.</h2>
+			<ol>
+			</ol>
 			
 			<button id='beginInterview' type='button' class='disabled submit' onclick='catmh.authInterview()'>Begin</button>
 		</div>
 		<div id='interviewTest'>
-			<span class='question'>1 - In the last 2 weeks, have you felt in the dumps?</span>
-			<!--	example:
-			<button class='answerSelector'>Never</button>
-			<button class='answerSelector'>Sometimes</button>
-			<button class='answerSelector'>Moderately</button>
-			<button class='answerSelector'>Frequently</button>
-			<button class='answerSelector'>Always</button>
-			-->
+			<span class='question'></span>
 			<button id='submitAnswer' type='button' class='disabled submit' onclick='catmh.submitAnswer()'>Submit</button>
 		</div>
 		<div id='interviewResults'>
 			<h2>Your interview is complete.</h2>
 			<h3>Interview results:</h3>
 			<div>
-				<!-- possible columns: label, diagnosis, confidence, severity, category, precision, prob, percentile -->
 				<table>
 					<tr>
 						<th>Test Type</th>
 						<th>Diagnosis</th>
 						<th>Confidence</th>
+						<th>Severity</th>
 						<th>Category</th>
 						<th>Precision</th>
 						<th>Probability</th>
-					</tr>
-					<tr>
-						<td>Depression</td>
-						<td>Positive</td>
-						<td>99.3%</td>
-						<td>N/A</td>
-						<td>N/A</td>
-						<td>N/A</td>
-					</tr>
-					<tr>
-						<td>Anxiety Disorder (Perinatal)</td>
-						<td>N/A</td>
-						<td>N/A</td>
-						<td>58.3%</td>
-						<td>Mild</td>
-						<td>88.5%</td>
+						<th>Percentile</th>
 					</tr>
 				</table>
 			</div>
-			<button type='button' onclick='catmh.showInterviews()'>Back</button>
+			<button type='button' onclick='catmh.refreshInterviews()'>Back</button>
 		</div>
 		<div id='error'>
 			<span></span>
@@ -95,6 +63,13 @@
 <script type='text/javascript'>
 	$(function() {
 		catmh.interviews = JSON.parse('" . json_encode($interviews) . "');
+		catmh.interviews.sort(function(a, b) {
+			if (parseInt(a.interviewID) < parseInt(b.interviewID)) {
+				return -1;
+			} else {
+				return 1;
+			}
+		});
 		$('body > div').css('display', 'flex');
 		$('body > div:not(#interviewSelect').css('display', 'none');
 		catmh.setInterviewOptions();
