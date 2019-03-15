@@ -2,7 +2,7 @@
 namespace VICTR\REDCAP\CAT_MH;
 
 class CAT_MH extends \ExternalModules\AbstractExternalModule {
-	public $testAPI = true;
+	// public $testAPI = true;
 	public $testTypes = [
 		'mdd' => "Major Depressive Disorder",
 		'dep' => "Depression",
@@ -119,6 +119,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		
 		// initialize return/output array
 		$output = [];
+		// $output['args'] = $args;
 		
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $args['address']);
@@ -199,7 +200,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			"Accept: application/json",
 			"Content-Type: application/json"
 		];
-		$curlArgs['body'] = [
+		$curlArgs['body'] = json_encode([
 			"organizationID" => intval($interviewConfig['organizationid']),
 			"userFirstName" => "Automated",
 			"userLastName" => "Creation",
@@ -207,7 +208,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			"numberOfInterviews" => 1,
 			"language" => intval($interviewConfig['language']),
 			"tests" => $interviewConfig['tests']
-		];
+		]);
 		$curlArgs['post'] = true;
 		$testAddress = "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=" . $this->getProjectId() . "&action=" . __FUNCTION__;
 		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://www.cat-mh.com/portal/secure/interview/createInterview";
@@ -356,7 +357,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			if (gettype($json) != 'array') throw new \Exception("json error");
 			$out['success'] = true;
 			if ($json['questionID'] < 0) {
-				$out['getResults'] = true;
+				$out['needResults'] = true;
 			}
 		} catch (\Exception $e) {
 			$out['moduleError'] = true;
@@ -382,14 +383,14 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			"Content-Type: application/json",
 			"Cookie: JSESSIONID=" . $authValues['JSESSIONID'] . "; AWSELB=" . $authValues['AWSELB']
 		];
-		$curlArgs['body'] = [
-			"questionID" => $args['questionID'],
-			"response" => $args['response'],
-			"duration" => $args['duration'],
+		$curlArgs['body'] = json_encode([
+			"questionID" => intval($args['questionID']),
+			"response" => intval($args['response']),
+			"duration" => intval($args['duration']),
 			"curT1" => 0,
 			"curT2" => 0,
 			"curT3" => 0
-		];
+		]);
 		$curlArgs['post'] = true;
 		$testAddress = "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=" . $this->getProjectId() . "&action=" . __FUNCTION__;
 		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://www.cat-mh.com/interview/rest/interview/test/question";

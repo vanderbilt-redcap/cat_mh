@@ -247,7 +247,7 @@ catmh.getResults = function() {
 			catmh.lastXhr = xhr;
 			catmh.lastResponse = JSON.parse(xhr.responseText);
 			if (catmh.lastResponse.success == true) {
-				catmh.testResults = JSON.parse(catmh.lastResponse.response);
+				catmh.testResults = JSON.parse(catmh.lastResponse.curl.body);
 				catmh.endInterview();
 				catmh.showResults();
 			}

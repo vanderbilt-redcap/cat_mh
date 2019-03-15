@@ -10,8 +10,8 @@
 	</head>
 	<body>
 		<div id='interviewSelect'>
-			<h1>Select an interview to take:</h1>
-			<h2 id='missingInterviewsNote'>REDCap didn't find any interviews for you.</h2>
+			<h1>Your interview will include the following tests:</h1>
+			<h2 id='missingInterviewsNote'>REDCap didn't find an interview for you.</h2>
 			<ol>
 			</ol>
 			
