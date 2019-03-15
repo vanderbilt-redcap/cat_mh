@@ -8,12 +8,12 @@ switch($action) {
 					"interviewID" => 123,
 					"identifier" => 'abc',
 					"signature" => 'def',
-				],
-				1 => [
-					"interviewID" => 456,
-					"identifier" => 'ghi',
-					"signature" => 'jkl',
-				],
+				]
+				// 1 => [
+					// "interviewID" => 456,
+					// "identifier" => 'ghi',
+					// "signature" => 'jkl',
+				// ],
 			]
 		];
 		header("Content-Type: application/json");
@@ -43,8 +43,8 @@ switch($action) {
 	case "getQuestion":
 		header("Content-Type: application/json");
 		$data = [
-			"questionID" => 14,
-			// "questionID" => -1,
+			// "questionID" => 14,
+			"questionID" => -1,
 			"questionNumber" => 2,
 			"questionDescription" => "In the past 2 weeks, how much of the time did you feel depressed?",
 			"questionAnswers" => [
@@ -85,6 +85,7 @@ switch($action) {
 	case "endInterview":
 		header("Location: http://www.cat-mh.com/");
 		http_response_code(302);
+		setcookie("JSESSIONID", "ymOPw72ci6jeBibjJq3ca3np.ip-172-31-24-54; path=/interview; secure; HttpOnly", time()+3600, "/");
 		break;
 	case "getResults":
 		header("Content-Type: application/json");

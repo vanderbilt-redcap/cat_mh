@@ -182,7 +182,7 @@ catmh.getQuestion = function() {
 					$("#loader span").text("Test complete. Retrieving results.");
 					catmh.getResults();
 				} else {
-					catmh.currentQuestion = JSON.parse(catmh.lastResponse.response);
+					catmh.currentQuestion = JSON.parse(catmh.lastResponse.curl.body);
 					
 					// set question text
 					$(".question").text(catmh.currentQuestion.questionNumber + '. ' + catmh.currentQuestion.questionDescription);
