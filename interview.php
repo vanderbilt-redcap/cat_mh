@@ -15,11 +15,11 @@
 			<ol>
 			</ol>
 			
-			<button id='beginInterview' type='button' class='disabled submit' onclick='catmh.authInterview()'>Begin</button>
+			<button id='beginInterview' type='button' class='disabled submit' onMouseDown='catmh.authInterview()'>Begin</button>
 		</div>
 		<div id='interviewTest'>
 			<span class='question'></span>
-			<button id='submitAnswer' type='button' class='disabled submit' onclick='catmh.submitAnswer()'>Submit</button>
+			<button id='submitAnswer' type='button' class='disabled submit' onMouseDown='catmh.submitAnswer()'>Submit</button>
 		</div>
 		<div id='interviewResults'>
 			<h2>Your interview is complete.</h2>

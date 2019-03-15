@@ -43,8 +43,8 @@ switch($action) {
 	case "getQuestion":
 		header("Content-Type: application/json");
 		$data = [
-			// "questionID" => 14,
-			"questionID" => -1,
+			"questionID" => 14,
+			// "questionID" => -1,
 			"questionNumber" => 2,
 			"questionDescription" => "In the past 2 weeks, how much of the time did you feel depressed?",
 			"questionAnswers" => [
@@ -129,17 +129,14 @@ switch($action) {
 		break;
 	case "getInterviewStatus":
 		header('Content-Type: application/json');
-		$out = '{
-			"interviewValid":true,
-			"credentialsValid":true,
-			"startTime":null,
-			"endTime":null,
-			"inProgress":false
-		}';
-		$out = str_replace('\r', '', $out);
-		$out = str_replace('\n', '', $out);
-		$out = str_replace('\t', '', $out);
-		echo($out);
+		$data = [
+			"interviewValid" => true,
+			"credentialsValid" => true,
+			"startTime" => null,
+			"endTime" => null,
+			"inProgress" => false
+		];
+		echo(json_encode($data));
 		break;
 	case "breakLock":
 		header("Location: " . "https://www.cat-mh.com/interview/secure/index.html");

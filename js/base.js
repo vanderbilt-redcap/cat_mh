@@ -26,7 +26,7 @@ catmh.setAnswerOptions = function(answers) {
 	});
 	$("button.answerSelector").on('focus', function() {
 		$("#submitAnswer").removeClass('disabled');
-		catmh.lastAnswerSelected = $(this).attr('data-ordinal');
+		// catmh.lastAnswerSelected = $(this).attr('data-ordinal');
 	}).on('blur', function() {
 		$("#submitAnswer").addClass('disabled');
 	});
@@ -38,7 +38,6 @@ catmh.setInterviewOptions = function() {
 		$("#missingInterviewsNote").show();
 		return;
 	}
-	
 	catmh.interviews.forEach(test => {
 		$("ol").append(`
 				<li>
@@ -46,11 +45,9 @@ catmh.setInterviewOptions = function() {
 					<span class='interviewLabel'>(` + catmh.testStatuses[test['status']] + `)</span>
 				</li>`);
 	});
-	
-	$("button.interviewSelector").on('focus', function() {
+	$("button.interviewSelector:not(.completed)").on('focus', function() {
 		$("#beginInterview").removeClass('disabled');
-		catmh.lastInterviewSelected = $('.interviewSelector').index(this);
-	}).on('blur', function() {
+	}).on('blur', function(event) {
 		$("#beginInterview").addClass('disabled');
 	});
 }
@@ -103,14 +100,17 @@ catmh.showResults = function() {
 }
 
 catmh.authInterview = function() {
-	if (typeof catmh.lastInterviewSelected != 'number') return;
+	let i = $('.interviewSelector:focus').index('.interviewSelector');
+	catmh.currentInterview = catmh.interviews[i];
+	if (catmh.currentInterview == null) return;
+	
 	$("#loader span").text("Authorizing the interview...");
 	if (catmh.startingInterview) {
 		return;
 	} else {
 		catmh.startingInterview = true
 	}
-	catmh.currentInterview = catmh.interviews[catmh.lastInterviewSelected];
+	
 	catmh.lastInterviewSelected = null;
 	let data = {
 		action: 'authInterview',
@@ -123,6 +123,7 @@ catmh.authInterview = function() {
 	})
 	
 	// authInterview first
+	console.log("sending authInterview request");
 	$.ajax({
 		type: "POST",
 		url: window.location.href.replace('interview', 'CAT_MH'),
@@ -145,6 +146,7 @@ catmh.startInterview = function () {
 		args: catmh.currentInterview
 	};
 	
+	console.log("sending startInterview request");
 	$.ajax({
 		type: "POST",
 		url: window.location.href.replace('interview', 'CAT_MH'),
@@ -166,6 +168,7 @@ catmh.getQuestion = function() {
 		args: catmh.currentInterview
 	};
 	
+	console.log("sending getQuestion request");
 	$.ajax({
 		type: "POST",
 		url: window.location.href.replace('interview', 'CAT_MH'),
@@ -196,15 +199,20 @@ catmh.getQuestion = function() {
 	});
 }
 catmh.submitAnswer = function() {
+	let i = $('.answerSelector:focus').index('.answerSelector');
+	if (i < 0) return;
+	i++;
+	
 	let now = +new Date();
 	catmh.currentInterview.questionID = parseInt(catmh.currentQuestion.questionID);
-	catmh.currentInterview.response = parseInt(catmh.lastAnswerSelected);
+	catmh.currentInterview.response = parseInt(i);
 	catmh.currentInterview.duration = now - catmh.questionDisplayTime;
 	let data = {
 		action: 'submitAnswer',
 		args: catmh.currentInterview
 	};
 	
+	console.log("sending submitAnswer request");
 	$.ajax({
 		type: "POST",
 		url: window.location.href.replace('interview', 'CAT_MH'),
@@ -229,6 +237,7 @@ catmh.getResults = function() {
 		args: catmh.currentInterview
 	};
 	
+	console.log("sending getResults request");
 	$.ajax({
 		type: "POST",
 		url: window.location.href.replace('interview', 'CAT_MH'),
@@ -239,8 +248,26 @@ catmh.getResults = function() {
 			catmh.lastResponse = JSON.parse(xhr.responseText);
 			if (catmh.lastResponse.success == true) {
 				catmh.testResults = JSON.parse(catmh.lastResponse.response);
+				catmh.endInterview();
 				catmh.showResults();
 			}
+		}
+	});
+}
+catmh.endInterview = function() {
+	let data = {
+		action: 'endInterview',
+		args: catmh.currentInterview
+	};
+	
+	console.log("sending endInterview request");
+	$.ajax({
+		type: "POST",
+		url: window.location.href.replace('interview', 'CAT_MH'),
+		data: JSON.stringify(data),
+		contentType: 'application/json',
+		complete: function(xhr) {
+			catmh.lastXhr = xhr;
 		}
 	});
 }
@@ -258,11 +285,4 @@ var getUrlParameter = function getUrlParameter(sParam) {
             return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
         }
     }
-}
-
-function getMicrotime() {
-    var s,
-        now = (Date.now ? Date.now() : new Date().getTime()) / 1000;
-    s = now | 0
-    return (Math.round((now - s) * 1000) / 1000) + ' ' + s
 }
