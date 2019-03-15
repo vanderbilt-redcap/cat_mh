@@ -38,7 +38,13 @@ tr:not(:last-child) {
 }
 ol {
 	list-style: none;
+	padding: 0px;
 	li {
+		padding: 16px 32px;
+		font-size: 32px;
+		font-weight: 450;
+		border: 2px solid #88D6FF;
+		border-radius: 5px;
 		margin-bottom: 10px;
 	}
 }

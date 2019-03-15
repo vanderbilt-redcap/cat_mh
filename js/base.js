@@ -40,16 +40,13 @@ catmh.setInterviewOptions = function() {
 	}
 	catmh.interviews.forEach(test => {
 		$("ol").append(`
-				<li>
-					<button type='button' class='interviewSelector${test.status == 2 ? ' completed' : ''}'>` + test['label'] + `</button>
-					<span class='interviewLabel'>(` + catmh.testStatuses[test['status']] + `)</span>
-				</li>`);
+				<li class='interviewLabel'>${test.label}</li>`);
 	});
-	$("button.interviewSelector:not(.completed)").on('focus', function() {
-		$("#beginInterview").removeClass('disabled');
-	}).on('blur', function(event) {
-		$("#beginInterview").addClass('disabled');
-	});
+	// $("button.interviewSelector:not(.completed)").on('focus', function() {
+		// $("#beginInterview").removeClass('disabled');
+	// }).on('blur', function(event) {
+		// $("#beginInterview").addClass('disabled');
+	// });
 }
 
 catmh.refreshInterviews = function() {
@@ -100,8 +97,8 @@ catmh.showResults = function() {
 }
 
 catmh.authInterview = function() {
-	let i = $('.interviewSelector:focus').index('.interviewSelector');
-	catmh.currentInterview = catmh.interviews[i];
+	// let i = $('.interviewSelector:focus').index('.interviewSelector');
+	catmh.currentInterview = catmh.interviews[0];
 	if (catmh.currentInterview == null) return;
 	
 	$("#loader span").text("Authorizing the interview...");
@@ -248,7 +245,7 @@ catmh.getResults = function() {
 			catmh.lastResponse = JSON.parse(xhr.responseText);
 			if (catmh.lastResponse.success == true) {
 				catmh.testResults = JSON.parse(catmh.lastResponse.curl.body);
-				catmh.endInterview();
+				// catmh.endInterview();
 				catmh.showResults();
 			}
 		}

@@ -10,12 +10,12 @@
 	</head>
 	<body>
 		<div id='interviewSelect'>
-			<h1>Your interview will include the following tests:</h1>
+			<h1>Your interview today will include the following tests:</h1>
 			<h2 id='missingInterviewsNote'>REDCap didn't find an interview for you.</h2>
 			<ol>
 			</ol>
-			
-			<button id='beginInterview' type='button' class='disabled submit' onMouseDown='catmh.authInterview()'>Begin</button>
+			<span>Click below to begin your interview.</span>
+			<button id='beginInterview' type='button' class='submit' onMouseDown='catmh.authInterview()'>Begin</button>
 		</div>
 		<div id='interviewTest'>
 			<span class='question'></span>

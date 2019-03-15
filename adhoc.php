@@ -1,20 +1,20 @@
 <?php
 $out = $module->removeLogs("true");
-// $out = $module->createInterviews(['instrument' => 'second_instrument', 'recordID' => 1]);
+$out = $module->createInterviews(['instrument' => 'second_instrument', 'recordID' => 1]);
 
-$params = [
-	'subjectID' => "8iPISYvnnZYFM4FIzdqFglOgybMZKlgm",
-	'recordID' =>  5,
-	'interviewID' => 191569,
-	'status' => 0,
-	'timestamp' => time(),
-	'instrument' => 'survey_1',
-	'identifier' => 'kadg',
-	'signature' => 'vu7r5p',
-	'type' => 'mdd',
-	'label' => 'Major Depressive Disorder'
-];
-$module->log("createInterviews", $params);
+// $params = [
+	// 'subjectID' => "8iPISYvnnZYFM4FIzdqFglOgybMZKlgm",
+	// 'recordID' =>  5,
+	// 'interviewID' => 191569,
+	// 'status' => 0,
+	// 'timestamp' => time(),
+	// 'instrument' => 'survey_1',
+	// 'identifier' => 'kadg',
+	// 'signature' => 'vu7r5p',
+	// 'type' => 'mdd',
+	// 'label' => 'Major Depressive Disorder'
+// ];
+// $module->log("createInterviews", $params);
 
 // $args = [
 	// 'subjectID' => $_GET['sid']

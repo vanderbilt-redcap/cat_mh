@@ -2,20 +2,17 @@
 $action = $_GET['action'];
 switch($action) {
 	case "createInterviews":
+		$input = json_decode(file_get_contents("php://input"), true);
 		$data = [
-			"interviews" => [
-				0 => [
-					"interviewID" => 123,
-					"identifier" => 'abc',
-					"signature" => 'def',
-				]
-				// 1 => [
-					// "interviewID" => 456,
-					// "identifier" => 'ghi',
-					// "signature" => 'jkl',
-				// ],
-			]
+			"interviews" => []
 		];
+		foreach ($input['tests'] as $test) {
+			$arr = [];
+			$arr['interviewID'] = rand(1, 9999999);
+			$arr['identifier'] = substr(str_shuffle(MD5(microtime())), 0, 10);
+			$arr['signature'] = substr(str_shuffle(MD5(microtime())), 0, 10);
+			$data['interviews'][] = $arr;
+		}
 		header("Content-Type: application/json");
 		echo(json_encode($data));
 		break;
