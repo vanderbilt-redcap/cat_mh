@@ -14,8 +14,8 @@
 			<h2 id='missingInterviewsNote'>REDCap didn't find an interview for you.</h2>
 			<ol>
 			</ol>
-			<span>Click below to begin your interview.</span>
-			<button id='beginInterview' type='button' class='submit' onMouseDown='catmh.authInterview()'>Begin</button>
+			<span id='buttonInstructions' style='display: none;'>Click below to begin your interview.</span>
+			<button id='beginInterview' style='display: none;' type='button' class='submit' onMouseDown='catmh.authInterview()'>Begin</button>
 		</div>
 		<div id='interviewTest'>
 			<span class='question'></span>
@@ -38,7 +38,7 @@
 					</tr>
 				</table>
 			</div>
-			<button type='button' onclick='catmh.refreshInterviews()'>Back</button>
+			<span>Your test results have been stored in the REDCap database. You may now close this window or tab.</span>
 		</div>
 		<div id='error'>
 			<span></span>
@@ -51,28 +51,23 @@
 		<?php
 			// pull all interview info from logs
 			$subjectID = $_GET['sid'];
-			$result = $module->queryLogs("select subjectID, recordID, interviewID, status, timestamp, instrument, identifier, signature, type, label
-				where subjectID='$subjectID' order by timestamp desc");
-			$interviews = [];
-			while($row = db_fetch_assoc($result)) {
-				$interviews[] = $row;
-			}
+			$result = $module->queryLogs("select subjectID, recordID, interviewID, status, tstamp, instrument, identifier, signature, types, labels
+				where subjectID='$subjectID' order by tstamp desc");
+			$interview = db_fetch_assoc($result);
 			
 			// give js this info
 			echo "
 <script type='text/javascript'>
 	$(function() {
-		catmh.interviews = JSON.parse('" . json_encode($interviews) . "');
-		catmh.interviews.sort(function(a, b) {
-			if (parseInt(a.interviewID) < parseInt(b.interviewID)) {
-				return -1;
-			} else {
-				return 1;
-			}
-		});
+		catmh.interview = " . json_encode($interview) . ";
+		// console.log(catmh.interview);
+		catmh.interview.types = JSON.parse(catmh.interview.types);
+		catmh.interview.labels = JSON.parse(catmh.interview.labels);
+		// console.log(catmh.interview);
+		catmh.setInterviewOptions();
+		
 		$('body > div').css('display', 'flex');
 		$('body > div:not(#interviewSelect').css('display', 'none');
-		catmh.setInterviewOptions();
 	})
 </script>
 			";

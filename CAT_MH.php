@@ -2,7 +2,7 @@
 namespace VICTR\REDCAP\CAT_MH;
 
 class CAT_MH extends \ExternalModules\AbstractExternalModule {
-	public $testAPI = true;
+	// public $testAPI = true;
 	public $debug = true;
 	public $convertTestAbbreviation = [
 		'mdd' => "mdd",
@@ -21,13 +21,13 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		'mdd' => "Major Depressive Disorder",
 		'dep' => "Depression",
 		'anx' => "Anxiety Disorder",
-		'mhm' => "Mania/Hypomania",
-		'pdep' => "Depression (Perinatal)",
-		'panx' => "Anxiety Disorder (Perinatal)",
-		'pmhm' => "Mania/Hypomania (Perinatal)",
+		'm/hm' => "Mania/Hypomania",
+		'p-dep' => "Depression (Perinatal)",
+		'p-anx' => "Anxiety Disorder (Perinatal)",
+		'p-m/hm' => "Mania/Hypomania (Perinatal)",
 		'sa' => "Substance Abuse",
 		'ptsd' => "Post-Traumatic Stress Disorder",
-		'cssrs' => "C-SSRS Suicide Screen",
+		'c-ssrs' => "C-SSRS Suicide Screen",
 		'ss' => "Suicide Scale"
 	];
 	
@@ -55,6 +55,11 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 				</script>
 				");
 			} else {
+				echo($instrument);
+				echo("<br />");
+				echo($out['config']['instrumentRealName']);
+				echo("<br />");
+				
 				echo("There was an error in creating your CAT-MH interview:<br />");
 				if (isset($out['moduleError'])) echo($out['moduleMessage'] . "<br />");
 				echo("Please contact your REDCap system administrator.");
@@ -89,7 +94,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 				
 				// tests array
 				$tests = [];
-				$testTypeKeys = array_keys($this->testTypes);
+				$testTypeKeys = array_keys($this->convertTestAbbreviation);
 				foreach ($testTypeKeys as $j => $testAbbreviation) {
 					if ($projectSettings[$testAbbreviation]['value'][$settingsIndex] == 1) {
 						$tests[] = ["type" => $this->convertTestAbbreviation[$testAbbreviation]];
@@ -109,18 +114,13 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		return false;
 	}
 	
-	public function getInterviews($args) {
+	public function getInterview($args) {
 		$subjectID = $args['subjectID'];
-		$result = $this->queryLogs("select subjectID, recordID, interviewID, status, timestamp, instrument, identifier, signature, type, label
+		$result = $this->queryLogs("select subjectID, recordID, interviewID, status, instrument, identifier, signature, type, label
 			where subjectID='$subjectID'");
-		// don't query for auth details or results, as this interview info goes back to client
-		$interviews = [];
-		while($row = db_fetch_assoc($result)) {
-			if (intval($row['interviewID']) > 0) {
-				$interviews[] = $row;
-			}
-		}
-		if (!empty($interviews)) return $interviews;
+		// don't query for auth details, as this interview info goes back to client
+		$interview = db_fetch_assoc($result);
+		if (gettype($interview) == 'array') $interview;
 		return false;
 	}
 	
@@ -220,6 +220,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			"userLastName" => "Creation",
 			"subjectID" => $interviewConfig['subjectID'],
 			"numberOfInterviews" => 1,
+			// "numberOfInterviews" => sizeof($interviewConfig['tests']),
 			"language" => intval($interviewConfig['language']),
 			"tests" => $interviewConfig['tests']
 		]);
@@ -236,22 +237,24 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		// handle response
 		try {
 			$json = json_decode($curl['body'], true);
-			foreach ($json['interviews'] as $i => $interview) {
-				$interview['type'] = $interviewConfig['tests'][$i]['type'];
-				$params = [
-					'subjectID' => $interviewConfig['subjectID'],
-					'recordID' =>  $args['recordID'],
-					'interviewID' => $interview['interviewID'],
-					'status' => 0,
-					'timestamp' => time(),
-					'instrument' => $args['instrument'],
-					'identifier' => $interview['identifier'],
-					'signature' => $interview['signature'],
-					'type' => $interview['type'],
-					'label' => $this->testTypes[$interview['type']]
-				];
-				$this->log("createInterviews", $params);
+			$interview = $json['interviews'][0];	//contains interviewID, identifier, signature
+			$interview['subjectID'] = $interviewConfig['subjectID'];
+			$interview['recordID'] = $args['recordID'];
+			$interview['status'] = 0;
+			$interview['tstamp'] = time();
+			$interview['instrument'] = $args['instrument'];
+			
+			// add types and labels json encoded fields
+			$types = [];
+			$labels = [];
+			foreach ($interviewConfig['tests'] as $arr) {
+				$types[] = $arr['type'];
+				$labels[] = $this->testTypes[$arr['type']];
 			}
+			$interview['types'] = json_encode($types, JSON_UNESCAPED_SLASHES);
+			$interview['labels'] = json_encode($labels, JSON_UNESCAPED_SLASHES);
+			
+			$this->log("createInterviews", $interview);
 			$out['success'] = true;
 		} catch (\Exception $e) {
 			$out['moduleError'] = true;
@@ -288,8 +291,10 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			$this->removeLogs("subjectID='{$args['subjectID']}' and interviewID={$args['interviewID']}");
 			$args['JSESSIONID'] = $curl['cookies']['JSESSIONID'];
 			$args['AWSELB'] = $curl['cookies']['AWSELB'];
-			$args['timestamp'] = time();
+			$args['tstamp'] = time();
 			$args['status'] = 1;
+			$args['types'] = json_encode($args['types'], JSON_UNESCAPED_SLASHES);
+			$args['labels'] = json_encode($args['labels'], JSON_UNESCAPED_SLASHES);
 			$this->log("authInterview", $args);
 			$out['success'] = true;
 		} else {
@@ -455,8 +460,10 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		try {
 			if ($curl['cookies']['JSESSIONID'] == $authValues['JSESSIONID'] and $curl['info']['http_code'] == 302) {
 				$this->removeLogs("subjectID='" . $args['subjectID'] . "' and interviewID=" . $args['interviewID']);
-				$args['timestamp'] = time();
+				$args['tstamp'] = time();
 				$args['status'] = 2;
+				$args['types'] = json_encode($args['types'], JSON_UNESCAPED_SLASHES);
+				$args['labels'] = json_encode($args['labels'], JSON_UNESCAPED_SLASHES);
 				// put auth values in db as well
 				$this->log("endInterview", array_merge($authValues, $args));
 				$out['success'] = true;
@@ -501,9 +508,11 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 				
 				// update interview status in db/logs
 				$this->removeLogs("subjectID='{$args['subjectID']}' and interviewID={$args['interviewID']}");
-				$args['timestamp'] = time();
+				$args['tstamp'] = time();
 				$args['status'] = 3;
 				$args['results'] = $curl['body'];
+				$args['types'] = json_encode($args['types'], JSON_UNESCAPED_SLASHES);
+				$args['labels'] = json_encode($args['labels'], JSON_UNESCAPED_SLASHES);
 				// put auth values in db as well
 				$this->log("getResults", array_merge($authValues, $args));
 			} else {
@@ -653,8 +662,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 			$out = $catmh->breakLock($json['args']);
 			echo json_encode($out);
 			break;
-		case 'getInterviews':
-			$out = $catmh->getInterviews($json['args']);
+		case 'getInterview':
+			$out = $catmh->getInterview($json['args']);
 			echo json_encode($out);
 			break;
 	}

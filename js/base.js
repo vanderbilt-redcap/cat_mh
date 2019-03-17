@@ -34,13 +34,15 @@ catmh.setAnswerOptions = function(answers) {
 catmh.setInterviewOptions = function() {
 	$("ol").empty();
 	$("#missingInterviewsNote").hide();
-	if (catmh.interviews.length <= 0) {
+	if (typeof catmh.interview !== 'object') {
 		$("#missingInterviewsNote").show();
 		return;
 	}
-	catmh.interviews.forEach(test => {
+	
+	$("#buttonInstructions, #beginInterview").css('display', 'inherit');
+	catmh.interview.labels.forEach(label => {
 		$("ol").append(`
-				<li class='interviewLabel'>${test.label}</li>`);
+				<li class='interviewLabel'>${label}</li>`);
 	});
 	// $("button.interviewSelector:not(.completed)").on('focus', function() {
 		// $("#beginInterview").removeClass('disabled');
@@ -49,31 +51,11 @@ catmh.setInterviewOptions = function() {
 	// });
 }
 
-catmh.refreshInterviews = function() {
-	let data = {
-		action: "getInterviews",
-		args: catmh.currentInterview
-	};
-	$.ajax({
-		type: "POST",
-		url: window.location.href.replace('interview', 'CAT_MH'),
-		data: JSON.stringify(data),
-		contentType: 'application/json',
-		complete: function(xhr) {
-			catmh.lastXhr = xhr;
-			catmh.interviews = JSON.parse(xhr.responseText);
-			catmh.interviews.sort(function(a, b) {
-				if (parseInt(a.interviewID) < parseInt(b.interviewID)) {
-					return -1;
-				} else {
-					return 1;
-				}
-			});
-			catmh.setInterviewOptions();
-			$("#interviewSelect").fadeIn(100);
-		}
+catmh.showError = function(message) {
+	$("body > div:visible").fadeOut(100, function() {
+		$("#error span").text(message);
+		$("#error").fadeIn(100);
 	});
-	$("body > div:visible").fadeOut(100);
 }
 catmh.showResults = function() {
 	$("table > tr:not(first-child").remove();
@@ -86,7 +68,7 @@ catmh.showResults = function() {
 						<td>${test.severity==null ? 'N/A' : test.severity + '%'}</td>
 						<td>${test.category==null ? 'N/A' : test.category}</td>
 						<td>${test.precision==null ? 'N/A' : test.precision + '%'}</td>
-						<td>${test.prob==null ? 'N/A' : (test.prob*100) + '%'}</td>
+						<td>${test.prob==null ? 'N/A' : (test.prob.toPrecision(3)*100) + '%'}</td>
 						<td>${test.percentile==null ? 'N/A' : test.percentile + '%'}</td>
 					</tr>
 `);
@@ -97,21 +79,11 @@ catmh.showResults = function() {
 }
 
 catmh.authInterview = function() {
-	// let i = $('.interviewSelector:focus').index('.interviewSelector');
-	catmh.currentInterview = catmh.interviews[0];
-	if (catmh.currentInterview == null) return;
-	
+	if (typeof catmh.interview !== 'object') return;
 	$("#loader span").text("Authorizing the interview...");
-	if (catmh.startingInterview) {
-		return;
-	} else {
-		catmh.startingInterview = true
-	}
-	
-	catmh.lastInterviewSelected = null;
 	let data = {
 		action: 'authInterview',
-		args: catmh.currentInterview
+		args: catmh.interview
 	};
 	
 	// show loader
@@ -120,7 +92,7 @@ catmh.authInterview = function() {
 	})
 	
 	// authInterview first
-	console.log("sending authInterview request");
+	// console.log("sending authInterview request");
 	$.ajax({
 		type: "POST",
 		url: window.location.href.replace('interview', 'CAT_MH'),
@@ -132,6 +104,8 @@ catmh.authInterview = function() {
 			if (catmh.lastResponse.success == true) {
 				catmh.startingInterview = null;
 				catmh.startInterview(catmh.currentInterview);
+			} else {
+				catmh.showError(catmh.lastResponse.moduleMessage);
 			}
 		}
 	});
@@ -140,10 +114,10 @@ catmh.startInterview = function () {
 	$("#loader span").text("Initializing the interview...");
 	let data = {
 		action: 'startInterview',
-		args: catmh.currentInterview
+		args: catmh.interview
 	};
 	
-	console.log("sending startInterview request");
+	// console.log("sending startInterview request");
 	$.ajax({
 		type: "POST",
 		url: window.location.href.replace('interview', 'CAT_MH'),
@@ -155,6 +129,8 @@ catmh.startInterview = function () {
 			if (catmh.lastResponse.success == true) {
 				$("#loader span").text("Fetching the first question...");
 				catmh.getQuestion();
+			} else {
+				catmh.showError(catmh.lastResponse.moduleMessage);
 			}
 		}
 	});
@@ -162,10 +138,10 @@ catmh.startInterview = function () {
 catmh.getQuestion = function() {
 	let data = {
 		action: 'getQuestion',
-		args: catmh.currentInterview
+		args: catmh.interview
 	};
 	
-	console.log("sending getQuestion request");
+	// console.log("sending getQuestion request");
 	$.ajax({
 		type: "POST",
 		url: window.location.href.replace('interview', 'CAT_MH'),
@@ -191,6 +167,8 @@ catmh.getQuestion = function() {
 						$("#interviewTest").fadeIn(100);
 					});
 				}
+			} else {
+				catmh.showError(catmh.lastResponse.moduleMessage);
 			}
 		}
 	});
@@ -201,15 +179,15 @@ catmh.submitAnswer = function() {
 	i++;
 	
 	let now = +new Date();
-	catmh.currentInterview.questionID = parseInt(catmh.currentQuestion.questionID);
-	catmh.currentInterview.response = parseInt(i);
-	catmh.currentInterview.duration = now - catmh.questionDisplayTime;
+	catmh.interview.questionID = parseInt(catmh.currentQuestion.questionID);
+	catmh.interview.response = parseInt(i);
+	catmh.interview.duration = now - catmh.questionDisplayTime;
 	let data = {
 		action: 'submitAnswer',
-		args: catmh.currentInterview
+		args: catmh.interview
 	};
 	
-	console.log("sending submitAnswer request");
+	// console.log("sending submitAnswer request");
 	$.ajax({
 		type: "POST",
 		url: window.location.href.replace('interview', 'CAT_MH'),
@@ -220,12 +198,14 @@ catmh.submitAnswer = function() {
 			catmh.lastResponse = JSON.parse(xhr.responseText);
 			if (catmh.lastResponse.success == true) {
 				catmh.getQuestion();
+			} else {
+				catmh.showError(catmh.lastResponse.moduleMessage);
 			}
 		}
 	});
-	catmh.currentInterview.questionID = null;
-	catmh.currentInterview.response = null;
-	catmh.currentInterview.duration = null;
+	catmh.interview.questionID = null;
+	catmh.interview.response = null;
+	catmh.interview.duration = null;
 	
 	$("#loader span").text("Fetching the next question...");
 	$("body > div:visible").fadeOut(100, function() {
@@ -235,10 +215,10 @@ catmh.submitAnswer = function() {
 catmh.getResults = function() {
 	let data = {
 		action: 'getResults',
-		args: catmh.currentInterview
+		args: catmh.interview
 	};
 	
-	console.log("sending getResults request");
+	// console.log("sending getResults request");
 	$.ajax({
 		type: "POST",
 		url: window.location.href.replace('interview', 'CAT_MH'),
@@ -251,6 +231,8 @@ catmh.getResults = function() {
 				catmh.testResults = JSON.parse(catmh.lastResponse.curl.body);
 				// catmh.endInterview();
 				catmh.showResults();
+			} else {
+				catmh.showError(catmh.lastResponse.moduleMessage);
 			}
 		}
 	});
@@ -258,10 +240,10 @@ catmh.getResults = function() {
 catmh.endInterview = function() {
 	let data = {
 		action: 'endInterview',
-		args: catmh.currentInterview
+		args: catmh.interview
 	};
 	
-	console.log("sending endInterview request");
+	// console.log("sending endInterview request");
 	$.ajax({
 		type: "POST",
 		url: window.location.href.replace('interview', 'CAT_MH'),

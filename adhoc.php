@@ -1,31 +1,38 @@
 <?php
 $out = $module->removeLogs("true");
-$out = $module->createInterviews(['instrument' => 'survey_1', 'recordID' => 1]);
+// $out = $module->createInterviews(['instrument' => 'survey_1', 'recordID' => 1]);
+
+// $out = $module->removeLogs("interviewID=192140");
 
 // $params = [
-	// 'subjectID' => "8iPISYvnnZYFM4FIzdqFglOgybMZKlgm",
-	// 'recordID' =>  5,
-	// 'interviewID' => 191569,
-	// 'status' => 0,
-	// 'timestamp' => time(),
-	// 'instrument' => 'survey_1',
 	// 'identifier' => 'kadg',
+	// 'instrument' => 'survey_1',
+	// 'interviewID' => 191569,
+	// 'label' => 'Anxiety Disorder (Perinatal)',
+	// 'recordID' =>  1,
 	// 'signature' => 'vu7r5p',
-	// 'type' => 'mdd',
-	// 'label' => 'Major Depressive Disorder'
+	// 'status' => 0,
+	// 'subjectID' => "8IgG569YkMzDl4uPHyXoEmfW0FUcjEkP",
+	// 'tstamp' => time(),
+	// 'type' => 'mdd'
 // ];
-// $module->log("createInterviews", $params);
+// $out = $module->log("createInterviews", $params);
 
-$args = [
-	'subjectID' => $_GET['sid']
-];
-$iviews = $module->getInterviews($args);
-if ($iviews !== false) {
-$iview1 = $iviews[0];
-$out = $module->getInterviewStatus($iview1);
-} else {
-	$out = 'no interviews found';
-}
+// $args = [
+	// 'subjectID' => $_GET['sid']
+// ];
+// $iview = $module->getInterview($args);
+// if ($iview !== false) {
+	// $out = $module->authInterview($iview);
+// } else {
+	// $out = 'no interviews found';
+// }
+
+// $in = [];
+// $out = $module->getResultsTableData($in);
+
+// $result = $module->queryLogs("select tstamp");
+// $out = db_fetch_assoc($result);
 
 echo "<pre>";
 // print_r($iviews);

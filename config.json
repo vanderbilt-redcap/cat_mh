@@ -23,7 +23,11 @@
 
 	"links": {
 		"project": [
-
+			{
+				"name": "CAT-MH Interview Results Report",
+				"icon": "report",
+				"url": "resultsReport.php"
+			}
 		],
 		"control-center": [
 
