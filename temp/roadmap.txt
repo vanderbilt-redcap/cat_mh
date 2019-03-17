@@ -1,3 +1,0 @@
-x finalize interview.php
-  make resultsReport.php
-  make getLostResults.php and cron
