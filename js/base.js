@@ -223,6 +223,10 @@ catmh.submitAnswer = function() {
 			}
 		}
 	});
+	catmh.currentInterview.questionID = null;
+	catmh.currentInterview.response = null;
+	catmh.currentInterview.duration = null;
+	
 	$("#loader span").text("Fetching the next question...");
 	$("body > div:visible").fadeOut(100, function() {
 		$("#loader").fadeIn(100);

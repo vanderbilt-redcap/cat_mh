@@ -1,6 +1,6 @@
 <?php
 $out = $module->removeLogs("true");
-$out = $module->createInterviews(['instrument' => 'second_instrument', 'recordID' => 1]);
+$out = $module->createInterviews(['instrument' => 'survey_1', 'recordID' => 1]);
 
 // $params = [
 	// 'subjectID' => "8iPISYvnnZYFM4FIzdqFglOgybMZKlgm",
@@ -16,18 +16,18 @@ $out = $module->createInterviews(['instrument' => 'second_instrument', 'recordID
 // ];
 // $module->log("createInterviews", $params);
 
-// $args = [
-	// 'subjectID' => $_GET['sid']
-// ];
-// $iviews = $module->getInterviews($args);
-// if ($iviews !== false) {
-// $iview1 = $iviews[0];
-// $out = $module->getInterviewStatus($iview1);
-// } else {
-	// $out = 'no interviews found';
-// }
+$args = [
+	'subjectID' => $_GET['sid']
+];
+$iviews = $module->getInterviews($args);
+if ($iviews !== false) {
+$iview1 = $iviews[0];
+$out = $module->getInterviewStatus($iview1);
+} else {
+	$out = 'no interviews found';
+}
 
-// echo "<pre>";
-// // print_r($iviews);
-// print_r($out);
-// echo "</pre>";
+echo "<pre>";
+// print_r($iviews);
+print_r($out);
+echo "</pre>";
