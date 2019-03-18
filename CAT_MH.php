@@ -3,7 +3,7 @@ namespace VICTR\REDCAP\CAT_MH;
 
 class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	// public $testAPI = true;
-	public $debug = true;
+	// public $debug = true;
 	public $convertTestAbbreviation = [
 		'mdd' => "mdd",
 		'dep' => "dep",
