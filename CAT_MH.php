@@ -3,7 +3,7 @@ namespace VICTR\REDCAP\CAT_MH;
 
 class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	// public $testAPI = true;
-	// public $debug = true;
+	public $debug = true;
 	public $convertTestAbbreviation = [
 		'mdd' => "mdd",
 		'dep' => "dep",
@@ -116,11 +116,11 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	
 	public function getInterview($args) {
 		$subjectID = $args['subjectID'];
-		$result = $this->queryLogs("select subjectID, recordID, interviewID, status, instrument, identifier, signature, type, label
+		$result = $this->queryLogs("select subjectID, recordID, interviewID, status, instrument, identifier, signature, types, labels
 			where subjectID='$subjectID'");
 		// don't query for auth details, as this interview info goes back to client
 		$interview = db_fetch_assoc($result);
-		if (gettype($interview) == 'array') $interview;
+		if (gettype($interview) == "array") return $interview;
 		return false;
 	}
 	
@@ -199,7 +199,14 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		
 		// get project/system configuration information
 		$interviewConfig = $this->getInterviewConfig($args['instrument']);
-		if ($this->debug) $out['config'] = $interviewConfig;
+		if ($this->debug) {
+			$out['config'] = $interviewConfig;
+		} else {
+			$out['config'] = [
+				"subjectID" => $interviewConfig['subjectID'],
+				"instrumentRealName" => $interviewConfig['instrumentRealName']
+			];
+		}
 		
 		if ($interviewConfig === false) {
 			$out['moduleError'] = true;
@@ -368,7 +375,11 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		
 		// send request via curl
 		$curl = $this->curl($curlArgs);
-		if ($this->debug) $out['curl'] = $curl;
+		if ($this->debug) {
+			$out['curl'] = $curl;
+		} else {
+			$out['curl'] = ["body" => $curl["body"]];
+		}
 		
 		// handle response
 		try {
@@ -459,13 +470,13 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		// handle response
 		try {
 			if ($curl['cookies']['JSESSIONID'] == $authValues['JSESSIONID'] and $curl['info']['http_code'] == 302) {
-				$this->removeLogs("subjectID='" . $args['subjectID'] . "' and interviewID=" . $args['interviewID']);
-				$args['tstamp'] = time();
-				$args['status'] = 2;
-				$args['types'] = json_encode($args['types'], JSON_UNESCAPED_SLASHES);
-				$args['labels'] = json_encode($args['labels'], JSON_UNESCAPED_SLASHES);
+				// $this->removeLogs("subjectID='" . $args['subjectID'] . "' and interviewID=" . $args['interviewID']);
+				// $args['tstamp'] = time();
+				// $args['status'] = 2;
+				// $args['types'] = json_encode($args['types'], JSON_UNESCAPED_SLASHES);
+				// $args['labels'] = json_encode($args['labels'], JSON_UNESCAPED_SLASHES);
 				// put auth values in db as well
-				$this->log("endInterview", array_merge($authValues, $args));
+				// $this->log("endInterview", array_merge($authValues, $args));
 				$out['success'] = true;
 			}
 		} catch (\Exception $e) {
@@ -497,7 +508,11 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		
 		// send request via curl
 		$curl = $this->curl($curlArgs);
-		if ($this->debug) $out['curl'] = $curl;
+		if ($this->debug) {
+			$out['curl'] = $curl;
+		} else {
+			$out['curl'] = ["body" => $curl["body"]];
+		}
 		
 		// handle response
 		try {

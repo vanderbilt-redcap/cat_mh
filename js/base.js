@@ -26,7 +26,6 @@ catmh.setAnswerOptions = function(answers) {
 	});
 	$("button.answerSelector").on('focus', function() {
 		$("#submitAnswer").removeClass('disabled');
-		// catmh.lastAnswerSelected = $(this).attr('data-ordinal');
 	}).on('blur', function() {
 		$("#submitAnswer").addClass('disabled');
 	});
@@ -44,11 +43,6 @@ catmh.setInterviewOptions = function() {
 		$("ol").append(`
 				<li class='interviewLabel'>${label}</li>`);
 	});
-	// $("button.interviewSelector:not(.completed)").on('focus', function() {
-		// $("#beginInterview").removeClass('disabled');
-	// }).on('blur', function(event) {
-		// $("#beginInterview").addClass('disabled');
-	// });
 }
 
 catmh.showError = function(message) {
@@ -92,7 +86,6 @@ catmh.authInterview = function() {
 	})
 	
 	// authInterview first
-	// console.log("sending authInterview request");
 	$.ajax({
 		type: "POST",
 		url: window.location.href.replace('interview', 'CAT_MH'),
@@ -102,8 +95,7 @@ catmh.authInterview = function() {
 			catmh.lastXhr = xhr;
 			catmh.lastResponse = JSON.parse(xhr.responseText);
 			if (catmh.lastResponse.success == true) {
-				catmh.startingInterview = null;
-				catmh.startInterview(catmh.currentInterview);
+				catmh.startInterview();
 			} else {
 				catmh.showError(catmh.lastResponse.moduleMessage);
 			}
@@ -228,9 +220,9 @@ catmh.getResults = function() {
 			catmh.lastXhr = xhr;
 			catmh.lastResponse = JSON.parse(xhr.responseText);
 			if (catmh.lastResponse.success == true) {
-				catmh.testResults = JSON.parse(catmh.lastResponse.curl.body);
-				// catmh.endInterview();
+				catmh.testResults = JSON.parse(catmh.lastResponse.results);
 				catmh.showResults();
+				catmh.endInterview();
 			} else {
 				catmh.showError(catmh.lastResponse.moduleMessage);
 			}
