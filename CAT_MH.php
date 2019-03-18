@@ -39,7 +39,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		$input['recordID'] = $record;
 		$out = $this->createInterviews($input);
 		// echo(json_encode($out));
-		if (isset($out['moduleError'])) $this->log('catmhError', ['output' => $out]);
+		if (isset($out['moduleError'])) $this->log('catmhError', ['output' => json_encode($out)]);
 		
 		if ($out !== false) {
 			if ($instrument == $out['config']['instrumentRealName']) {
