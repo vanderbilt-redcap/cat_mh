@@ -37,3 +37,5 @@ To create an interview for your survey instrument
 After saving this configuration, survey participants should then see a message and a button at the end of the survey prompting them to continue to the CAT-MH interview.
 
 ![Survey Complete](/images/surveyComplete.PNG)
+
+After a participant finishes a survey, they will see a button that will redirect them to the CAT-MH interview that is proctored via the CAT-MH API. When the participant finishes the interview, they are shown the results, which are also stored in the REDCap project. You can view the results by clicking the “CAT-MH Interview Results Report” link on the project sidebar.
