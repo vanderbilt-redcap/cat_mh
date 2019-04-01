@@ -43,17 +43,19 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		
 		if ($out !== false) {
 			if ($instrument == $out['config']['instrumentRealName']) {
-				echo("Click to begin your CAT-MH screening interview.<br />");
 				$page = $this->getUrl("interview.php") . "&NOAUTH&rid=" . $record . "&sid=" . $out['config']['subjectID'];
-				echo("
-				<button id='catmh_button'>Begin Interview</button>
-				<script>
-					var btn = document.getElementById('catmh_button')
-					btn.addEventListener('click', function() {
-						window.location.assign('$page');
-					})
-				</script>
-				");
+				header('Location: ' . $page, true, 302);
+				$this->exitAfterHook();
+				// echo("Click to begin your CAT-MH screening interview.<br />");
+				// echo("
+				// <button id='catmh_button'>Begin Interview</button>
+				// <script>
+					// var btn = document.getElementById('catmh_button')
+					// btn.addEventListener('click', function() {
+						// window.location.assign('$page');
+					// })
+				// </script>
+				// ");
 			} else {
 				echo($instrument);
 				echo("<br />");
