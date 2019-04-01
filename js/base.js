@@ -1,4 +1,8 @@
 var catmh = {};
+catmh.bridgeUrl = window.location.href;
+catmh.bridgeUrl = catmh.bridgeUrl.replace('interview', 'CAT_MH');
+catmh.bridgeUrl = catmh.bridgeUrl.replace('&NOAUTH', '');
+
 catmh.testTypes = {
 	mdd: "Major Depressive Disorder",
 	dep: "Depression",
@@ -103,7 +107,7 @@ catmh.authInterview = function() {
 	// authInterview first
 	$.ajax({
 		type: "POST",
-		url: window.location.href.replace('interview', 'CAT_MH'),
+		url: catmh.bridgeUrl,
 		data: JSON.stringify(data),
 		contentType: 'application/json',
 		complete: function(xhr) {
@@ -127,7 +131,7 @@ catmh.startInterview = function () {
 	// console.log("sending startInterview request");
 	$.ajax({
 		type: "POST",
-		url: window.location.href.replace('interview', 'CAT_MH'),
+		url: catmh.bridgeUrl,
 		data: JSON.stringify(data),
 		contentType: 'application/json',
 		complete: function(xhr) {
@@ -151,7 +155,7 @@ catmh.getQuestion = function() {
 	// console.log("sending getQuestion request");
 	$.ajax({
 		type: "POST",
-		url: window.location.href.replace('interview', 'CAT_MH'),
+		url: catmh.bridgeUrl,
 		data: JSON.stringify(data),
 		contentType: 'application/json',
 		complete: function(xhr) {
@@ -197,7 +201,7 @@ catmh.submitAnswer = function() {
 	// console.log("sending submitAnswer request");
 	$.ajax({
 		type: "POST",
-		url: window.location.href.replace('interview', 'CAT_MH'),
+		url: catmh.bridgeUrl,
 		data: JSON.stringify(data),
 		contentType: 'application/json',
 		complete: function(xhr) {
@@ -228,7 +232,7 @@ catmh.getResults = function() {
 	// console.log("sending getResults request");
 	$.ajax({
 		type: "POST",
-		url: window.location.href.replace('interview', 'CAT_MH'),
+		url: catmh.bridgeUrl,
 		data: JSON.stringify(data),
 		contentType: 'application/json',
 		complete: function(xhr) {
@@ -253,7 +257,7 @@ catmh.endInterview = function() {
 	// console.log("sending endInterview request");
 	$.ajax({
 		type: "POST",
-		url: window.location.href.replace('interview', 'CAT_MH'),
+		url: catmh.bridgeUrl,
 		data: JSON.stringify(data),
 		contentType: 'application/json',
 		complete: function(xhr) {
