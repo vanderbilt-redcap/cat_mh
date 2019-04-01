@@ -2,8 +2,8 @@
 namespace VICTR\REDCAP\CAT_MH;
 
 class CAT_MH extends \ExternalModules\AbstractExternalModule {
-	// public $testAPI = true;
-	// public $debug = true;
+	public $testAPI = true;
+	public $debug = true;
 	public $convertTestAbbreviation = [
 		'mdd' => "mdd",
 		'dep' => "dep",
@@ -44,7 +44,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		if ($out !== false) {
 			if ($instrument == $out['config']['instrumentRealName']) {
 				echo("Click to begin your CAT-MH screening interview.<br />");
-				$page = $this->getUrl("interview.php") . "&rid=" . $record . "&sid=" . $out['config']['subjectID'];
+				$page = $this->getUrl("interview.php") . "&NOAUTH&rid=" . $record . "&sid=" . $out['config']['subjectID'];
 				echo("
 				<button id='catmh_button'>Begin Interview</button>
 				<script>
@@ -514,15 +514,50 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			$out['curl'] = ["body" => $curl["body"]];
 		}
 		
+		// need config to see if we should send results back to user or not
+		$keepResults = [];
+		$projectSettings = $this->getProjectSettings();
+		// get instrument's display name
+		$query = $this->query('select form_name, form_menu_description
+			from redcap_metadata
+			where form_name="' . $args['instrument'] . '" and project_id=' . $this->getProjectId() . ' and form_menu_description<>""');
+		$record = db_fetch_assoc($query);
+		$displayName = $record['form_menu_description'];
+		
+		foreach ($projectSettings['survey_instrument']['value'] as $settingsIndex => $instrumentName) {
+			if ($instrumentName == $displayName) {
+				foreach($args['types'] as $testType) {
+					if ($projectSettings[$testType . '_show_results']['value'][$settingsIndex] == 1) {
+						$keepResults[$testType] = true;
+					}
+				}
+				break;
+			}
+		}
+		// now remove results from curl response as necessary
+		$results = json_decode($curl['body'], true);
+		foreach ($results['tests'] as &$test) {
+			$abbreviation = strtolower($test['type']);
+			if ($keepResults[$abbreviation] !== true) {
+				$test['diagnosis'] = "The results for this test have been saved in REDCap for your test provider to review.";
+				$test['confidence'] = null;
+				$test['severity'] = null;
+				$test['category'] = null;
+				$test['precision'] = null;
+				$test['prob'] = null;
+				$test['percentile'] = null;
+			}
+		}
 		// handle response
 		try {
 			$json = json_decode($curl['body'], true);
 			if ($json['interviewId'] > 0) {
 				$out['success'] = true;
-				$out['results'] = $curl['body'];
+				$out['results'] = json_encode($results);
+				$out['keepResults'] = json_encode($keepResults);
 				
 				// update interview status in db/logs
-				$this->removeLogs("subjectID='{$args['subjectID']}' and interviewID={$args['interviewID']}");
+				// $this->removeLogs("subjectID='{$args['subjectID']}' and interviewID={$args['interviewID']}");
 				$args['tstamp'] = time();
 				$args['status'] = 3;
 				$args['results'] = $curl['body'];

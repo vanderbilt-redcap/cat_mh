@@ -54,7 +54,21 @@ catmh.showError = function(message) {
 catmh.showResults = function() {
 	$("table > tr:not(first-child").remove();
 	catmh.testResults.tests.forEach(function(test) {
-		$("table").append(`
+		// if (test.hideResults == true) {
+			// $("table").append(`
+					// <tr>
+						// <td>${test.label}</td>
+						// <td>The results for this test have been saved in REDCap for your test provider to review.</td>
+						// <td></td>
+						// <td></td>
+						// <td></td>
+						// <td></td>
+						// <td></td>
+						// <td></td>
+					// </tr>
+// `);
+		// } else {
+			$("table").append(`
 					<tr>
 						<td>${test.label}</td>
 						<td>${test.diagnosis==null ? 'N/A' : test.diagnosis}</td>
@@ -66,6 +80,7 @@ catmh.showResults = function() {
 						<td>${test.percentile==null ? 'N/A' : test.percentile + '%'}</td>
 					</tr>
 `);
+		// }
 	});
 	$("body > div:visible").fadeOut(100, function() {
 		$("#interviewResults").fadeIn(100);

@@ -35,7 +35,7 @@
 	},
 
 	"no-auth-pages": [
-
+		"interview"
 	],
 
 	"project-settings": [
@@ -68,16 +68,27 @@
 			   "type": "descriptive"
             },
 			{"type": "checkbox", "key": "dep", "name": "Depression"},
+			{"type": "checkbox", "key": "dep_show_results", "name": "Show Results"},
 			{"type": "checkbox", "key": "mdd", "name": "Major Depressive Disorder"},
+			{"type": "checkbox", "key": "mdd_show_results", "name": "Show Results"},
 			{"type": "checkbox", "key": "anx", "name": "Anxiety Disorder"},
+			{"type": "checkbox", "key": "anx_show_results", "name": "Show Results"},
 			{"type": "checkbox", "key": "mhm", "name": "Mania/Hypomania"},
+			{"type": "checkbox", "key": "mhm_show_results", "name": "Show Results"},
 			{"type": "checkbox", "key": "pdep", "name": "Depression (Perinatal)"},
+			{"type": "checkbox", "key": "pdep_show_results", "name": "Show Results"},
 			{"type": "checkbox", "key": "panx", "name": "Anxiety Disorder (Perinatal)"},
+			{"type": "checkbox", "key": "panx_show_results", "name": "Show Results"},
 			{"type": "checkbox", "key": "pmhm", "name": "Mania/Hypomania (Perinatal)"},
+			{"type": "checkbox", "key": "pmhm_show_results", "name": "Show Results"},
 			{"type": "checkbox", "key": "sa", "name": "Substance Abuse"},
+			{"type": "checkbox", "key": "sa_show_results", "name": "Show Results"},
 			{"type": "checkbox", "key": "ptsd", "name": "Post-Traumatic Stress Disorder"},
+			{"type": "checkbox", "key": "ptsd_show_results", "name": "Show Results"},
 			{"type": "checkbox", "key": "cssrs", "name": "C-SSRS Suicide Screen"},
-			{"type": "checkbox", "key": "ss", "name": "Suicide Scale"}
+			{"type": "checkbox", "key": "cssrs_show_results", "name": "Show Results"},
+			{"type": "checkbox", "key": "ss", "name": "Suicide Scale"},
+			{"type": "checkbox", "key": "ss_show_results", "name": "Show Results"}
          ]
       }
 	],
