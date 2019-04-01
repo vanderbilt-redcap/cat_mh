@@ -676,45 +676,74 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
 	$catmh = new CAT_MH();
 	$json = json_decode(file_get_contents("php://input"), true);
-	$action = $json['action'];
+	if (isset($json['args']['interviewID'])) $json['args']['interviewID'] = filter_var($json['args']['interviewID'], FILTER_SANITIZE_STRING);
+	if (isset($json['args']['subjectID'])) $json['args']['subjectID'] = filter_var($json['args']['subjectID'], FILTER_SANITIZE_STRING);
+	if (isset($json['args']['instrument'])) $json['args']['instrument'] = filter_var($json['args']['instrument'], FILTER_SANITIZE_STRING);
+	if (isset($json['args']['recordID'])) $json['args']['recordID'] = filter_var($json['args']['recordID'], FILTER_SANITIZE_STRING);
+	if (isset($json['args']['identifier'])) $json['args']['identifier'] = filter_var($json['args']['identifier'], FILTER_SANITIZE_STRING);
+	if (isset($json['args']['signature'])) $json['args']['signature'] = filter_var($json['args']['signature'], FILTER_SANITIZE_STRING);
+	if (isset($json['args']['questionID'])) $json['args']['questionID'] = filter_var($json['args']['questionID'], FILTER_SANITIZE_STRING);
+	if (isset($json['args']['response'])) $json['args']['response'] = filter_var($json['args']['response'], FILTER_SANITIZE_STRING);
+	if (isset($json['args']['duration'])) $json['args']['duration'] = filter_var($json['args']['duration'], FILTER_SANITIZE_STRING);
+	if (isset($json['args']['types'])) {
+		foreach ($json['args']['types'] as &$type) {
+			$type = filter_var($type, FILTER_SANITIZE_STRING);
+		}
+	}
+	if (isset($json['args']['labels'])) {
+		foreach ($json['args']['labels'] as &$label) {
+			$label = filter_var($label, FILTER_SANITIZE_STRING);
+		}
+	}
+	$action = filter_var($json['action'], FILTER_SANITIZE_STRING);
 	switch ($action) {
 		case 'createInterviews':
+			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->createInterviews($json['args']);
 			echo json_encode($out);
 			break;
 		case 'authInterview':
+			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->authInterview($json['args']);
 			echo json_encode($out);
 			break;
 		case 'startInterview':
+			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->startInterview($json['args']);
 			echo json_encode($out);
 			break;
 		case 'getQuestion':
+			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->getQuestion($json['args']);
 			echo json_encode($out);
 			break;
 		case 'submitAnswer':
+			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->submitAnswer($json['args']);
 			echo json_encode($out);
 			break;
 		case 'endInterview':
+			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->endInterview($json['args']);
 			echo json_encode($out);
 			break;
 		case 'getResults':
+			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->getResults($json['args']);
 			echo json_encode($out);
 			break;
 		case 'getInterviewStatus':
+			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->getInterviewStatus($json['args']);
 			echo json_encode($out);
 			break;
 		case 'breakLock':
+			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->breakLock($json['args']);
 			echo json_encode($out);
 			break;
 		case 'getInterview':
+			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->getInterview($json['args']);
 			echo json_encode($out);
 			break;
