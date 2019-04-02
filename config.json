@@ -36,6 +36,7 @@
 
 	"no-auth-pages": [
 		"interview"
+		"CAT_MH"
 	],
 
 	"project-settings": [

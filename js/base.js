@@ -1,7 +1,7 @@
 var catmh = {};
 catmh.bridgeUrl = window.location.href;
 catmh.bridgeUrl = catmh.bridgeUrl.replace('interview', 'CAT_MH');
-catmh.bridgeUrl = catmh.bridgeUrl.replace('&NOAUTH', '');
+// catmh.bridgeUrl = catmh.bridgeUrl.replace('&NOAUTH', '');
 
 catmh.testTypes = {
 	mdd: "Major Depressive Disorder",
