@@ -71,16 +71,18 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	public function redcap_module_link_check_display($project_id, $link) {
-		if (strpos($link, 'Interview Results') == false) {
-			return $link;
-		} else {
-			$user = \ExternalModules::getUsername();
-			if ($user != null) {
-				$rights = \REDCap::getUserRights($user);
-				if (empty($rights)) return null;
-				if ($rights[$user]['design']) return $link;
-			}
-		}
+		// if (strpos($link, 'Interview Results') == false) {
+			// return $link;
+		// } else {
+			// $user = \ExternalModules::getUsername();
+			// if ($user != null) {
+				// $rights = \REDCap::getUserRights($user);
+				// if (empty($rights)) return null;
+				// if ($rights[$user]['design']) return $link;
+			// }
+		// }
+		// return null;
+		return $link;
 	}
 	
 	// utility
