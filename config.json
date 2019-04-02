@@ -35,7 +35,7 @@
 	},
 
 	"no-auth-pages": [
-		"interview"
+		"interview",
 		"CAT_MH"
 	],
 
