@@ -43,8 +43,8 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		
 		if ($out !== false) {
 			if ($instrument == $out['config']['instrumentRealName']) {
-				// $page = $this->getUrl("interview.php") . "&NOAUTH&rid=" . $record . "&sid=" . $out['config']['subjectID'];
-				$page = $this->getUrl("interview.php") . "&rid=" . $record . "&sid=" . $out['config']['subjectID'];
+				$page = $this->getUrl("interview.php") . "&NOAUTH&rid=" . $record . "&sid=" . $out['config']['subjectID'];
+				// $page = $this->getUrl("interview.php") . "&rid=" . $record . "&sid=" . $out['config']['subjectID'];
 				header('Location: ' . $page, true, 302);
 				$this->exitAfterHook();
 				// echo("Click to begin your CAT-MH screening interview.<br />");
