@@ -33,44 +33,42 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	
 	// hooks
 	public function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
-		// provide button for user to click to send them to interview page after they've read the last page of the survey submission document
+		// if user did not consent, then do not forward to interview, instead notify them that they were rejected and that they may now close this window
+		$userConsent = \REDCap::getData($project_id, 'array', $record, 'consent')[$record][$event_id]['consent'];
+		if ($userConsent != 1) {
+			echo("You did not consent to the adaptive testing interview and may now close this tab/window.");
+			// delete record that REDCap created
+			$tpk = \Records::getTablePK($module->getProjectId());
+			$ret = \Records::deleteRecord(1, $tpk, null, null, null, null, null, "CAT-MH module removed record for consent==0", true);
+			return;
+		}
+		
+		// determine if this survey is configured to forward to cat-mh testing interview
 		$input = [];
 		$input['instrument'] = $instrument;
 		$input['recordID'] = $record;
 		$out = $this->createInterviews($input);
-		// echo(json_encode($out));
+		
 		if (isset($out['moduleError'])) $this->log('catmhError', ['output' => json_encode($out)]);
 		
-		if ($out !== false) {
-			if ($instrument == $out['config']['instrumentRealName']) {
-				$page = $this->getUrl("interview.php") . "&NOAUTH&rid=" . $record . "&sid=" . $out['config']['subjectID'];
-				// $page = $this->getUrl("interview.php") . "&rid=" . $record . "&sid=" . $out['config']['subjectID'];
-				header('Location: ' . $page, true, 302);
-				$this->exitAfterHook();
-				// echo("Click to begin your CAT-MH screening interview.<br />");
-				// echo("
-				// <button id='catmh_button'>Begin Interview</button>
-				// <script>
-					// var btn = document.getElementById('catmh_button')
-					// btn.addEventListener('click', function() {
-						// window.location.assign('$page');
-					// })
-				// </script>
-				// ");
-			} else {
-				echo($instrument);
-				echo("<br />");
-				echo($out['config']['instrumentRealName']);
-				echo("<br />");
-				
-				echo("There was an error in creating your CAT-MH interview:<br />");
-				if (isset($out['moduleError'])) echo($out['moduleMessage'] . "<br />");
-				echo("Please contact your REDCap system administrator.");
-			}
+		if ($out['success'] == true) {
+			// redirect
+			$page = $this->getUrl("interview.php") . "&NOAUTH&rid=" . $record . "&sid=" . $out['config']['subjectID'];
+			$data = [
+				$record => [
+					$event_id => [
+						"interview_link" => $page
+					]
+				]
+			];
+			
+			\REDCap::saveData($project_id, 'array', $data);
+			
+			header('Location: ' . $page, true, 302);
 		}
 	}
 	
-	public function redcap_module_link_check_display($project_id, $link) {
+	// public function redcap_module_link_check_display($project_id, $link) {
 		// if (strpos($link, 'Interview Results') == false) {
 			// return $link;
 		// } else {
@@ -82,8 +80,8 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			// }
 		// }
 		// return null;
-		return $link;
-	}
+		// return $link;
+	// }
 	
 	// utility
 	public function getAuthValues($args) {
@@ -100,8 +98,8 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		$projectSettings = $this->getProjectSettings();
 		$result = $this->query('select form_name, form_menu_description from redcap_metadata where form_name="' . $instrumentName . '" and project_id=' . $pid . ' and form_menu_description<>""');
 		$record = db_fetch_assoc($result);
-		foreach ($projectSettings['survey_instrument']['value'] as $settingsIndex => $instrumentDisplayName) {
-			if ($instrumentDisplayName == $record['form_menu_description']) {
+		foreach ($projectSettings['survey_instrument']['value'] as $settingsIndex => $instrumentRealName) {
+			if ($instrumentRealName == $record['form_name']) {
 				// create random subject ID
 				$subjectID = "";
 				$sidDomain = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
@@ -123,7 +121,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 				$config['tests'] = $tests;
 				$config['organizationid'] = $this->getSystemSetting('organizationid');
 				$config['applicationid'] = $this->getSystemSetting('applicationid');
-				$config['instrumentDisplayName'] = $instrumentDisplayName;
+				// $config['instrumentDisplayName'] = $instrumentDisplayName;
 				$config['instrumentRealName'] = $record['form_name'];
 				$config['language'] = $projectSettings['language']['value'][$settingsIndex] == 2 ? 2 : 1;
 				return $config;
@@ -268,6 +266,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			$interview['status'] = 0;
 			$interview['tstamp'] = time();
 			$interview['instrument'] = $args['instrument'];
+			$interview['link'] = $this->getUrl("interview.php") . "&NOAUTH&rid=" . $args['recordID'] . "&sid=" . $interviewConfig['subjectID'];
 			
 			// add types and labels json encoded fields
 			$types = [];

@@ -51,7 +51,7 @@
 				"key": "survey_instrument",
 				"name": "Administer CAT-MH interview at the end of this survey instrument",
 				"required": true,
-				"type": "text"
+				"type": "form-list"
 			},
             {
                "key": "language",

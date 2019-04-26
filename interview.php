@@ -51,7 +51,7 @@
 		<?php
 			// pull all interview info from logs
 			$subjectID = $_GET['sid'];
-			$result = $module->queryLogs("select subjectID, recordID, interviewID, status, tstamp, instrument, identifier, signature, types, labels
+			$result = $module->queryLogs("select link, recordID, interviewID, status, tstamp, instrument, identifier, signature, types, labels
 				where subjectID='$subjectID' order by tstamp desc");
 			$interview = db_fetch_assoc($result);
 			
