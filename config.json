@@ -116,6 +116,11 @@
 			"key": "email-body",
 			"name": "Body text for automated interview invitations",
 			"type": "rich-text"
+		},
+		{
+			"key": "daysElapsed",
+			"name": "Number of days that have elapsed for purposes of sending invitations",
+			"type": "text"
 		}
 	],
 

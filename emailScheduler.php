@@ -51,9 +51,9 @@ foreach($data as $rid => $record) {
 		foreach($urls as $url) {
 			$success = \REDCap::email($addressTo, $emailSender, $emailSubject, $emailBody);
 			if ($success === false) {
-				\REDCap::logEvent("Failed Sending Interview Email", implode([$addressTo, $emailSender, $emailSubject, $emailBody], "\n"), NULL, $rid, $eid, $module->getProjectId());
+				\REDCap::logEvent("Failed Sending Interview Email", "$addressTo, $emailSender, $emailSubject, $emailBody" ), NULL, $rid, $eid, $module->getProjectId());
 			} else {
-				\REDCap::logEvent("Sent Interview Email", implode([$addressTo, $emailSender, $emailSubject, $emailBody], "\n"), NULL, $rid, $eid, $module->getProjectId());
+				\REDCap::logEvent("Sent Interview Email", "$addressTo, $emailSender, $emailSubject, $emailBody"), NULL, $rid, $eid, $module->getProjectId());
 			}
 		}
 	}
