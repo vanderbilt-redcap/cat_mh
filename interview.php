@@ -51,23 +51,27 @@
 		<?php
 			// pull all interview info from logs
 			$subjectID = $_GET['sid'];
-			$result = $module->queryLogs("select link, recordID, interviewID, status, tstamp, instrument, identifier, signature, types, labels
-				where subjectID='$subjectID' order by tstamp desc");
-			$interview = db_fetch_assoc($result);
+			
+			// $result = $module->queryLogs("select subjectID, recordID, interviewID, status, tstamp, instrument, identifier, signature, types, labels
+				// where subjectID='$subjectID' order by tstamp desc");
+			// $interview = db_fetch_assoc($result);
+			
+			$interview = $module->getNextInterview($subjectID);
 			
 			// give js this info
 			echo "
 <script type='text/javascript'>
 	$(function() {
-		catmh.interview = " . json_encode($interview) . ";
-		// console.log(catmh.interview);
-		catmh.interview.types = JSON.parse(catmh.interview.types);
-		catmh.interview.labels = JSON.parse(catmh.interview.labels);
-		// console.log(catmh.interview);
-		catmh.setInterviewOptions();
-		
 		$('body > div').css('display', 'flex');
-		$('body > div:not(#interviewSelect').css('display', 'none');
+		$('body > div').css('display', 'none');
+		$('#interviewSelect').css('display', 'flex');
+		
+		catmh.interview = " . json_encode($interview) . ";
+		if (typeof(catmh.interview) == 'object') {
+			catmh.interview.types = JSON.parse(catmh.interview.types);
+			catmh.interview.labels = JSON.parse(catmh.interview.labels);
+			catmh.setInterviewOptions();
+		}
 	})
 </script>
 			";
