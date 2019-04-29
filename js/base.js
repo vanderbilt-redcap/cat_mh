@@ -92,6 +92,7 @@ catmh.showResults = function() {
 }
 
 catmh.authInterview = function() {
+	// console.log('auth');
 	if (typeof catmh.interview !== 'object') return;
 	$("#loader span").text("Authorizing the interview...");
 	let data = {
@@ -122,6 +123,7 @@ catmh.authInterview = function() {
 	});
 }
 catmh.startInterview = function () {
+	// console.log('start');
 	$("#loader span").text("Initializing the interview...");
 	let data = {
 		action: 'startInterview',
@@ -147,6 +149,7 @@ catmh.startInterview = function () {
 	});
 }
 catmh.getQuestion = function() {
+	// console.log('question');
 	let data = {
 		action: 'getQuestion',
 		args: catmh.interview
@@ -185,6 +188,7 @@ catmh.getQuestion = function() {
 	});
 }
 catmh.submitAnswer = function() {
+	// console.log('answer');
 	let i = $('.answerSelector:focus').index('.answerSelector');
 	if (i < 0) return;
 	i++;
@@ -224,6 +228,7 @@ catmh.submitAnswer = function() {
 	});
 }
 catmh.getResults = function() {
+	// console.log('results');
 	let data = {
 		action: 'getResults',
 		args: catmh.interview
@@ -249,6 +254,7 @@ catmh.getResults = function() {
 	});
 }
 catmh.endInterview = function() {
+	console.log('end');
 	let data = {
 		action: 'endInterview',
 		args: catmh.interview

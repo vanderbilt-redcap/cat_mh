@@ -52,7 +52,7 @@
 			// pull all interview info from logs
 			$subjectID = $_GET['sid'];
 			$interview = $module->newInterview($subjectID);
-			
+			$interview['subjectID'] = $subjectID;
 			// give js this info
 			echo "
 <script type='text/javascript'>
@@ -63,8 +63,8 @@
 		
 		catmh.interview = " . json_encode($interview) . ";
 		if (typeof(catmh.interview) == 'object') {
-			catmh.interview.types = JSON.parse(catmh.interview.types);
-			catmh.interview.labels = JSON.parse(catmh.interview.labels);
+			// catmh.interview.types = JSON.parse(catmh.interview.types);
+			// catmh.interview.labels = JSON.parse(catmh.interview.labels);
 			catmh.setInterviewOptions();
 		}
 	})
