@@ -10,9 +10,9 @@ $daysElapsed = intval($daysElapsed);
 // determine which sequences to send emails for
 $urls = [];
 $settings = $module->getProjectSettings();
-echo("<pre>");
-print_r($settings);
-echo("</pre>");
+// echo("<pre>");
+// print_r($settings);
+// echo("</pre>");
 foreach ($settings['sequence']['value'] as $i => $sequence) {
 	$period_every = $settings['periodicity-every']['value'][$i];
 	$period_end = $settings['periodicity-end']['value'][$i];
