@@ -13,10 +13,10 @@ $settings = $module->getProjectSettings();
 foreach ($settings['sequence']['value'] as $i => $sequence) {
 	$period_every = $settings['periodicity-every']['value'][$i];
 	$period_end = $settings['periodicity-end']['value'][$i];
-	if ($isset($period_every) and $isset($period_end)) {
+	if (isset($period_every) and isset($period_end)) {
 		$period_every = intval($period_every);
 		$period_end = intval($period_end);
-		if (($daysElapsed % $period_every) == 0 and $daysElapsed <= $period_end) {
+		if (($daysElapsed % $period_every) == 0 and $daysElapsed <= $period_end and $daysElapsed != 0) {
 			$urls[] = $module->getUrl("interview.php") . "&NOAUTH&sequence=$sequence";
 		}
 	}
@@ -48,9 +48,9 @@ foreach($data as $rid => $record) {
 		foreach($urls as $url) {
 			$success = \REDCap::email($addressTo, $emailSender, $emailSubject, $emailBody);
 			if ($success === false) {
-				\REDCap::logEvent("Failed Sending Interview Email", implode([$addressTo, $emailSender, $emailSubject, $emailBody], "\n"), NULL, $rid, $eid, $module->thisProjectId());
+				\REDCap::logEvent("Failed Sending Interview Email", implode([$addressTo, $emailSender, $emailSubject, $emailBody], "\n"), NULL, $rid, $eid, $module->getProjectId());
 			} else {
-				\REDCap::logEvent("Sent Interview Email", implode([$addressTo, $emailSender, $emailSubject, $emailBody], "\n"), NULL, $rid, $eid, $module->thisProjectId());
+				\REDCap::logEvent("Sent Interview Email", implode([$addressTo, $emailSender, $emailSubject, $emailBody], "\n"), NULL, $rid, $eid, $module->getProjectId());
 			}
 		}
 	}
@@ -58,3 +58,4 @@ foreach($data as $rid => $record) {
 
 // increment daysElapsed
 $module->setProjectSetting('daysElapsed', $daysElapsed + 1);
+echo($daysElapsed + 1);
