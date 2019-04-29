@@ -140,7 +140,13 @@
 	],
 
 	"crons": [
-		
+		{
+			"cron_name": "emailScheduler",
+			"cron_description": "Cron that runs every day to send automatic interview invites",
+			"method": "cronEmail",
+			"cron_frequency": "86400",
+			"cron_max_run_time": "300"
+		},
 	],
 
 	"compatibility": {

@@ -1,4 +1,5 @@
 <?php
+\REDCap::logEvent("Running Email Scheduler", time(), NULL, NULL, NULL, $module->getProjectId());
 // determine number of days that have elapsed
 $daysElapsed = $module->getProjectSetting('days-elapsed');
 if (!isset($daysElapsed)) {
