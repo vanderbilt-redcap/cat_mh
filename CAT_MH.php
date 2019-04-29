@@ -39,7 +39,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			echo("You did not consent to the adaptive testing interview and may now close this tab/window.");
 			// delete record that REDCap created
 			$tpk = \Records::getTablePK($module->getProjectId());
-			$ret = \Records::deleteRecord(1, $tpk, null, null, null, null, null, "CAT-MH module removed record for consent==0", true);
+			$ret = \Records::deleteRecord($record, $tpk, null, null, null, null, null, "CAT-MH module removed record for consent==0", true);
 			return;
 		}
 		
