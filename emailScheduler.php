@@ -25,9 +25,9 @@ foreach ($settings['sequence']['value'] as $i => $sequence) {
 	}
 }
 
-$emailSender = $settings['email-sender']['value'][0];
-$emailSubject = $settings['email-subject']['value'][0];
-$emailBody = $settings['email-body']['value'][0];
+$emailSender = $settings['email-sender']['value'];
+$emailSubject = $settings['email-subject']['value'];
+$emailBody = $settings['email-body']['value'];
 
 if (empty($urls) or !isset($emailSender) or !isset($emailSubject) or !isset($emailBody)) {
 	// increment daysElapsed
