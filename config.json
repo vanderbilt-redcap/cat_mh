@@ -118,7 +118,7 @@
 			"type": "rich-text"
 		},
 		{
-			"key": "daysElapsed",
+			"key": "days-elapsed",
 			"name": "Number of days that have elapsed for purposes of sending invitations",
 			"type": "text"
 		}

@@ -1,9 +1,9 @@
 <?php
 // determine number of days that have elapsed
-$daysElapsed = $module->getProjectSetting('daysElapsed');
+$daysElapsed = $module->getProjectSetting('days-elapsed');
 if (!isset($daysElapsed)) {
 	$daysElapsed = 0;
-	$module->setProjectSetting('daysElapsed', 0);
+	$module->setProjectSetting('days-elapsed', 0);
 }
 $daysElapsed = intval($daysElapsed);
 
@@ -31,7 +31,7 @@ $emailBody = $settings['email-body']['value'][0];
 
 if (empty($urls) or !isset($emailSender) or !isset($emailSubject) or !isset($emailBody)) {
 	// increment daysElapsed
-	$module->setProjectSetting('daysElapsed', $daysElapsed + 1);
+	$module->setProjectSetting('days-elapsed', $daysElapsed + 1);
 	exit();
 }
 
@@ -60,5 +60,5 @@ foreach($data as $rid => $record) {
 }
 
 // increment daysElapsed
-$module->setProjectSetting('daysElapsed', $daysElapsed + 1);
+$module->setProjectSetting('days-elapsed', $daysElapsed + 1);
 echo($daysElapsed + 1);
