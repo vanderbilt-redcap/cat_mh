@@ -34,7 +34,7 @@
 	foreach($data as $rid => $record) {
 		$eid = array_keys($record)[0];
 		$catmh = json_decode($data[$rid][$eid]['cat_mh_data'], true);
-		foreach ($catmh['interviews'] as $i => $interview) {
+		foreach($catmh['interviews'] as $i => $interview) {
 			if ($interview['status'] == "4" and $interview['results'] != NULL) {
 				foreach($interview['results']['tests'] as $j => $test) {
 					echo("

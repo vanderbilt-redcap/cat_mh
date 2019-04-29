@@ -44,11 +44,15 @@ $pid = $module->getProjectId();
 // // test getAuthValues
 // $result = $module->getAuthValues($args);
 
-$data = \REDCap::getData($pid, 'array', 2);
-$rid = array_keys($data)[0];
-$eid = array_keys($data[$rid])[0];
-$data[$rid][$eid]['cat_mh_data'] = json_decode($data[$rid][$eid]['cat_mh_data'], true);
-print_r($data);
+// $data = \REDCap::getData($pid, 'array', 2);
+// $rid = array_keys($data)[0];
+// $eid = array_keys($data[$rid])[0];
+// $data[$rid][$eid]['cat_mh_data'] = json_decode($data[$rid][$eid]['cat_mh_data'], true);
+// print_r($data);
 
-// print_r($keepResults);
+// // test module->get/setProjectSetting
+// $module->setProjectSetting('daysElapsed', 0);
+$results = $module->getProjectSetting('daysElapsed');
+
+var_dump($results);
 echo("</pre>");

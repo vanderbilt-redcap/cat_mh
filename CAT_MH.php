@@ -80,6 +80,11 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		header('Location: ' . $page, true, 302);
 	}
 	
+	// crons
+	public function cronEmail() {
+		require_once("emailScheduler.php");
+	}
+	
 	//utility
 	public function curl($args) {
 		// required args:
