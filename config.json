@@ -141,7 +141,7 @@
 
 	"crons": [
 		{
-			"cron_name": "emailScheduler",
+			"cron_name": "emailscheduler",
 			"cron_description": "Cron that runs every day to send automatic interview invites",
 			"method": "cronEmail",
 			"cron_frequency": "86400",

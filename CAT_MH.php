@@ -82,7 +82,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	
 	// crons
 	public function cronEmail() {
-		require_once("emailScheduler.php");
+		return require_once("emailScheduler.php");
 	}
 	
 	//utility

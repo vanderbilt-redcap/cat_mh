@@ -1,7 +1,7 @@
 <?php
 echo("<pre>");
 // get pid
-$pid = $module->getProjectId();
+// $pid = $module->getProjectId();
 
 // // remove all log data
 // $module->removeLogs("subjectID<>''");
@@ -52,7 +52,9 @@ $pid = $module->getProjectId();
 
 // // test module->get/setProjectSetting
 // $module->setProjectSetting('daysElapsed', 0);
-$results = $module->getProjectSetting('daysElapsed');
+// $results = $module->getProjectSetting('daysElapsed');
+
+$results = $module->cronEmail();
 
 var_dump($results);
 echo("</pre>");
