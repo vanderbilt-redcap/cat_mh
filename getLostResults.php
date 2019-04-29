@@ -1,7 +1,11 @@
 <?php
-// search logs for interviews that were ended but that we have no results for
-// then try to get results for themg
+// daily cron script:
+
+// first search logs for interviews that were ended but that we have no results for
+// then try to get results for them
 $result = $module->queryLogs("status=2 and results is NULL");
 while($interview = db_fetch_assoc($result)) {
 	$fetch = $module->getResults($interview);\
 }
+
+// handle automatic survey invites
