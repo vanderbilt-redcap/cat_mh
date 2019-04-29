@@ -186,7 +186,9 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 				$args['language'] = $projectSettings['language']['value'][$i] == 2 ? 2 : 1;
 			}
 		}
-		return createInterview($args);
+		$interview = createInterview($args);
+		
+		return $interview;
 	}
 	
 	// CAT-MH API methods
