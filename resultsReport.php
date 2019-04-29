@@ -14,7 +14,6 @@
 		<table style='width:90%' id='results'>
 			<thead>
 				<tr>
-					<th>Subject ID</th>
 					<th>Record ID</th>
 					<th>Date</th>
 					<th>Sequence</th>
@@ -26,6 +25,7 @@
 					<th>Precision</th>
 					<th>Probability</th>
 					<th>Percentile</th>
+					<th>Interview Link</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -37,9 +37,9 @@
 		foreach($catmh['interviews'] as $i => $interview) {
 			if ($interview['status'] == "4" and $interview['results'] != NULL) {
 				foreach($interview['results']['tests'] as $j => $test) {
+					$url = $module->getUrl("interview.php") . "&NOAUTH&sid=" . $record[$eid]['subjectid'] . "&sequence=". $interview['sequence'];
 					echo("
 					<tr>
-						<td>{$record[$eid]['subjectid']}</td>
 						<td>{$rid}</td>
 						<td>" . date("m-d-Y", $interview['timestamp']) . "</td>
 						<td>{$interview['sequence']}</td>
@@ -51,6 +51,7 @@
 						<td>{$test['precision']}</td>
 						<td>{$test['prob']}</td>
 						<td>{$test['percentile']}</td>
+						<td>{$url}</td>
 					</tr>");
 				}
 			}
