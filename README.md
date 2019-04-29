@@ -6,11 +6,16 @@ This external module allows a REDCap administrators to send participants a link 
 The prerequisites for using this module are:
 * A REDCap project to host the module
 * Public survey instrument in said project that has the following fields:
+
 	[participant_email] (of type 'Text Box') *optional
+
 	[consent] (of type 'Yes - No')
+
 	[cat_mh_data] (of type 'Notes Box (Paragraph Text)') (it is recommended that this field have the @HIDDEN action tag)
+
 	[subjectid] (of type 'Text Box') (it is recommended that this field have the @HIDDEN action tag)
 
+	
 #### Project Configuration
 You can configure any number of sequences. Each sequence consists of a series of CAT-MH tests that make up a CAT-MH interview.
 On the project configuration modal, you can select any number of tests for a sequence and select whether the interviewee should see the results at the end of their test.
