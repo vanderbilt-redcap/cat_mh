@@ -146,7 +146,7 @@
 			"method": "cronEmail",
 			"cron_frequency": "86400",
 			"cron_max_run_time": "300"
-		},
+		}
 	],
 
 	"compatibility": {
