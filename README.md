@@ -1,41 +1,27 @@
 # REDCap CAT-MH External Module
 
-This external module allows a REDCap administrator to add a link to the end of any survey that redirects the survey participant (user) to a new page where a test or series of tests will be administered via the CAT-MH API. Once the interview is complete, the results will be stored in REDCap and can be viewed by a separate report page accessible from the project's Control Center.
+This external module allows a REDCap administrators to send participants a link to a public survey. Upon providing their consent and finishing the public survey, the survey taker will be forwarded to a page where a test or series of tests will be administered via the CAT-MH API. Once the interview is complete, the results will be stored in REDCap and can be viewed by a separate report page accessible from the project's Control Center. Finally, there is an option to configure automatic interview invites for users who have provided an email address.
 
 ## Getting Started
-
 The prerequisites for using this module are:
-* Instance of REDCap
-* Project created
-* Survey type instrument created in that project
+* A REDCap project to host the module
+* Public survey instrument in said project that has the following fields:
+	[participant_email] (of type 'Text Box') *optional
+	[consent] (of type 'Yes - No')
+	[cat_mh_data] (of type 'Notes Box (Paragraph Text)') (it is recommended that this field have the @HIDDEN action tag)
+	[subjectid] (of type 'Text Box') (it is recommended that this field have the @HIDDEN action tag)
 
-Next, you should install the CAT-MH external module. For more info about external modules visit [REDCap External Modules](https://redcap.vanderbilt.edu/external_modules/manager/control_center.php).
+#### Project Configuration
+You can configure any number of sequences. Each sequence consists of a series of CAT-MH tests that make up a CAT-MH interview.
+On the project configuration modal, you can select any number of tests for a sequence and select whether the interviewee should see the results at the end of their test.
+You may optionally set the email and periodicity settings. If these values are set, the module will automatically send an email to each participant who has provided a
+`[participant_email]` value during their initial public survey.
 
-### Configuration
 
+#### System Configuration (for REDCap Administrators)
 After installing the external module, it must be configured on both then system level and the project level.
-
-#### System Configuration:
-
 You must provide the module with both of the following CAT-MH API registration details:
 * Application ID
 * Organization ID
 
 ![System Configuration Details](/images/systemLevel.PNG)
-
-#### Project Configuration:
-
-Each survey instrument in a project can redirect the participant to one set of tests (interview) upon completion. You can create multiple survey instruments for your project and configure the CAT-MH external module to issue different interviews for each instrument.
-
-To create an interview for your survey instrument
-* Enter the instrument full display name in the first project-level input
-* Select a language
-* Select 1 or more tests to include in the interview associated with this instrument.
-
-![Project Configuration Details](/images/projectLevel.PNG)
-
-After saving this configuration, survey participants should then see a message and a button at the end of the survey prompting them to continue to the CAT-MH interview.
-
-![Survey Complete](/images/surveyComplete.PNG)
-
-After a participant finishes a survey, they will see a button that will redirect them to the CAT-MH interview that is proctored via the CAT-MH API. When the participant finishes the interview, they are shown the results, which are also stored in the REDCap project. You can view the results by clicking the “CAT-MH Interview Results Report” link on the project sidebar.
