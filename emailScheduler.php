@@ -10,6 +10,9 @@ $daysElapsed = intval($daysElapsed);
 // determine which sequences to send emails for
 $urls = [];
 $settings = $module->getProjectSettings();
+echo("<pre>");
+print_r($settings);
+echo("</pre>");
 foreach ($settings['sequence']['value'] as $i => $sequence) {
 	$period_every = $settings['periodicity-every']['value'][$i];
 	$period_end = $settings['periodicity-end']['value'][$i];
@@ -22,9 +25,9 @@ foreach ($settings['sequence']['value'] as $i => $sequence) {
 	}
 }
 
-$emailSender = $settings['email-sender'];
-$emailSubject = $settings['email-subject'];
-$emailBody = $settings['email-body'];
+$emailSender = $settings['email-sender']['value'][0];
+$emailSubject = $settings['email-subject']['value'][0];
+$emailBody = $settings['email-body']['value'][0];
 
 if (empty($urls) or !isset($emailSender) or !isset($emailSubject) or !isset($emailBody)) {
 	// increment daysElapsed
