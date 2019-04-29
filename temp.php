@@ -24,7 +24,9 @@ $pid = $module->getProjectId();
 
 // fetch data
 // $result = \REDCap::getData($pid, 'array', 1);
-$result = $module->getPatientData("t9KyCq5afWbul7EOxrsHuc5221UcRbJa");
+// $result = $module->getPatientData("t9KyCq5afWbul7EOxrsHuc5221UcRbJa");
 
-print_r($result);
+$val = $module->getProjectSettings()['sequence']['value'][0];
+var_dump($val);
+// print_r($result);
 echo("</pre>");

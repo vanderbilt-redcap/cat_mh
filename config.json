@@ -48,10 +48,10 @@
          "repeatable":true,
          "sub_settings":[
             {
-				"key": "survey_instrument",
-				"name": "Administer CAT-MH interview at the end of this survey instrument",
+				"key": "sequence",
+				"name": "Name for this sequence of CAT-MH tests",
 				"required": true,
-				"type": "form-list"
+				"type": "text"
 			},
             {
                "key": "language",
