@@ -54,7 +54,10 @@ echo("<pre>");
 // $module->setProjectSetting('daysElapsed', 0);
 // $results = $module->getProjectSetting('daysElapsed');
 
-$results = $module->cronEmail();
-
+try {
+	$results = $module->cronEmail();
+} catch (\Exception $e) {
+	print_r($e);
+}
 var_dump($results);
 echo("</pre>");
