@@ -63,6 +63,16 @@
 					{"value": "2", "name": "Spanish"}
 			   ]
             },
+			{
+				"key": "periodicity-every",
+				"name": "Email interview invitations to participants every [x] days",
+				"type": "text"
+			},
+			{
+				"key": "periodicity-end",
+				"name": "Until [y] days have elapsed",
+				"type": "text"
+			},
             {
 			   "key": "tests",
 			   "name": "Tests included in interview",
