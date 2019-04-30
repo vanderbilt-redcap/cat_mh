@@ -146,12 +146,10 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 					}
 				}
 			}
-			
-			$_GET['pid'] = $originalPid;
 			// increment daysElapsed
 			$this->setProjectSetting('days-elapsed', $daysElapsed + 1);
 		}
-		
+		$_GET['pid'] = $originalPid;
 		
 		return "The CAT-MH external module cron method 'cronEmail' ran successfully";
 	}
