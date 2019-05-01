@@ -109,6 +109,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 					$period_end = intval($period_end);
 					if (($daysElapsed % $period_every) == 0 and $daysElapsed <= $period_end and $daysElapsed != 0) {
 						$urls[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=$sequence";
+						// echo ($this->getUrl("interview.php") . "&NOAUTH&sequence=$sequence <br />");
 					}
 				}
 			}
