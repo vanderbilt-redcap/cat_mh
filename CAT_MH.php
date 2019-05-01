@@ -120,7 +120,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			if (empty($urls) or !isset($emailSender) or !isset($emailSubject) or !isset($emailBody)) {
 				// increment daysElapsed
 				$this->setProjectSetting('days-elapsed', $daysElapsed + 1);
-				exit();
+				$this->exitAfterHook();
 			}
 
 			// prepare email body by replacing [interview-links] and [interview-urls]

@@ -1,2 +1,4 @@
 <?php
-print_r($module->cronEmail());
+echo("<pre>");
+print_r($module->getProjectSettings());
+echo("</pre>");
