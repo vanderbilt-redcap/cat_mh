@@ -77,7 +77,8 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		
 		// finally redirect survey participant
 		$page = $this->getUrl("interview.php") . "&NOAUTH&sid=" . $subjectID . "&sequence=$sequence";
-		redirect($page);
+		header('Location: ' . $page, true, 302);
+		$this->exitAfterHook();
 	}
 	
 	// crons
