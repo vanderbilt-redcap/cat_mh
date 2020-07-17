@@ -105,9 +105,9 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			foreach ($settings['sequence']['value'] as $i => $sequence) {
 				$period_every = $settings['periodicity-every']['value'][$i];
 				$period_end = $settings['periodicity-end']['value'][$i];
-				if (isset($period_every) and isset($period_end)) {
-					$period_every = intval($period_every);
-					$period_end = intval($period_end);
+				$period_every = intval($period_every);
+				$period_end = intval($period_end);
+				if (!empty($period_end) && !empty($period_every) && $period_every != 0) {
 					if (($daysElapsed % $period_every) == 0 and $daysElapsed <= $period_end and $daysElapsed != 0) {
 						$urls[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=$sequence";
 						// echo ($this->getUrl("interview.php") . "&NOAUTH&sequence=$sequence <br />");
