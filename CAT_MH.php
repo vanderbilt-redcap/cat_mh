@@ -118,17 +118,17 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			if (!isset($emailSender) or !isset($emailSubject) or !isset($emailBody)) {
 				$result_log_message .= "Cancelling automatic interview invitations via email because one of the following project-level module settings is empty: email-sender, email-subject, email-body.";
 				\REDCap::logEvent("CAT-MH External Module", $result_log_message, NULL, NULL, NULL, $this->getProjectId());
-				$this->exitAfterHook();
+				return;
 			}
 			if (strpos($emailBody, "[interview-urls]") == false and strpos($emailBody, "[interview-links]") == false) {
 				$result_log_message .= "Cancelling automatic interview invitations via email since module setting [emailBody] does not contain '[interview-links]' or '[interview-urls]'.";
 				\REDCap::logEvent("CAT-MH External Module", $result_log_message, NULL, NULL, NULL, $this->getProjectId());
-				$this->exitAfterHook();
+				return;
 			}
 			if (empty($urls)) {
 				$result_log_message .= "Cancelling automatic interview invitations via email. (No sequences scheduled to send)";
 				\REDCap::logEvent("CAT-MH External Module", $result_log_message, NULL, NULL, NULL, $this->getProjectId());
-				$this->exitAfterHook();
+				return;
 			}
 
 			// we have links to send so for each participant with a listed email, invite to take interview(s)
