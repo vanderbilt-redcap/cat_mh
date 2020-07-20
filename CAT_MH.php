@@ -103,7 +103,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 				if (!empty($period_end) && !empty($period_every) && $period_every != 0) {
 					if (($daysElapsed % $period_every) == 0 and $daysElapsed <= $period_end and $daysElapsed != 0) {
 						$urls[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=$sequence";
-						$result_log_message .= "Added sequence '$sequence' to test schedule.\n";
+						$result_log_message .= "Added sequence '$sequence' to invitations.\n";
 					}
 				}
 			}
