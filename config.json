@@ -156,5 +156,9 @@
 		"redcap-version-max": ""
 	},
 	
-	"framework-version": 2
+	"framework-version": 2,
+	
+	"versions": {
+		"0.1.1": "Fixed issue where interview URLs sent via cron task had missing subject IDs. Updated logging to be more helpful for scheduled emails (cronEmail)."
+	}
 }
