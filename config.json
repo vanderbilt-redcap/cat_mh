@@ -24,6 +24,16 @@
 	"links": {
 		"project": [
 			{
+				"name": "CAT-MH Patient Dashboard",
+				"icon": "report",
+				"url": "dashboard.php"
+			},
+			{
+				"name": "CAT-MH Sequence Scheduling",
+				"icon": "report",
+				"url": "scheduling.php"
+			},
+			{
 				"name": "CAT-MH Interview Results Report",
 				"icon": "report",
 				"url": "resultsReport.php"
@@ -156,7 +166,7 @@
 		"redcap-version-max": ""
 	},
 	
-	"framework-version": 2,
+	"framework-version": 5,
 	
 	"versions": {
 		"0.1.1": "Fixed issue where interview URLs sent via cron task had missing subject IDs. Updated logging to be more helpful for scheduled emails (cronEmail)."

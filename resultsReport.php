@@ -1,3 +1,6 @@
+<?php
+require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
+?>
 <!doctype html>
 <html lang="en">
 	<head>
@@ -70,3 +73,6 @@
 		<script src="<?php echo $module->getUrl('js/results.js'); ?>"></script>
 	</body>
 </html>
+<?php
+require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';
+?>

@@ -356,6 +356,12 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		return $interview;
 	}
 	
+	function llog($text) {
+		if (file_exists("C:/vumc/log.txt")) {
+			file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
+		}
+	}
+	
 	// CAT-MH API methods
 	public function createInterview($args) {
 		// args needed: applicationid, organizationid, subjectID, language, tests[]
