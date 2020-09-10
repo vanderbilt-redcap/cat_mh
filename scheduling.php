@@ -1,12 +1,14 @@
 <?php
+
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 
 ?>
-
-<div class="card card-body w-50">
+<script type='text/javascript' src="//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<link rel='stylesheet' href='//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css'>
+<div class="card card-body w-75">
 	<h3>Schedule a Sequence</h3>
 	<div class="dropdown">
-		<label class="pr-3">1. Choose a Sequence:</label>
+		<label class="pr-3">Choose a Sequence:</label>
 		<button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 			Sequences
 		</button>
@@ -19,17 +21,79 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 			?>
 		</div>
 	</div>
-	
+	<div class='row mt-3'>
+		<div class='col-6'>
+			<h5>Schedule By Interval</h5>
+			<form>
+				<div class="form-group">
+					<label for="frequency">Invitation frequency (number of days)</label>
+					<input type="text" class="form-control w-25" id="frequency" aria-describedby="frequency_note">
+					<small id="frequency_note" class="form-text text-muted">Send sequence invitation emails every [x] days</small>
+				</div>
+				<div class="form-group">
+					<label for="duration">Duration (number of days)</label>
+					<input type="text" class="form-control w-25" id="duration" aria-describedby="duration_note">
+					<small id="duration_note" class="form-text text-muted">for [y] days</small>
+				</div>
+				<div class="form-group">
+					<label for="delay">Delay (number of days)</label>
+					<input type="text" class="form-control w-25" id="delay" aria-describedby="delay_note">
+					<small id="delay_note" class="form-text text-muted">starting after [z] days</small>
+				</div>
+				<div class="form-group">
+					<label for="time_of_day">Time of day to send invitations</label>
+					<input type="time" class="form-control w-50" id="time_of_day" aria-describedby="time_of_day_note">
+					<small id="time_of_day_note" class="form-text text-muted">For example, send invitations at 10:30 AM</small>
+				</div>
+				<button type="submit" class="btn btn-primary">Add to Schedule</button>
+			</form>
+		</div>
+		<div class='col-6'>
+			<h5 class='mb-3'>Schedule By Calendar</h5>
+			<div id="calendar" class='dt-picker'></div>
+			<button type="button" class="btn btn-primary mt-4">Add to Schedule</button>
+		</div>
+	</div>
 </div>
 
 <div class="card card-body w-75 mt-3">
 	<h3>Scheduled Sequences</h3>
-
+	<table id='seq_schedule'>
+		<thead>
+			<th>Select</th>
+			<th>Date</th>
+			<th>Sequence</th>
+			<th>Completed</th>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
 </div>
 
 <div class="card card-body w-50 mt-3">
 	<h3>Reminder Emails</h3>
-
+	<div class="form-group form-check">
+		<input type="checkbox" class="form-check-input" id="reminders_cbox">
+		<label class="form-check-label" style="font-size: 0.9rem" for="reminders_cbox">Send reminder emails to patients who have not completed their scheduled sequences</label>
+	</div>
+	<div class="form-group">
+		<label for="reminder_frequency">Reminder frequency (number of days)</label>
+		<input type="text" class="form-control w-25" id="reminder_frequency" aria-describedby="reminder_frequency_note">
+		<small id="reminder_frequency_note" class="form-text text-muted">Send reminder emails every [x] days</small>
+	</div>
+	<div class="form-group">
+		<label for="reminder_duration">Duration (number of days)</label>
+		<input type="text" class="form-control w-25" id="reminder_duration" aria-describedby="reminder_duration_note">
+		<small id="reminder_duration_note" class="form-text text-muted">for [y] days</small>
+	</div>
+	<div class="form-group">
+		<label for="reminder_delay">Delay (number of days)</label>
+		<input type="text" class="form-control w-25" id="reminder_delay" aria-describedby="reminder_delay_note">
+		<small id="reminder_delay_note" class="form-text text-muted">starting after [z] days</small>
+	</div>
+	<div class="alert alert-light" style="border: none !important;" role="alert">
+		REDCap will send the reminder emails at the time of day specified for the associated scheduled sequence
+	</div>
 </div>
 
 

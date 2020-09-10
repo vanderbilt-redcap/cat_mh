@@ -362,6 +362,28 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		}
 	}
 	
+	// scheduling
+	
+	function scheduleSequence($seq_name, $datetimes) {
+		
+	}
+	
+	function unscheduleSequence($schedule_id) {
+		
+	}
+	
+	function getScheduledSequences() {
+		
+	}
+	
+	function setReminderEmailSettings($settings) {
+		
+	}
+	
+	function getReminderEmailSettings() {
+		
+	}
+	
 	// CAT-MH API methods
 	public function createInterview($args) {
 		// args needed: applicationid, organizationid, subjectID, language, tests[]
