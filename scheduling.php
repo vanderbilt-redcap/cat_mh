@@ -45,13 +45,13 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 					<input type="time" class="form-control w-50" id="time_of_day" aria-describedby="time_of_day_note">
 					<small id="time_of_day_note" class="form-text text-muted">For example, send invitations at 10:30 AM</small>
 				</div>
-				<button type="submit" class="btn btn-primary">Add to Schedule</button>
+				<button id="scheduleByInterval" type="button" class="btn btn-primary">Add to Schedule</button>
 			</form>
 		</div>
 		<div class='col-6'>
 			<h5 class='mb-3'>Schedule By Calendar</h5>
 			<div id="calendar" class='dt-picker'></div>
-			<button type="button" class="btn btn-primary mt-4">Add to Schedule</button>
+			<button id="scheduleByCalendar" type="button" class="btn btn-primary mt-4">Add to Schedule</button>
 		</div>
 	</div>
 </div>
@@ -100,6 +100,12 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 
 <?php
 $js_url = $module->getUrl('js/scheduling.js');
+$sched_ajax_url = $module->getUrl('scheduling_ajax.php');
+$catmh_debug = $module->debug;
 echo "<script type='text/javascript' src='$js_url'></script>";
+echo "<script type='text/javascript'>
+	CATMH.scheduling_ajax_url = '$sched_ajax_url';
+	CATMH.debug = $catmh_debug;
+</script>";
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';
 ?>

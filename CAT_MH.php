@@ -31,6 +31,8 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		'ss' => "Suicide Scale"
 	];
 	
+	public $debug = true;
+	
 	// hooks
 	public function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
 		// if user did not consent, then do not forward to interview, instead notify them that they were rejected and that they may now close this window
@@ -357,6 +359,8 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function llog($text) {
+		if ($this->debug !== true)
+			return;
 		if (file_exists("C:/vumc/log.txt")) {
 			file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
 		}
