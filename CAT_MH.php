@@ -368,16 +368,38 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	
 	// scheduling
 	
-	function scheduleSequence($seq_name, $datetimes) {
+	function scheduleSequence($seq_name, $datetime) {
+		// ensure not duplicate scheduled
+		$result = $this->queryLogs("SELECT message, name, scheduled_datetime WHERE message='scheduleSequence' AND name='$seq_name' AND scheduled_datetime='$datetime'");
+		if ($result->num_rows != 0) {
+			return [false, "This sequence is already scheduled for this date/time"];
+		}
 		
+		$log_id = $this->log("scheduleSequence", [
+			"name" => $seq_name,
+			"scheduled_datetime" => $datetime
+		]);
+		
+		if (!empty($log_id)) {
+			return [true, null];
+		} else {
+			return [false, "CAT-MH module failed to schedule sequence (log insertion failed)"];
+		}
 	}
 	
-	function unscheduleSequence($schedule_id) {
-		
+	function unscheduleSequence($seq_name, $datetime) {
+		return $this->removeLogs("message='scheduleSequence' AND name='$seq_name' AND scheduled_datetime='$datetime'");
 	}
 	
 	function getScheduledSequences() {
+		$result = $this->queryLogs("SELECT message, name, scheduled_datetime WHERE message='scheduleSequence' ORDER BY timestamp desc");
 		
+		$sequences = [];
+		while ($row = db_fetch_array($result)) {
+			$sequences[] = ['', $row['scheduled_datetime'], $row['name'], '0/0'];
+		}
+		
+		return $sequences;
 	}
 	
 	function setReminderEmailSettings($settings) {

@@ -102,10 +102,14 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 $js_url = $module->getUrl('js/scheduling.js');
 $sched_ajax_url = $module->getUrl('scheduling_ajax.php');
 $catmh_debug = $module->debug;
+
+$scheduled = json_encode($module->getScheduledSequences());
+
 echo "<script type='text/javascript' src='$js_url'></script>";
 echo "<script type='text/javascript'>
 	CATMH.scheduling_ajax_url = '$sched_ajax_url';
 	CATMH.debug = $catmh_debug;
+	CATMH.scheduledSequences = JSON.parse('$scheduled');
 </script>";
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';
 ?>

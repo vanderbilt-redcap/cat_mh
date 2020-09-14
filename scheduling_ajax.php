@@ -2,7 +2,7 @@
 
 // sanitize inputs
 $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
-$module->llog("\$_POST:\n" . print_r($_POST, true));
+// $module->llog("\$_POST:\n" . print_r($_POST, true));
 
 // initialize functions/properties
 $sequenceNames = $module->getProjectSetting('sequence');
@@ -21,7 +21,7 @@ $json = new \stdClass();
 $user_sequence = $_POST['sequence'];
 
 if ($_POST['schedulingMethod'] == 'calendar') {
-	$module->llog("\$_POST['schedulingMethod'] == 'calendar'");
+	// $module->llog("\$_POST['schedulingMethod'] == 'calendar'");
 	
 	if (!isValidSequenceName($user_sequence))
 		$json->error = "'$user_sequence' is not the name of a valid sequence.";
@@ -30,19 +30,26 @@ if ($_POST['schedulingMethod'] == 'calendar') {
 	if ($timestamp === false)
 		$json->error = $_POST['datetime'] . " is not a valid datetime.";
 	
-	$module->llog("user_sequence: $user_sequence");
-	$module->llog("timestamp: $timestamp");
+	if (!empty($json->error))
+		exit(json_encode($json));
 	
 	$user_datetime = date('Y-m-d H:i:s', $timestamp);
-	$module->llog("user_datetime: $user_datetime");
 	
+	list($ok, $msg) = $module->scheduleSequence($user_sequence, $user_datetime);
 	
+	if (!$ok) {
+		$json->error = $msg;
+	} else {
+		$json->sequences = $module->getScheduledSequences();
+	}
 } elseif ($_POST['schedulingMethod'] == 'interval') {
 	$module->llog("\$_POST['schedulingMethod'] == 'interval'");
+	
+	
 } else {
 	$json->error = 'No scheduling method specified (must be calendar or interval).';
 }
 
 // send response
-$module->llog("json: " . print_r($json, true));
+// $module->llog("json: " . print_r($json, true));
 exit(json_encode($json));
