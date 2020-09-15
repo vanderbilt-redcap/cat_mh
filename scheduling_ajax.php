@@ -21,7 +21,7 @@ $json = new \stdClass();
 $user_sequence = $_POST['sequence'];
 
 if ($_POST['schedulingMethod'] == 'calendar') {
-	// $module->llog("\$_POST['schedulingMethod'] == 'calendar'");
+	$module->llog("\$_POST['schedulingMethod'] == 'calendar'");
 	
 	if (!isValidSequenceName($user_sequence))
 		$json->error = "'$user_sequence' is not the name of a valid sequence.";
@@ -33,7 +33,7 @@ if ($_POST['schedulingMethod'] == 'calendar') {
 	if (!empty($json->error))
 		exit(json_encode($json));
 	
-	$user_datetime = date('Y-m-d H:i:s', $timestamp);
+	$user_datetime = date('Y-m-d H:i', $timestamp);
 	
 	list($ok, $msg) = $module->scheduleSequence($user_sequence, $user_datetime);
 	

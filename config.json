@@ -51,6 +51,16 @@
 
 	"project-settings": [
 		{
+			"key": "email-subject",
+			"name": "Subject line for automated interview invitations",
+			"type": "text"
+		},
+		{
+			"key": "email-body",
+			"name": "Body text for automated interview invitations",
+			"type": "rich-text"
+		},
+		{
          "key": "catmh_options",
          "name": "CAT-MH Interview Options",
          "required": false,
@@ -73,16 +83,6 @@
 					{"value": "2", "name": "Spanish"}
 			   ]
             },
-			{
-				"key": "periodicity-every",
-				"name": "Email interview invitations to participants every [x] days",
-				"type": "text"
-			},
-			{
-				"key": "periodicity-end",
-				"name": "Until [y] days have elapsed",
-				"type": "text"
-			},
             {
 			   "key": "tests",
 			   "name": "Tests included in interview",
@@ -111,27 +111,7 @@
 			{"type": "checkbox", "key": "ss", "name": "Suicide Scale"},
 			{"type": "checkbox", "key": "ss_show_results", "name": "Show Results"}
          ]
-        },
-		{
-			"key": "email-sender",
-			"name": "Sender address for automated interview invitations",
-			"type": "text"
-		},
-		{
-			"key": "email-subject",
-			"name": "Subject line for automated interview invitations",
-			"type": "text"
-		},
-		{
-			"key": "email-body",
-			"name": "Body text for automated interview invitations",
-			"type": "rich-text"
-		},
-		{
-			"key": "days-elapsed",
-			"name": "Number of days that have elapsed for purposes of sending invitations",
-			"type": "text"
-		}
+        }
 	],
 
 	"system-settings": [
@@ -166,7 +146,7 @@
 		"redcap-version-max": ""
 	},
 	
-	"framework-version": 5,
+	"framework-version": 2,
 	
 	"versions": {
 		"0.1.1": "Fixed issue where interview URLs sent via cron task had missing subject IDs. Updated logging to be more helpful for scheduled emails (cronEmail)."
