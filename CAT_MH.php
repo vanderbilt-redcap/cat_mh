@@ -385,7 +385,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		]);
 		
 		if (!empty($log_id)) {
-			return [true, null];
+			return [true, $log_id];
 		} else {
 			return [false, "CAT-MH module failed to schedule sequence (log insertion failed)"];
 		}

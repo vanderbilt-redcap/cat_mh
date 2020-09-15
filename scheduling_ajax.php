@@ -44,7 +44,43 @@ if ($_POST['schedulingMethod'] == 'calendar') {
 	}
 } elseif ($_POST['schedulingMethod'] == 'interval') {
 	$module->llog("\$_POST['schedulingMethod'] == 'interval'");
+		
+	$frequency = (int) $_POST['frequency'];
+	$duration = (int) $_POST['duration'];
+	$delay = (int) $_POST['delay'];
+	if (empty($_POST['time_of_day'])) {
+		$time_of_day = "00:00";
+	} else {
+		$time_of_day = $_POST['time_of_day'];
+	}
 	
+	// require frequency and duration
+	if (empty($frequency) or empty($duration)) {
+		$json->error = "The CAT-MH module can't schedule sequences by interval without valid frequency and duration parameters.";
+		exit(json_encode($json));
+	}
+	if ($duration > 999) {
+		$json->error = "The maximum allowed duration value is 999.";
+		exit(json_encode($json));
+	}
+	
+	$start_date = date("Y-m-d");
+	if (!empty($delay)) {
+		$start_date = date("Y-m-d", strtotime($start_date . " +" . $delay . " days"));
+	}
+	$module->llog("start_date: $start_date");
+	
+	for ($day_offset = 0; $day_offset < $duration; $day_offset += $frequency) {
+		$next_datetime = date("Y-m-d", strtotime($start_date . " +" . $day_offset . " days"));
+		list($ok, $id_or_msg) = $module->scheduleSequence($_POST['sequence'], $next_datetime . " $time_of_day");
+		if (!$ok) {
+			$json->error = $id_or_msg;
+			exit(json_encode($json));
+		}
+	}
+	
+	$json->sequences = $module->getScheduledSequences();
+	$module->llog("seqs: " . print_r($json->sequences, true));
 } elseif ($_POST['schedulingMethod'] == 'delete') {
 	$module->llog("\$_POST['schedulingMethod'] == 'delete'");
 	
