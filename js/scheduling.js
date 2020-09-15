@@ -1,10 +1,74 @@
 CATMH = {}
 
+CATMH.selectCheckbox = "<input type='checkbox' class='sequence_cbox'>"
+
 CATMH.addSelectCheckboxes = function() {
 	// add select checkboxes for each #seq_schedule tbody row
 	$("#seq_schedule tbody tr").each(function() {
-		$(this).find('td:first').html("<input type='checkbox'>")
+		$(this).find('td:first').html(CATMH.selectCheckbox)
 	})
+}
+
+CATMH.rebuildSequencesTable = function(sequences) {
+	sequences.forEach(function(row, i) {
+		row[0] = CATMH.selectCheckbox
+	})
+	CATMH.schedule.clear()
+	CATMH.schedule.rows.add(sequences)
+	CATMH.schedule.draw()
+	$("#deleteScheduledSequence").attr('disabled', true)
+}
+
+CATMH.submitReminderSettings = function() {
+	var post_data = {
+		schedulingMethod: 'setReminderSettings',
+		enabled: $("#reminders_cbox:checked").val(),
+		frequency: $("#reminder_frequency").val(),
+		duration: $("#reminder_duration").val(),
+		delay: $("#reminder_delay").val()
+	}
+	console.log('reminder_settings sent', post_data)
+	
+	$.ajax({
+		type: "POST",
+		url: CATMH.scheduling_ajax_url,
+		data: post_data,
+		success: function(response) {
+			if (CATMH.debug)
+				console.log('scheduleByCalendar ajax returned successfully', response)
+			if (response.error) {
+				alert(response.error)
+			}
+			if (response.reminderSettings) {
+				console.log('reminder_settings RECEIVED', response.reminderSettings)
+				CATMH.reminderSettings = response.reminderSettings
+				CATMH.updateReminderInputs()
+			}
+		},
+		dataType: 'json'
+	})
+}
+
+CATMH.updateReminderInputs = function() {
+	var settings = CATMH.reminderSettings
+	$("#reminder_frequency").val(settings.frequency)
+	$("#reminder_duration").val(settings.duration)
+	$("#reminder_delay").val(settings.delay)
+	$("#reminder_frequency").val(settings.frequency)
+	$("#reminder_duration").val(settings.duration)
+	$("#reminder_delay").val(settings.delay)
+	
+	if (settings.enabled == true) {
+		$("#reminders_cbox").prop('checked', true)
+		$("#reminder_frequency").attr('disabled', false)
+		$("#reminder_duration").attr('disabled', false)
+		$("#reminder_delay").attr('disabled', false)
+	} else {
+		$("#reminders_cbox").prop('checked', false)
+		$("#reminder_frequency").attr('disabled', true)
+		$("#reminder_duration").attr('disabled', true)
+		$("#reminder_delay").attr('disabled', true)
+	}
 }
 
 // initialize schedule (datatable) and calendar (datetimepicker)
@@ -28,6 +92,9 @@ $(function() {
 	if (CATMH.scheduledSequences.length) {
 		CATMH.addSelectCheckboxes()
 	}
+	
+	// update inputs with reminderSettings given in initial response:
+	CATMH.updateReminderInputs()
 })
 
 // show the user which sequence they selected from the dropdown
@@ -66,12 +133,7 @@ $('body').on('click', '#scheduleByCalendar', function() {
 				alert(response.error)
 			}
 			if (response.sequences) {
-				response.sequences.forEach(function(row, i) {
-					row[0] = "<input type='checkbox'>"
-				})
-				CATMH.schedule.clear()
-				CATMH.schedule.rows.add(response.sequences)
-				CATMH.schedule.draw()
+				CATMH.rebuildSequencesTable(response.sequences)
 			}
 		},
 		dataType: 'json'
@@ -104,19 +166,68 @@ $('body').on('click', '#scheduleByInterval', function() {
 		data: post_data,
 		success: function(response) {
 			if (CATMH.debug)
-				console.log('scheduleByCalendar ajax returned successfully', response)
+				console.log('scheduleByInterval ajax returned successfully', response)
 			if (response.error) {
 				alert(response.error)
 			}
 			if (response.sequences) {
-				response.sequences.forEach(function(row, i) {
-					row[0] = "<input type='checkbox'>"
-				})
-				CATMH.schedule.clear()
-				CATMH.schedule.rows.add(response.sequences)
-				CATMH.schedule.draw()
+				CATMH.rebuildSequencesTable(response.sequences)
 			}
 		},
 		dataType: 'json'
 	})
+})
+
+// detect user select a scheduled sequence
+$('body').on('change', '.sequence_cbox', function() {
+	if ($(".sequence_cbox:checked").length) {
+		$("#deleteScheduledSequence").attr('disabled', false)
+	} else {
+		$("#deleteScheduledSequence").attr('disabled', true)
+	}
+})
+
+// delete scheduled sequences
+$('body').on('click', '#deleteScheduledSequence', function() {
+	if ($(".sequence_cbox:checked").length == 0)
+		return
+	
+	var post_data = {
+		sequencesToDelete: [],
+		schedulingMethod: 'delete'
+	}
+	
+	// add sequences selected for deleting to post_data
+	$(".sequence_cbox:checked").each(function(i, e) {
+		var row = $(this).closest('tr')
+		var seq = {
+			name: row.children('td:eq(2)').html(),
+			datetime: row.children('td:eq(1)').html()
+		}
+		post_data.sequencesToDelete.push(seq)
+	})
+	
+	console.log("post_data", post_data)
+	
+	$.ajax({
+		type: "POST",
+		url: CATMH.scheduling_ajax_url,
+		data: post_data,
+		success: function(response) {
+			if (CATMH.debug)
+				console.log('deleteScheduledSequence ajax returned successfully', response)
+			if (response.error) {
+				alert(response.error)
+			}
+			if (response.sequences) {
+				CATMH.rebuildSequencesTable(response.sequences)
+			}
+		},
+		dataType: 'json'
+	})
+})
+
+// send request to server to set reminder settings
+$('body').on('input', '.reminder_setting', function() {
+	CATMH.submitReminderSettings()
 })

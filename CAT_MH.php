@@ -78,6 +78,10 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	// crons
+	public function cron_send_emails() {
+		
+	}
+	
 	public function cronEmail() {
 		$originalPid = $_GET['pid'];
 		foreach($this->framework->getProjectsWithModuleEnabled() as $localProjectId){
@@ -402,12 +406,13 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		return $sequences;
 	}
 	
-	function setReminderEmailSettings($settings) {
-		
+	function setReminderSettings($settings) {
+		$this->removeLogs("message='reminderSettings'");
+		return $this->log("reminderSettings", (array) $settings);
 	}
 	
-	function getReminderEmailSettings() {
-		
+	function getReminderSettings() {
+		return db_fetch_assoc($this->queryLogs("SELECT message, enabled, frequency, duration, delay WHERE message='reminderSettings'"));
 	}
 	
 	// CAT-MH API methods

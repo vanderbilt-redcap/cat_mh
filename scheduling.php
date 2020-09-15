@@ -68,27 +68,28 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 		<tbody>
 		</tbody>
 	</table>
+	<button id="deleteScheduledSequence" disabled='true' type="button" class="btn btn-primary col-2">Delete</button>
 </div>
 
 <div class="card card-body w-50 mt-3">
 	<h3>Reminder Emails</h3>
 	<div class="form-group form-check">
-		<input type="checkbox" class="form-check-input" id="reminders_cbox">
+		<input type="checkbox" class="form-check-input reminder_setting" id="reminders_cbox">
 		<label class="form-check-label" style="font-size: 0.9rem" for="reminders_cbox">Send reminder emails to patients who have not completed their scheduled sequences</label>
 	</div>
 	<div class="form-group">
 		<label for="reminder_frequency">Reminder frequency (number of days)</label>
-		<input type="text" class="form-control w-25" id="reminder_frequency" aria-describedby="reminder_frequency_note">
+		<input type="text" class="form-control reminder_setting w-25" id="reminder_frequency" aria-describedby="reminder_frequency_note">
 		<small id="reminder_frequency_note" class="form-text text-muted">Send reminder emails every [x] days</small>
 	</div>
 	<div class="form-group">
 		<label for="reminder_duration">Duration (number of days)</label>
-		<input type="text" class="form-control w-25" id="reminder_duration" aria-describedby="reminder_duration_note">
+		<input type="text" class="form-control reminder_setting w-25" id="reminder_duration" aria-describedby="reminder_duration_note">
 		<small id="reminder_duration_note" class="form-text text-muted">for [y] days</small>
 	</div>
 	<div class="form-group">
 		<label for="reminder_delay">Delay (number of days)</label>
-		<input type="text" class="form-control w-25" id="reminder_delay" aria-describedby="reminder_delay_note">
+		<input type="text" class="form-control reminder_setting w-25" id="reminder_delay" aria-describedby="reminder_delay_note">
 		<small id="reminder_delay_note" class="form-text text-muted">starting after [z] days</small>
 	</div>
 	<div class="alert alert-light" style="border: none !important;" role="alert">
@@ -104,12 +105,14 @@ $sched_ajax_url = $module->getUrl('scheduling_ajax.php');
 $catmh_debug = $module->debug;
 
 $scheduled = json_encode($module->getScheduledSequences());
+$reminderSettings = json_encode((object) $module->getReminderSettings());
 
 echo "<script type='text/javascript' src='$js_url'></script>";
 echo "<script type='text/javascript'>
-	CATMH.scheduling_ajax_url = '$sched_ajax_url';
-	CATMH.debug = $catmh_debug;
-	CATMH.scheduledSequences = JSON.parse('$scheduled');
+	CATMH.scheduling_ajax_url = '$sched_ajax_url'
+	CATMH.debug = $catmh_debug
+	CATMH.scheduledSequences = JSON.parse('$scheduled')
+	CATMH.reminderSettings = JSON.parse('$reminderSettings')
 </script>";
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';
 ?>
