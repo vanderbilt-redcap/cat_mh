@@ -95,6 +95,9 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 	<div class="alert alert-light" style="border: none !important;" role="alert">
 		REDCap will send the reminder emails at the time of day specified for the associated scheduled sequence
 	</div>
+	<div class="alert alert-light" style="border: none !important;" role="alert">
+		Note: Email reminders will also be disabled if the frequency or duration settings above are absent.
+	</div>
 </div>
 
 

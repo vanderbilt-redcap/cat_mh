@@ -113,6 +113,12 @@ if ($_POST['schedulingMethod'] == 'calendar') {
 	$json->error = 'No scheduling method specified (must be calendar or interval).';
 }
 
+// clear and re-queue reminder emails if needed
+if (array_search($_POST['schedulingMethod'], ['interval', 'calendar', 'delete', 'setReminderSettings'], true)) {
+	$module->clearQueuedReminderEmails();
+	$module->queueAllReminderEmails();
+}
+
 // send response
 // $module->llog("json: " . print_r($json, true));
 exit(json_encode($json));

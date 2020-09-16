@@ -78,242 +78,12 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	// crons
-	public function cron_send_emails() {
-		/*	method todo:
-			make catmh_email and catmh_provider_email fields configurable (project setting)
-			
-		*/
-		
+	public function cron() {
 		$originalPid = $_GET['pid'];
-		
 		foreach($this->framework->getProjectsWithModuleEnabled() as $localProjectId) {
-			// determine which sequences need to be sent this minute
-			$ymd_hi = date("Y-m-d H:i");
-			// // // // // // method testing override
-			// $ymd_hi = "2020-09-15 00:00";
-			$seq_logs = $this->queryLogs("SELECT message, name, scheduled_datetime WHERE message='scheduleSequence' and scheduled_datetime='$ymd_hi' ORDER BY timestamp desc");
-			
-			
-			$sequences = [];
-			$sequenceURLs = [];
-			
-			while ($row = db_fetch_assoc($seq_logs)) {
-				// make double sure
-				if ($row['message'] == 'scheduleSequence' and $row['scheduled_datetime'] == $ymd_hi) {
-					$sequences[] = $row['name'];
-					$sequenceURLs[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=" . $row['name'];
-				}
-			}
-			
-			$this->llog("\$sequences: " . print_r($sequences, true));
-			
-			// return early if there are no sequences to send invitations for
-			if (empty($sequences))
-				return;
-			
-			// prepare email invitation using project settings
-			$email = new \Message();
-			// $project_settings = $this->getProjectSettings();
-			// $this->llog('project_settings: ' . print_r($project_settings, true));
-			$email->setFrom("redcap.services@vumc.org");
-			$email->setSubject($this->getProjectSetting('email-subject'));
-			$email_body = $this->getProjectSetting('email-body');
-			
-			// prepare redcap log message
-			$result_log_message = "Sending scheduled sequence invitations ($ymd_hi)\n";
-			$result_log_message .= "Sequences: " . implode(" ", $sequences) . "\n";
-			$result_log_message .= "Email Subject: " . $this->getProjectSetting('email-subject') . "\n";
-			
-			// if there's no [interview-urls/links] then remember not to replace, but to append links/urls
-			$append_links = false;
-			if (strpos($email_body, "[interview-links]") === false)
-				$append_links = true;
-			$append_urls = false;
-			if (strpos($email_body, "[interview-urls]") === false)
-				$append_urls = true;
-			
-			// iterate through participants
-			$params = [
-				"project_id" => $this->getProjectId(),
-				"return_format" => "array",
-				"fields" => ["catmh_email", "cat_mh_data", "record_id", "subjectid"]
-			];
-			$data = \REDCap::getData($this->getProjectId(), 'array');
-			foreach($data as $rid => $record) {
-				// ensure we have an email value to use
-				$eid = array_keys($record)[0];
-				$email_address_field = 'catmh_email';
-				$addressTo = $record[$eid][$email_address_field];
-				if (empty($addressTo)) {
-					$result_log_message .= "Record $rid: Skipping participant (empty [$email_address_field] field)\n";
-					continue;
-				}
-				$email->setTo($addressTo);
-				
-				// generate subject ID and interviews for [cat_mh_data] if missing
-				if (empty($record[$eid]['subjectid'])) {
-					$subjectID = $this->generateSubjectID();
-					$cat_mh_data = json_encode(["interviews" => []]);
-					$record[$eid]["subjectid"] = $subjectID;
-					$record[$eid]["cat_mh_data"] = $cat_mh_data;
-					$save_results = \REDCap::saveData($this->getProjectId(), 'array', [$record]);
-				}
-				if (empty($subjectID))
-					$subjectID = $record[$eid]["subjectid"];
-				// ensure we have a subjectID by this point
-				if (empty($subjectID)) {
-					$result_log_message .= "Record $rid: Skipping participant (failed to generate required subjectID)\n";
-					continue;
-				}
-				
-				// prepare participant-specific interview URLs and links
-				$participantURLs = [];
-				$participantLinks = [];
-				foreach($sequenceURLs as $i => $url) {
-					$url_with_sid = $url . "&sid=$subjectID";
-					$participantURLs[$i] = $url_with_sid;
-					$participantLinks[$i] = "<a href=\"$url_with_sid\">CAT-MH Interview ($i)</a>";
-				}
-				
-				// prepare email body by replacing [interview-links] and [interview-urls] (or appending)
-				$participant_email_body = $email_body;
-				if ($append_links) {
-					$participant_email_body .= "<br>" . implode($participantLinks, "<br>");
-				} else {
-					$participant_email_body = str_replace("[interview-links]", implode($participantLinks, "<br>"), $participant_email_body);
-				}
-				if ($append_urls) {
-					$participant_email_body .= "<br>" . implode($participantURLs, "<br>");
-				} else {
-					$participant_email_body = str_replace("[interview-urls]", implode($participantURLs, "<br>"), $participant_email_body);
-				}
-				$email->setBody($participant_email_body);
-				
-				$success = $email->send();
-				$this->llog("success: " . print_r($success, true));
-				if ($success) {
-					$result_log_message .= "Record $rid: Sent interview invitation email\n";
-				} else {
-					$result_log_message .= "Record $rid: Failed to send email (" . $email->ErrorInfo . ")\n";
-				}
-			}
+			$this->sendScheduledSequenceEmails();
+			// $this->sendReminderEmails();
 		}
-		\REDCap::logEvent("CAT-MH External Module", $result_log_message, NULL, NULL, NULL, $this->getProjectId());
-		$_GET['pid'] = $originalPid;
-	}
-	
-	public function cronEmail() {
-		$originalPid = $_GET['pid'];
-		foreach($this->framework->getProjectsWithModuleEnabled() as $localProjectId){
-			$_GET['pid'] = $localProjectId;
-			
-			$datetime = date('c', time());
-			$result_log_message = "Starting scheduled email invitations routine ($datetime)\n";
-			
-			// determine number of days that have elapsed
-			$daysElapsed = $this->getProjectSetting('days-elapsed');
-			if (empty($daysElapsed)) {
-				$daysElapsed = 0;
-				$this->setProjectSetting('days-elapsed', 0);
-			}
-			$daysElapsed = intval($daysElapsed);
-
-			// determine which sequences to send emails for
-			$urls = [];
-			$settings = $this->getProjectSettings();
-			foreach ($settings['sequence']['value'] as $i => $sequence) {
-				$period_every = $settings['periodicity-every']['value'][$i];
-				$period_end = $settings['periodicity-end']['value'][$i];
-				$period_every = intval($period_every);
-				$period_end = intval($period_end);
-				if (!empty($period_end) && !empty($period_every) && $period_every != 0) {
-					if (($daysElapsed % $period_every) == 0 and $daysElapsed <= $period_end and $daysElapsed != 0) {
-						$urls[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=$sequence";
-						$result_log_message .= "Added sequence '$sequence' to invitations.\n";
-					}
-				}
-			}
-			
-			// increment daysElapsed
-			$this->setProjectSetting('days-elapsed', $daysElapsed + 1);
-			
-			$emailSender = $settings['email-sender']['value'];
-			$emailSubject = $settings['email-subject']['value'];
-			$emailBody = $settings['email-body']['value'];
-			
-			if (!isset($emailSender) or !isset($emailSubject) or !isset($emailBody)) {
-				$result_log_message .= "Cancelling automatic interview invitations via email because one of the following project-level module settings is empty: email-sender, email-subject, email-body.";
-				\REDCap::logEvent("CAT-MH External Module", $result_log_message, NULL, NULL, NULL, $this->getProjectId());
-				return;
-			}
-			if (strpos($emailBody, "[interview-urls]") == false and strpos($emailBody, "[interview-links]") == false) {
-				$result_log_message .= "Cancelling automatic interview invitations via email since module setting [emailBody] does not contain '[interview-links]' or '[interview-urls]'.";
-				\REDCap::logEvent("CAT-MH External Module", $result_log_message, NULL, NULL, NULL, $this->getProjectId());
-				return;
-			}
-			if (empty($urls)) {
-				$result_log_message .= "Cancelling automatic interview invitations via email. (No sequences scheduled to send)";
-				\REDCap::logEvent("CAT-MH External Module", $result_log_message, NULL, NULL, NULL, $this->getProjectId());
-				return;
-			}
-
-			// we have links to send so for each participant with a listed email, invite to take interview(s)
-			$params = [
-				"project_id" => $this->getProjectId(),
-				"return_format" => "array",
-				"fields" => ["participant_email", "cat_mh_data", "record_id", "subjectid"],
-				"filterLogic" => "[participant_email] <> ''",
-			];
-			$data = \REDCap::getData($this->getProjectId(), 'array');
-			foreach($data as $rid => $record) {
-				$eid = array_keys($record)[0];
-				$addressTo = $record[$eid]['participant_email'];
-				
-				// generate subject ID and interviews for [cat_mh_data] if missing
-				if (empty($record[$eid]['subjectid'])) {
-					$subjectID = $this->generateSubjectID();
-					$cat_mh_data = json_encode(["interviews" => []]);
-					$record[$eid]["subjectid"] = $subjectID;
-					$record[$eid]["cat_mh_data"] = $cat_mh_data;
-					$save_results = \REDCap::saveData($this->getProjectId(), 'array', [$record]);
-				}
-				
-				if (empty($subjectID))
-					$subjectID = $record[$eid]["subjectid"];
-				
-				// invite participant to complete CAT-MH interview sequences
-				if (empty($addressTo)) {
-					$result_log_message .= "Skipping record $rid (empty [participant_email] field)\n";
-				} elseif (empty($subjectID)) {
-					$result_log_message .= "Skipping record $rid (empty [subjectid] field)\n";
-				} else {
-					// append participant specific subjectID to each url
-					$participant_urls = [];
-					foreach($urls as $i => $url) {
-						$participant_urls[$i] = $url . "&sid=$subjectID";
-					}
-					
-					// prepare email body by replacing [interview-links] and [interview-urls]
-					$participant_email_text = $emailBody;
-					$participant_email_text = str_replace("[interview-urls]", implode($participant_urls, "<br>"), $participant_email_text);
-					
-					// convert urls in $participant_urls to links
-					foreach($participant_urls as $i => $url) {
-						$participant_urls[$i] = "<a href=\"$url\">CAT-MH Interview Link ($i)</a>";
-					}
-					
-					$participant_email_text = str_replace("[interview-links]", implode($participant_urls, "<br>"), $participant_email_text);
-					
-					$success = \REDCap::email($addressTo, $emailSender, $emailSubject, $participant_email_text);
-					if ($success) {
-						$result_log_message .= "Successfully sent email for record $rid (email address: $addressTo)\n";
-					} else {
-						$result_log_message .= "Failed to send email for record $rid (email address: $addressTo)\n";
-					}
-				}
-			}
-		}
-		\REDCap::logEvent("CAT-MH External Module", $result_log_message, NULL, NULL, NULL, $this->getProjectId());
 		$_GET['pid'] = $originalPid;
 	}
 	
@@ -526,6 +296,124 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		return $sequences;
 	}
 	
+	function sendScheduledSequenceEmails() {
+		// determine which sequences need to be sent this minute
+		$ymd_hi = date("Y-m-d H:i");
+		// // // // // // method testing override
+		$ymd_hi = "2020-09-15 00:00";
+		$seq_logs = $this->queryLogs("SELECT message, name, scheduled_datetime, log_id WHERE message='scheduleSequence' and scheduled_datetime='$ymd_hi' ORDER BY timestamp desc");
+		
+		
+		$sequences = [];
+		$sequenceURLs = [];
+		
+		while ($row = db_fetch_assoc($seq_logs)) {
+			// make double sure
+			$this->llog("seq log row: " . print_r($row, true));
+			if ($row['message'] == 'scheduleSequence' and $row['scheduled_datetime'] == $ymd_hi) {
+				$sequences[] = $row['name'];
+				$sequenceURLs[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=" . $row['name'] . "&log_id=" . $row['log_id'];
+			}
+		}
+		
+		$this->llog("\$sequences: " . print_r($sequences, true));
+		
+		// return early if there are no sequences to send invitations for
+		if (empty($sequences))
+			return;
+		
+		// prepare email invitation using project settings
+		$email = new \Message();
+		$email->setFrom("redcap.services@vumc.org");
+		
+		$email_subject = "CAT-MH Interview Invitation";
+		if (!empty($this->getProjectSetting('email-subject')))
+			$email_subject = $this->getProjectSetting('email-subject');
+		$email->setSubject($email_subject);
+		
+		$email_body = $this->getProjectSetting('email-body');
+		
+		// prepare redcap log message
+		$result_log_message = "Sending scheduled sequence invitations ($ymd_hi)\n";
+		$result_log_message .= "Sequences: " . implode(" ", $sequences) . "\n";
+		$result_log_message .= "Email Subject: " . $email_subject . "\n";
+		
+		// if there's no [interview-urls/links] then remember not to replace, but to append links/urls
+		$append_links = false;
+		if (strpos($email_body, "[interview-links]") === false)
+			$append_links = true;
+		$append_urls = false;
+		if (strpos($email_body, "[interview-urls]") === false)
+			$append_urls = true;
+		
+		// iterate through participants
+		$params = [
+			"project_id" => $this->getProjectId(),
+			"return_format" => "array",
+			"fields" => ["catmh_email", "cat_mh_data", "record_id", "subjectid"]
+		];
+		$data = \REDCap::getData($this->getProjectId(), 'array');
+		foreach($data as $rid => $record) {
+			// ensure we have an email value to use
+			$eid = array_keys($record)[0];
+			$email_address_field = 'catmh_email';
+			$addressTo = $record[$eid][$email_address_field];
+			if (empty($addressTo)) {
+				$result_log_message .= "Record $rid: Skipping participant (empty [$email_address_field] field)\n";
+				continue;
+			}
+			$email->setTo($addressTo);
+			
+			// generate subject ID and interviews for [cat_mh_data] if missing
+			if (empty($record[$eid]['subjectid'])) {
+				$subjectID = $this->generateSubjectID();
+				$cat_mh_data = json_encode(["interviews" => []]);
+				$record[$eid]["subjectid"] = $subjectID;
+				$record[$eid]["cat_mh_data"] = $cat_mh_data;
+				$save_results = \REDCap::saveData($this->getProjectId(), 'array', [$record]);
+			}
+			if (empty($subjectID))
+				$subjectID = $record[$eid]["subjectid"];
+			// ensure we have a subjectID by this point
+			if (empty($subjectID)) {
+				$result_log_message .= "Record $rid: Skipping participant (failed to generate required subjectID)\n";
+				continue;
+			}
+			
+			// prepare participant-specific interview URLs and links
+			$participantURLs = [];
+			$participantLinks = [];
+			foreach($sequenceURLs as $i => $url) {
+				$url_with_sid = $url . "&sid=$subjectID";
+				$participantURLs[$i] = $url_with_sid;
+				$participantLinks[$i] = "<a href=\"$url_with_sid\">CAT-MH Interview ($i)</a>";
+			}
+			
+			// prepare email body by replacing [interview-links] and [interview-urls] (or appending)
+			$participant_email_body = $email_body;
+			if ($append_links) {
+				$participant_email_body .= "<br>" . implode($participantLinks, "<br>");
+			} else {
+				$participant_email_body = str_replace("[interview-links]", implode($participantLinks, "<br>"), $participant_email_body);
+			}
+			if ($append_urls) {
+				$participant_email_body .= "<br>" . implode($participantURLs, "<br>");
+			} else {
+				$participant_email_body = str_replace("[interview-urls]", implode($participantURLs, "<br>"), $participant_email_body);
+			}
+			$email->setBody($participant_email_body);
+			
+			$success = $email->send();
+			$this->llog("success: " . print_r($success, true));
+			if ($success) {
+				$result_log_message .= "Record $rid: Sent interview invitation email\n";
+			} else {
+				$result_log_message .= "Record $rid: Failed to send email (" . $email->ErrorInfo . ")\n";
+			}
+		}
+		\REDCap::logEvent("CAT-MH External Module", $result_log_message, NULL, NULL, NULL, $this->getProjectId());
+	}
+	
 	function setReminderSettings($settings) {
 		$this->removeLogs("message='reminderSettings'");
 		return $this->log("reminderSettings", (array) $settings);
@@ -533,6 +421,167 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	
 	function getReminderSettings() {
 		return db_fetch_assoc($this->queryLogs("SELECT message, enabled, frequency, duration, delay WHERE message='reminderSettings'"));
+	}
+	
+	function clearQueuedReminderEmails() {
+		return $this->removeLogs("message='scheduleReminder'");
+	}
+	
+	function queueAllReminderEmails() {
+		// use reminder email settings to queue
+		$rem_settings = $this->getReminderSettings();
+		$this->llog("reminder settings:" . print_r($rem_settings, true));
+		
+		// check if reminder emails disabled
+		if (empty($rem_settings['enabled']) or empty($rem_settings['duration']) or empty($rem_settings['frequency']))
+			return;
+		
+		$sequences = $this->getScheduledSequences();
+		$this->llog("sequences:" . print_r($sequences, true));
+		
+		foreach ($sequences as $seq_i => $seq_arr) {
+			$seq_datetime = $seq_arr[1];
+			$seq_name = $seq_arr[2];
+			
+			$this->llog("setting reminder emails for seq/datetime: $seq_name / $seq_datetime");
+			
+			if (!empty($rem_settings['delay'])) {
+				$seq_datetime = date("Y-m-d H:i", strtotime($seq_datetime . " +" . $rem_settings['delay'] . " days"));
+			}
+			
+			for ($day_offset = 0; $day_offset < $rem_settings['duration']; $day_offset += $rem_settings['frequency']) {
+				$next_datetime = date("Y-m-d H:i", strtotime($seq_datetime . " +" . $day_offset . " days"));
+				$this->llog("\$next_datetime: $next_datetime");
+				
+				$log_id = $this->log("scheduleReminder", [
+					"name" => $seq_name,
+					"datetime" => $next_datetime
+				]);
+				if (!$log_id) {
+					$this->llog("error scheduling reminder");
+				}
+			}
+		}
+	}
+	
+	function sendReminderEmails() {
+		// determine which sequences need to be sent this minute
+		$ymd_hi = date("Y-m-d H:i");
+		// // // // // // method testing override
+		$ymd_hi = "2020-09-19 00:00";
+		$reminders = $this->queryLogs("SELECT message, name, datetime WHERE message='scheduleReminder' and datetime='$ymd_hi' ORDER BY timestamp desc");
+		
+		$sequences = [];
+		$sequenceURLs = [];
+		
+		while ($row = db_fetch_assoc($reminders)) {
+			// make double sure
+			if ($row['message'] == 'scheduleReminder' and $row['datetime'] == $ymd_hi) {
+				$sequences[] = $row['name'];
+				$sequenceURLs[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=" . $row['name'];
+			}
+		}
+		
+		$this->llog("\$sequences: " . print_r($sequences, true));
+		
+		// return early if there are no sequences to send invitations for
+		if (empty($sequences))
+			return;
+		
+		// prepare email invitation using project settings
+		$email = new \Message();
+		$email->setFrom("redcap.services@vumc.org");
+		
+		$email_subject = "CAT-MH Interview Reminder";
+		if (!empty($this->getProjectSetting('reminder-email-subject')))
+			$email_subject = $this->getProjectSetting('reminder-email-subject');
+		$email->setSubject($email_subject);
+		
+		$email_body = $this->getProjectSetting('reminder-email-body');
+		
+		// prepare redcap log message
+		$result_log_message = "Sending reminder emails ($ymd_hi)\n";
+		$result_log_message .= "Sequences: " . implode(" ", $sequences) . "\n";
+		$result_log_message .= "Email Subject: " . $email_subject . "\n";
+		
+		// if there's no [interview-urls/links] then remember not to replace, but to append links/urls
+		$append_links = false;
+		if (strpos($email_body, "[interview-links]") === false)
+			$append_links = true;
+		$append_urls = false;
+		if (strpos($email_body, "[interview-urls]") === false)
+			$append_urls = true;
+		
+		// iterate through participants
+		$params = [
+			"project_id" => $this->getProjectId(),
+			"return_format" => "array",
+			"fields" => ["catmh_email", "cat_mh_data", "record_id", "subjectid"]
+		];
+		$data = \REDCap::getData($this->getProjectId(), 'array');
+		foreach($data as $rid => $record) {
+			// ensure we have an email value to use
+			$eid = array_keys($record)[0];
+			$email_address_field = 'catmh_email';
+			$addressTo = $record[$eid][$email_address_field];
+			if (empty($addressTo)) {
+				$result_log_message .= "Record $rid: Skipping participant (empty [$email_address_field] field)\n";
+				continue;
+			}
+			$email->setTo($addressTo);
+			
+			// generate subject ID and interviews for [cat_mh_data] if missing
+			if (empty($record[$eid]['subjectid'])) {
+				$subjectID = $this->generateSubjectID();
+				$cat_mh_data = json_encode(["interviews" => []]);
+				$record[$eid]["subjectid"] = $subjectID;
+				$record[$eid]["cat_mh_data"] = $cat_mh_data;
+				$save_results = \REDCap::saveData($this->getProjectId(), 'array', [$record]);
+			}
+			if (empty($subjectID))
+				$subjectID = $record[$eid]["subjectid"];
+			// ensure we have a subjectID by this point
+			if (empty($subjectID)) {
+				$result_log_message .= "Record $rid: Skipping participant (failed to generate required subjectID)\n";
+				continue;
+			}
+			
+			// prepare participant-specific interview URLs and links
+			$participantURLs = [];
+			$participantLinks = [];
+			foreach($sequenceURLs as $i => $url) {
+				$url_with_sid = $url . "&sid=$subjectID";
+				$participantURLs[$i] = $url_with_sid;
+				$participantLinks[$i] = "<a href=\"$url_with_sid\">CAT-MH Interview ($i)</a>";
+			}
+			
+			// prepare email body by replacing [interview-links] and [interview-urls] (or appending)
+			$participant_email_body = $email_body;
+			if ($append_links) {
+				$participant_email_body .= "<br>" . implode($participantLinks, "<br>");
+			} else {
+				$participant_email_body = str_replace("[interview-links]", implode($participantLinks, "<br>"), $participant_email_body);
+			}
+			if ($append_urls) {
+				$participant_email_body .= "<br>" . implode($participantURLs, "<br>");
+			} else {
+				$participant_email_body = str_replace("[interview-urls]", implode($participantURLs, "<br>"), $participant_email_body);
+			}
+			$email->setBody($participant_email_body);
+			
+			$success = $email->send();
+			$this->llog("success: " . print_r($success, true));
+			if ($success) {
+				$result_log_message .= "Record $rid: Sent interview invitation email\n";
+			} else {
+				$result_log_message .= "Record $rid: Failed to send email (" . $email->ErrorInfo . ")\n";
+			}
+		}
+		\REDCap::logEvent("CAT-MH External Module", $result_log_message, NULL, NULL, NULL, $this->getProjectId());
+	}
+	
+	function sequenceCompleted($record, $seq_name) {
+		return false;
 	}
 	
 	// CAT-MH API methods

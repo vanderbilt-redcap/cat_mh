@@ -61,6 +61,21 @@
 			"type": "rich-text"
 		},
 		{
+			"key": "reminder-email-subject",
+			"name": "Subject line for reminder emails",
+			"type": "text"
+		},
+		{
+			"key": "reminder-email-body",
+			"name": "Body text for reminder emails",
+			"type": "rich-text"
+		},
+		{
+			"key": "send-provider-emails",
+			"name": "Automatically send email to patient's provider upon interview completion",
+			"type": "checkbox"
+		},
+		{
          "key": "catmh_options",
          "name": "CAT-MH Interview Options",
          "required": false,
@@ -131,9 +146,9 @@
 
 	"crons": [
 		{
-			"cron_name": "CAT-MH Scheduled Sequence Invitation Emailer",
-			"cron_description": "Cron that runs every minute to send automatic interview invites",
-			"method": "cron_send_emails",
+			"cron_name": "CAT-MH Scheduled Sequence Invitation and Reminder Emailer",
+			"cron_description": "Cron that runs every minute to send automatic interview invites and reminder emails",
+			"method": "cron",
 			"cron_frequency": "60",
 			"cron_max_run_time": "3540"
 		}
