@@ -49,10 +49,9 @@
 		</div>
 		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 		<?php
-			// pull all interview info from logs
-			$subjectID = $_GET['sid'];
-			$interview = $module->newInterview($subjectID);
-			$interview['subjectID'] = $subjectID;
+			// fetch interview information
+			$interview = $module->newInterview();
+			
 			// give js this info
 			echo "
 <script type='text/javascript'>

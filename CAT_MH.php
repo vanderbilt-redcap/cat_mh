@@ -181,16 +181,22 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		return $data;
 	}
 	
-	public function newInterview($sid, $sequence = "") {
-		// If no sequence given in url parameters, default to first sequence configured
+	public function getInterview() {
+		$subjectID = $_GET['sid'];
+		$sequence = $_GET['sequence'];
+		$scheduled_datetime = $_GET['sched_dt'];
+		
+		// see if interview is already created
+		$data = $this->getRecordBySID($subjectID);
+		$rid = array_keys($data)[0];
+		$eid = array_keys($data[$rid])[0];
+		$catmh_data = json_decode($data[$rid][$eid]['cat_mh_data'], true);
+		foreach ($catmh_data['interviews'] as $i => $interview) {
+			if ($interview['sequence'] == $sequence and $interview['scheduled_datetime'] == $scheduled_datetime)
+				return $interview;
+		}
+		
 		$projectSettings = $this->getProjectSettings();
-		if ($sequence == "") {
-			$sequence = $projectSettings['sequence']['value'][0];
-		}
-		if ($sequence == NULL) {
-			echo("There are no CAT-MH tests configured. Please contact your administrator and have them configure the CAT-MH module in REDCap.");
-			return;
-		}
 		
 		// get system configuration details
 		$args = [];
@@ -221,12 +227,11 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		
 		if (!isset($interview['moduleError'])) {
 			// save newly created interview info in redcap
-			$data = $this->getRecordBySID($sid);
-			$rid = array_keys($data)[0];
-			$eid = array_keys($data[$rid])[0];
-			$catmh_data = json_decode($data[$rid][$eid]['cat_mh_data'], true);
+			
 			$catmh_data['interviews'][] = [
 				"sequence" => $sequence,
+				"subjectID" => $subjectID,
+				"scheduled_datetime" => $scheduled_datetime,
 				"interviewID" => $interview['interviewID'],
 				"identifier" => $interview['identifier'],
 				"signature" => $interview['signature'],
