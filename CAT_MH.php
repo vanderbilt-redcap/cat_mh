@@ -188,6 +188,8 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		$sid = $_GET['sid'];
 		$sched_dt = $_GET['sched_dt'];
 		
+		$projectSettings = $this->getProjectSettings();
+		
 		// get system configuration details
 		$args = [];
 		$args['organizationid'] = $this->getSystemSetting('organizationid');
@@ -218,10 +220,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		
 		if (!isset($interview['moduleError'])) {
 			// save newly created interview info in redcap
-			$data = $this->getRecordBySID($sid);
-			$rid = array_keys($data)[0];
-			$eid = array_keys($data[$rid])[0];
-			$catmh_data = json_decode($data[$rid][$eid]['cat_mh_data'], true);
+			
 			$catmh_data['interviews'][] = [
 				"sequence" => $sequence,
 				"scheduled_datetime" => $sched_dt,

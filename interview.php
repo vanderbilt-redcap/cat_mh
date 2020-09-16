@@ -54,7 +54,6 @@
 			// $interview = $module->newInterview($subjectID);
 			// $interview['subjectID'] = $subjectID;
 			
-			// new call
 			$interview = $module->getInterview();
 			
 			// give js this info
