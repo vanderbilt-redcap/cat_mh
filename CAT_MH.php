@@ -557,6 +557,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			$email->setTo($addressTo);
 			
 			// generate subject ID and interviews for [cat_mh_data] if missing
+			$subjectID = null;
 			if (empty($record[$eid]['subjectid'])) {
 				$subjectID = $this->generateSubjectID();
 				$cat_mh_data = json_encode(["interviews" => []]);
