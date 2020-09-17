@@ -32,6 +32,8 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	];
 	
 	public $debug = true;
+	// public $api_host_name = "www.cat-mh.com";
+	public $api_host_name = "test.cat-mh.com";
 	
 	// hooks
 	public function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
@@ -233,6 +235,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 				"status" => 1,
 				"timestamp" => time()
 			];
+			
 			$data[$rid][$eid]['cat_mh_data'] = json_encode($catmh_data);
 			$result = \REDCap::saveData($this->getProjectId(), 'array', $data);
 			if (!empty($result['errors'])) {
@@ -307,14 +310,14 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		
 		while ($row = db_fetch_assoc($seq_logs)) {
 			// make double sure
-			$this->llog("seq log row: " . print_r($row, true));
+			// $this->llog("seq log row: " . print_r($row, true));
 			if ($row['message'] == 'scheduleSequence' and $row['scheduled_datetime'] == $ymd_hi) {
 				$sequences[] = $row['name'];
 				$sequenceURLs[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=" . $row['name'] . "&log_id=" . $row['log_id'];
 			}
 		}
 		
-		$this->llog("\$sequences: " . print_r($sequences, true));
+		// $this->llog("\$sequences: " . print_r($sequences, true));
 		
 		// return early if there are no sequences to send invitations for
 		if (empty($sequences))
@@ -402,7 +405,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			$email->setBody($participant_email_body);
 			
 			$success = $email->send();
-			$this->llog("success: " . print_r($success, true));
+			// $this->llog("success: " . print_r($success, true));
 			if ($success) {
 				$result_log_message .= "Record $rid: Sent interview invitation email\n";
 			} else {
@@ -623,7 +626,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		]);
 		$curlArgs['post'] = true;
 		$testAddress = "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=" . $this->getProjectId() . "&action=" . __FUNCTION__;
-		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://www.cat-mh.com/portal/secure/interview/createInterview";
+		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://" . $this->api_host_name . "/portal/secure/interview/createInterview";
 		
 		if ($this->debug) $out['curlArgs'] = $curlArgs;
 		
@@ -672,7 +675,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			"interviewID=" . $args['interviewID'];
 		$curlArgs['post'] = true;
 		$testAddress = "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=" . $this->getProjectId() . "&action=" . __FUNCTION__;
-		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://www.cat-mh.com/interview/signin";
+		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://" . $this->api_host_name . "/interview/signin";
 		if ($this->debug) $out['curlArgs'] = $curlArgs;
 		
 		// send request via curl
@@ -737,7 +740,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			"Cookie: JSESSIONID=" . $authValues['jsessionid'] . "; AWSELB=" . $authValues['awselb']
 		];
 		$testAddress = "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=" . $this->getProjectId() . "&action=" . __FUNCTION__;
-		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://www.cat-mh.com/interview/rest/interview";
+		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://" . $this->api_host_name . "/interview/rest/interview";
 		if ($this->debug) $out['curlArgs'] = $curlArgs;
 		
 		// send request via curl
@@ -804,7 +807,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			"Cookie: JSESSIONID=" . $authValues['jsessionid'] . "; AWSELB=" . $authValues['awselb']
 		];
 		$testAddress = "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=" . $this->getProjectId() . "&action=" . __FUNCTION__;
-		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://www.cat-mh.com/interview/rest/interview/test/question";
+		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://" . $this->api_host_name . "/interview/rest/interview/test/question";
 		if ($this->debug) $out['curlArgs'] = $curlArgs;
 		
 		// send request via curl
@@ -865,7 +868,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		
 		$curlArgs['post'] = true;
 		$testAddress = "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=" . $this->getProjectId() . "&action=" . __FUNCTION__;
-		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://www.cat-mh.com/interview/rest/interview/test/question";
+		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://" . $this->api_host_name . "/interview/rest/interview/test/question";
 		if ($this->debug) $out['curlArgs'] = $curlArgs;
 		
 		// send request via curl
@@ -876,7 +879,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			$out['success'] = true;
 		} else {
 			$out['moduleError'] = true;
-			$out['moduleMessage'] = "REDCap submitted answer but got back a non-OK response from the CAT-MH API server.";
+			$out['moduleMessage'] = "REDCap submitted answer but got back a non-OK response from the CAT-MH API server. Try refreshing the page to continue your interview.";
 		}
 		return $out;
 	}
@@ -902,7 +905,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			"Cookie: JSESSIONID=" . $authValues['jsessionid'] . "; AWSELB=" . $authValues['awselb']
 		];
 		$testAddress = "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=" . $this->getProjectId() . "&action=" . __FUNCTION__;
-		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://www.cat-mh.com/interview/signout";
+		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://" . $this->api_host_name . "/interview/signout";
 		if ($this->debug) $out['curlArgs'] = $curlArgs;
 		
 		// send request via curl
@@ -963,7 +966,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			"Cookie: JSESSIONID=" . $authValues['jsessionid'] . "; AWSELB=" . $authValues['awselb']
 		];
 		$testAddress = "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=" . $this->getProjectId() . "&action=" . __FUNCTION__;
-		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://www.cat-mh.com/interview/rest/interview/results?itemLevel=1";
+		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://" . $this->api_host_name . "/interview/rest/interview/results?itemLevel=1";
 		if ($this->debug) $out['curlArgs'] = $curlArgs;
 		
 		// send request via curl
@@ -1077,7 +1080,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		];
 		$curlArgs['post'] = true;
 		$testAddress = "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=" . $this->getProjectId() . "&action=" . __FUNCTION__;
-		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://www.cat-mh.com/portal/secure/interview/status";
+		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://" . $this->api_host_name . "/portal/secure/interview/status";
 		
 		if ($this->debug) $out['curlArgs'] = $curlArgs;
 		
@@ -1123,7 +1126,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		$curlArgs['body'] = [];
 		$curlArgs['post'] = true;
 		$testAddress = "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=" . $this->getProjectId() . "&action=" . __FUNCTION__;
-		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://www.cat-mh.com/interview/secure/breakLock";
+		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://" . $this->api_host_name . "/interview/secure/breakLock";
 		if ($this->debug) $out['curlArgs'] = $curlArgs;
 		
 		// send request via curl
@@ -1135,7 +1138,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		$location = trim($matches[1][0]);
 		if ($this->debug) $out['location'] = trim($matches[1][0]);
 		
-		if ($curl['info']['http_code'] == 302 and $location == "https://www.cat-mh.com/interview/secure/index.html") {
+		if ($curl['info']['http_code'] == 302 and $location == "https://" . $this->api_host_name . "/interview/secure/index.html") {
 			$out['success'] = true;
 		} else {
 			$out['moduleError'] = true;
@@ -1180,6 +1183,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 		}
 	}
 	$action = db_escape($json['action']);
+	
+	// $catmh->llog("json: " . print_r($json, true));
+	
 	switch ($action) {
 		// case 'createInterview':
 			// $out['receivedJson'] = json_encode($json);
