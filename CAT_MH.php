@@ -578,7 +578,24 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		\REDCap::logEvent("CAT-MH External Module", $result_log_message, NULL, NULL, NULL, $this->getProjectId());
 	}
 	
-	function sequenceCompleted($record, $seq_name) {
+	function sequenceCompleted($record, $seq_name, $datetime) {
+		$params = [
+			"project_id" => $this->getProjectId(),
+			"return_format" => "json",
+			"records" => $record,
+			"fields" => ["cat_mh_data", "record_id"]
+		];
+		$data = json_decode(\REDCap::getData($params));
+		$catmh = json_decode($data[0]->cat_mh_data);
+		$interviews = $catmh->interviews;
+		
+		// $this->llog("interviews: " . print_r($interviews, true));
+		foreach ($interviews as $i => $interview) {
+			if ($interview->sequence == $seq_name and $interview->scheduled_datetime == $datetime) {
+				if ($interview->status == 4)
+					return true;
+			}
+		}
 		return false;
 	}
 	
