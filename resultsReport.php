@@ -18,7 +18,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 			<thead>
 				<tr>
 					<th>Record ID</th>
-					<th>Date</th>
+					<th>Date/Time</th>
 					<th>Sequence</th>
 					<th>Test Type</th>
 					<th>Diagnosis</th>
@@ -28,7 +28,6 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 					<th>Precision</th>
 					<th>Probability</th>
 					<th>Percentile</th>
-					<th>Interview Link</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -44,7 +43,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 					echo("
 					<tr>
 						<td>{$rid}</td>
-						<td>" . date("m-d-Y", $interview['timestamp']) . "</td>
+						<td>" . date("Y-m-d H:i", $interview['timestamp']) . "</td>
 						<td>{$interview['sequence']}</td>
 						<td>{$test['label']}</td>
 						<td>{$test['diagnosis']}</td>
@@ -54,7 +53,6 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 						<td>{$test['precision']}</td>
 						<td>{$test['prob']}</td>
 						<td>{$test['percentile']}</td>
-						<td>{$url}</td>
 					</tr>");
 				}
 			}

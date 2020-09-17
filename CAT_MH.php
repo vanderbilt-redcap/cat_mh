@@ -321,7 +321,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			// $this->llog("seq log row: " . print_r($row, true));
 			if ($row['message'] == 'scheduleSequence' and $row['scheduled_datetime'] == $ymd_hi) {
 				$sequences[] = $row['name'];
-				$sequenceURLs[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=" . $row['name'] . "&log_id=" . $row['log_id'];
+				$sequenceURLs[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=" . $row['name'] . "&sched_dt=" . $ymd_hi;
 			}
 		}
 		
@@ -478,7 +478,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		$ymd_hi = date("Y-m-d H:i");
 		// // // // // // method testing override
 		$ymd_hi = "2020-09-19 00:00";
-		$reminders = $this->queryLogs("SELECT message, name, scheduled_datetime WHERE message='scheduleReminder' and scheduled_datetimef='$ymd_hi' ORDER BY timestamp desc");
+		$reminders = $this->queryLogs("SELECT message, name, scheduled_datetime WHERE message='scheduleReminder' and scheduled_datetime='$ymd_hi' ORDER BY timestamp desc");
 		
 		$sequences = [];
 		$sequenceURLs = [];
@@ -487,15 +487,16 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			// make double sure
 			if ($row['message'] == 'scheduleReminder' and $row['scheduled_datetime'] == $ymd_hi) {
 				$sequences[] = $row['name'];
-				$sequenceURLs[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=" . $row['name'];
+				$sequenceURLs[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=" . $row['name'] . "&sched_dt=" . $ymd_hi;
 			}
 		}
 		
-		$this->llog("\$sequences: " . print_r($sequences, true));
+		// $this->llog("\$sequences: " . print_r($sequences, true));
 		
 		// return early if there are no sequences to send invitations for
-		if (empty($sequences))
+		if (empty($sequences)) {
 			return;
+		}
 		
 		// prepare email invitation using project settings
 		$email = new \Message();
@@ -611,10 +612,13 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		// $this->llog("interviews: " . print_r($interviews, true));
 		foreach ($interviews as $i => $interview) {
 			if ($interview->sequence == $seq_name and $interview->scheduled_datetime == $datetime) {
-				if ($interview->status == 4)
+				if ($interview->status == 4) {
+					$this->llog("seeing if sequence complete: $record, $seq_name, $datetime - TRUE");
 					return true;
+				}
 			}
 		}
+		$this->llog("seeing if sequence complete: $record, $seq_name, $datetime - FALSE");
 		return false;
 	}
 	
