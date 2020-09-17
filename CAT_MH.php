@@ -224,6 +224,14 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			$rid = array_keys($data)[0];
 			$eid = array_keys($data[$rid])[0];
 			$catmh_data = json_decode($data[$rid][$eid]['cat_mh_data'], true);
+			
+			// remove previous unfinished interviews with same seq/datetime
+			$max_i = count($catmh_date['interviews']) - 1;
+			for ($i = $max_i; $i > 0; $i--) {
+				if ($interview['sequence'] == $sequence and $interview['scheduled_datetime'] == $sched_dt and $interview['status'] != 4)
+					array_splice($catmh_date['interviews'], $i, 1);
+			}
+			
 			$catmh_data['interviews'][] = [
 				"sequence" => $sequence,
 				"scheduled_datetime" => $sched_dt,
