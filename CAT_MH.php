@@ -464,7 +464,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 				
 				$log_id = $this->log("scheduleReminder", [
 					"name" => $seq_name,
-					"datetime" => $next_datetime
+					"scheduled_datetime" => $next_datetime
 				]);
 				if (!$log_id) {
 					$this->llog("error scheduling reminder");
@@ -478,14 +478,14 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		$ymd_hi = date("Y-m-d H:i");
 		// // // // // // method testing override
 		$ymd_hi = "2020-09-19 00:00";
-		$reminders = $this->queryLogs("SELECT message, name, datetime WHERE message='scheduleReminder' and datetime='$ymd_hi' ORDER BY timestamp desc");
+		$reminders = $this->queryLogs("SELECT message, name, scheduled_datetime WHERE message='scheduleReminder' and scheduled_datetimef='$ymd_hi' ORDER BY timestamp desc");
 		
 		$sequences = [];
 		$sequenceURLs = [];
 		
 		while ($row = db_fetch_assoc($reminders)) {
 			// make double sure
-			if ($row['message'] == 'scheduleReminder' and $row['datetime'] == $ymd_hi) {
+			if ($row['message'] == 'scheduleReminder' and $row['scheduled_datetime'] == $ymd_hi) {
 				$sequences[] = $row['name'];
 				$sequenceURLs[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=" . $row['name'];
 			}
@@ -559,9 +559,17 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			$participantURLs = [];
 			$participantLinks = [];
 			foreach($sequenceURLs as $i => $url) {
-				$url_with_sid = $url . "&sid=$subjectID";
-				$participantURLs[$i] = $url_with_sid;
-				$participantLinks[$i] = "<a href=\"$url_with_sid\">CAT-MH Interview ($i)</a>";
+				// skip this participant if they've already completed this interview sequence
+				if ($this->sequenceCompleted($rid, $sequences[$i], $ymd_hi) == false) {
+					$url_with_sid = $url . "&sid=$subjectID";
+					$participantURLs[$i] = $url_with_sid;
+					$participantLinks[$i] = "<a href=\"$url_with_sid\">CAT-MH Interview ($i)</a>";
+				}
+			}
+			
+			if (empty($participantURLs)) {
+				$result_log_message .= "Record $rid: Skipping participant (all sequences completed)\n";
+				continue;
 			}
 			
 			// prepare email body by replacing [interview-links] and [interview-urls] (or appending)
