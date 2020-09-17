@@ -1,0 +1,7 @@
+table#records {
+	max-width: 90%;
+}
+
+table#records a {
+	text-decoration: underline;
+}

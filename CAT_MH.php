@@ -269,8 +269,20 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		}
 	}
 	
-	// scheduling
+	// dashboard
+	function getDashboardColumns() {
+		$columns = ['Record ID'];
+		
+		// append a column name for each scheduled sequence
+		$seqs = $this->getScheduledSequences();
+		foreach ($seqs as $i => $seq) {
+			$columns[] = $seq[2] . "<br>" . $seq[1];
+		}
+		
+		return $columns;
+	}
 	
+	// scheduling
 	function scheduleSequence($seq_name, $datetime) {
 		// ensure not duplicate scheduled
 		$result = $this->queryLogs("SELECT message, name, scheduled_datetime WHERE message='scheduleSequence' AND name='$seq_name' AND scheduled_datetime='$datetime'");
@@ -446,7 +458,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			return;
 		
 		$sequences = $this->getScheduledSequences();
-		$this->llog("sequences:" . print_r($sequences, true));
+		// $this->llog("sequences:" . print_r($sequences, true));
 		
 		foreach ($sequences as $seq_i => $seq_arr) {
 			$seq_datetime = $seq_arr[1];
@@ -454,17 +466,20 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			
 			$this->llog("setting reminder emails for seq/datetime: $seq_name / $seq_datetime");
 			
+			// delay at least 1 day
+			$delay = 1;
 			if (!empty($rem_settings['delay'])) {
-				$seq_datetime = date("Y-m-d H:i", strtotime($seq_datetime . " +" . $rem_settings['delay'] . " days"));
+				$delay = (int) $rem_settings['delay'];
 			}
 			
-			for ($day_offset = 0; $day_offset < $rem_settings['duration']; $day_offset += $rem_settings['frequency']) {
+			for ($day_offset = $delay; $day_offset < $rem_settings['duration'] + $delay; $day_offset += $rem_settings['frequency']) {
 				$next_datetime = date("Y-m-d H:i", strtotime($seq_datetime . " +" . $day_offset . " days"));
 				$this->llog("\$next_datetime: $next_datetime");
 				
 				$log_id = $this->log("scheduleReminder", [
 					"name" => $seq_name,
-					"scheduled_datetime" => $next_datetime
+					"scheduled_datetime" => $seq_datetime,
+					"reminder_datetime" => $next_datetime
 				]);
 				if (!$log_id) {
 					$this->llog("error scheduling reminder");
@@ -477,17 +492,18 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		// determine which sequences need to be sent this minute
 		$ymd_hi = date("Y-m-d H:i");
 		// // // // // // method testing override
-		$ymd_hi = "2020-09-19 00:00";
-		$reminders = $this->queryLogs("SELECT message, name, scheduled_datetime WHERE message='scheduleReminder' and scheduled_datetime='$ymd_hi' ORDER BY timestamp desc");
+		$ymd_hi = "2020-09-27 05:00";
+		$reminders = $this->queryLogs("SELECT message, name, scheduled_datetime, reminder_datetime WHERE message='scheduleReminder' and reminder_datetime='$ymd_hi' ORDER BY timestamp desc");
 		
 		$sequences = [];
 		$sequenceURLs = [];
-		
+		$sequenceScheduledDatetimes = [];
 		while ($row = db_fetch_assoc($reminders)) {
 			// make double sure
-			if ($row['message'] == 'scheduleReminder' and $row['scheduled_datetime'] == $ymd_hi) {
+			if ($row['message'] == 'scheduleReminder' and $row['reminder_datetime'] == $ymd_hi) {
 				$sequences[] = $row['name'];
-				$sequenceURLs[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=" . $row['name'] . "&sched_dt=" . $ymd_hi;
+				$sequenceScheduledDatetimes[] = $row['scheduled_datetime'];
+				$sequenceURLs[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=" . $row['name'] . "&sched_dt=" . $row['scheduled_datetime'];
 			}
 		}
 		
@@ -561,7 +577,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 			$participantLinks = [];
 			foreach($sequenceURLs as $i => $url) {
 				// skip this participant if they've already completed this interview sequence
-				if ($this->sequenceCompleted($rid, $sequences[$i], $ymd_hi) == false) {
+				if ($this->sequenceCompleted($rid, $sequences[$i], $sequenceScheduledDatetimes[$i]) == false) {
 					$url_with_sid = $url . "&sid=$subjectID";
 					$participantURLs[$i] = $url_with_sid;
 					$participantLinks[$i] = "<a href=\"$url_with_sid\">CAT-MH Interview ($i)</a>";
