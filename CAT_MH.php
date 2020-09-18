@@ -32,8 +32,8 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	];
 	
 	public $debug = true;
-	// public $api_host_name = "www.cat-mh.com";
-	public $api_host_name = "test.cat-mh.com";
+	// public $api_host_name = "www.cat-mh.com";	// non-test
+	public $api_host_name = "test.cat-mh.com";		// test
 	
 	// hooks
 	public function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
@@ -181,6 +181,21 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		$pid = $this->getProjectId();
 		$data = \REDCap::getData($pid, 'array', NULL, NULL, NULL, NULL, NULL, NULL, NULL, "[subjectid]=\"$sid\"");
 		return $data;
+	}
+	
+	public function getRecordIDBySID($sid) {
+		$ridfield = $this->framework->getRecordIDField();
+		$params = [
+			"project_id" => $this->getProjectId(),
+			"return_format" => 'json',
+			"fields" => ["subjectid", $ridfield],
+			"filterLogic" => "[subjectid]='$sid'"
+		];
+		$data = json_decode(\REDCap::getData($params));
+		if (isset($data[0]) and !empty($data[0]->$ridfield)) {
+			return $data[0]->$ridfield;
+		}
+		return false;
 	}
 	
 	public function getInterview() {
@@ -485,6 +500,50 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 					$this->llog("error scheduling reminder");
 				}
 			}
+		}
+	}
+	
+	function sendProviderEmail() {
+		// feature enabled?
+		if (empty($this->getProjectSetting('send-provider-emails')))
+			return false;
+		
+		$sid = $_GET['sid'];
+		$rid = $this->getRecordIDBySID($sid);
+		
+		// get provider email address
+		$params = [
+			"project_id" => $this->getProjectId(),
+			"return_format" => 'json',
+			"fields" => ["catmh_provider_email", "subjectid"],
+			"filterLogic" => "[subjectid]='$sid'"
+		];
+		$data = json_decode(\REDCap::getData($params));
+		if (isset($data[0]) and !empty($data[0]->catmh_provider_email)) {
+			$provider_address = $data[0]->catmh_provider_email;
+		} else {
+			return false;
+		}
+		
+		$message_body = "You're receiving this automated message because a patient has completed a CAT-MH interview sequence.<br>";
+		
+		$seq = urlencode($_GET['sequence']);
+		$sched_dt = urlencode($_GET['sched_dt']);
+		$email = new \Message();
+		$email->setFrom("redcap.services@vumc.org");
+		$email->setTo($provider_address);
+		$email->setSubject("CAT-MH Interview Completed by Patient");
+		
+		// append link to results
+		$link = "<a href='" . $this->getURL('resultsReport.php') . "&record=$rid&seq=$seq&sched_dt=$sched_dt'>View Patient Interview Results<a/>";
+		$message_body .= "<br>$link";
+		
+		$email->setBody($message_body);
+		$success = $email->send();
+		if ($success) {
+			\REDCap::logEvent("CAT-MH External Module", "Record $rid: Successfully sent provider email upon interview completion", NULL, NULL, NULL, $this->getProjectId());
+		} else {
+			\REDCap::logEvent("CAT-MH External Module", "Record $rid: Failed to send provider email upon interview completion (" . $email->ErrorInfo . ")", NULL, NULL, NULL, $this->getProjectId());
 		}
 	}
 	
@@ -1257,6 +1316,11 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 		case 'getResults':
 			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->getResults($json['args']);
+			
+			if ($out['success']) {
+				$catmh->sendProviderEmail();
+			}
+			
 			echo json_encode($out);
 			break;
 		case 'getInterviewStatus':

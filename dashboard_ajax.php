@@ -31,7 +31,7 @@ foreach ($sequences as $i => $seq) {
 	];
 }
 
-$module->llog("got sequences: " . print_r($sequences, true));
+// $module->llog("got sequences: " . print_r($sequences, true));
 
 $json = new \stdClass();
 $table_data = [];
