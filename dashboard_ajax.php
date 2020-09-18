@@ -1,4 +1,5 @@
 <?php
+
 $pid = $module->getProjectId();
 $project = new \Project($pid);
 $eid = $project->firstEventId;
@@ -29,7 +30,8 @@ foreach ($sequences as $i => $seq) {
 		"scheduled_datetime" => $seq[1]
 	];
 }
-// $module->llog("got sequences: " . print_r($sequences, true));
+
+$module->llog("got sequences: " . print_r($sequences, true));
 
 $json = new \stdClass();
 $table_data = [];
@@ -66,7 +68,9 @@ foreach($data as $rid => $record) {
 		} else {
 			// append green circle (which itself, is a link to filtered results report)
 			$interview = $interviews[$interview_index];
-			$row[] = "<img src='" . APP_PATH_IMAGES . "circle_green_tick.png' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";
+			$img = "<img src='" . APP_PATH_IMAGES . "circle_green_tick.png' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";
+			$link = $module->getUrl('resultsReport.php') . "&record=$rid&seq=" . urlencode($seq['name']) . "&sched_dt=" . urlencode($seq['scheduled_datetime']);
+			$row[] = "<a href='$link'>$img</a>";
 		}
 	}
 	

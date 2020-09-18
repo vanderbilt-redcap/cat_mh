@@ -307,7 +307,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function getScheduledSequences() {
-		$result = $this->queryLogs("SELECT message, name, scheduled_datetime WHERE message='scheduleSequence' ORDER BY timestamp desc");
+		$result = $this->queryLogs("SELECT message, name, scheduled_datetime WHERE message='scheduleSequence' ORDER BY scheduled_datetime asc");
 		
 		$sequences = [];
 		while ($row = db_fetch_array($result)) {
