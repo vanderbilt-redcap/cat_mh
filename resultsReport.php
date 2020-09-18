@@ -18,7 +18,8 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 			<thead>
 				<tr>
 					<th>Record ID</th>
-					<th>Date/Time</th>
+					<th>Date Scheduled</th>
+					<th>Date Taken</th>
 					<th>Sequence</th>
 					<th>Test Type</th>
 					<th>Diagnosis</th>
@@ -32,17 +33,37 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 			</thead>
 			<tbody>
 <?php
-	$data = \REDCap::getData($module->getProjectId(), 'array');
+	$params = [
+		"project_id" => $module->getProjectId(),
+		"return_format" => 'array',
+		"fields" => ['cat_mh_data']
+	];
+	
+	// filter by record, sequence, and datetime if applicable
+	$recordFilter = (int) $_GET['record'];
+	if (!empty($recordFilter))
+		$params['records'] = $recordFilter;
+	if (isset($_GET['seq']))
+		$seqFilter = $_GET['seq'];
+	if (isset($_GET['sched_dt']))
+		$schedFilter = $_GET['sched_dt'];
+	
+	// $data = \REDCap::getData($module->getProjectId(), 'array');
+	$data = \REDCap::getData($params);
 	foreach($data as $rid => $record) {
 		$eid = array_keys($record)[0];
 		$catmh = json_decode($data[$rid][$eid]['cat_mh_data'], true);
 		foreach($catmh['interviews'] as $i => $interview) {
-			if ($interview['status'] == "4" and $interview['results'] != NULL) {
+			$seq_ok = (empty($seqFilter) or $seqFilter == $interview['sequence']);
+			$sched_ok = (empty($schedFilter) or $schedFilter == $interview['scheduled_datetime']);
+			
+			if ($interview['status'] == "4" and $interview['results'] != NULL and $sched_ok and $seq_ok) {
 				foreach($interview['results']['tests'] as $j => $test) {
 					$url = $module->getUrl("interview.php") . "&NOAUTH&sid=" . $record[$eid]['subjectid'] . "&sequence=". $interview['sequence'];
 					echo("
 					<tr>
 						<td>{$rid}</td>
+						<td>" . $interview['scheduled_datetime'] . "</td>
 						<td>" . date("Y-m-d H:i", $interview['timestamp']) . "</td>
 						<td>{$interview['sequence']}</td>
 						<td>{$test['label']}</td>
