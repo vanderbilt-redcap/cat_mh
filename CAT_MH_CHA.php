@@ -81,6 +81,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	public function emailer_cron() {
 		$originalPid = $_GET['pid'];
 		foreach($this->framework->getProjectsWithModuleEnabled() as $localProjectId) {
+			$_GET['pid'] = $localProjectId;
 			$this->sendScheduledSequenceEmails();
 			$this->sendReminderEmails();
 		}
