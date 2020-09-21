@@ -346,7 +346,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			// $this->llog("seq log row: " . print_r($row, true));
 			if ($row['message'] == 'scheduleSequence' and $row['scheduled_datetime'] == $ymd_hi) {
 				$sequences[] = $row['name'];
-				$sequenceURLs[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=" . $row['name'] . "&sched_dt=" . $ymd_hi;
+				$sequenceURLs[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=" . urlencode($row['name']) . "&sched_dt=" . urlencode($ymd_hi);
 			}
 		}
 		
