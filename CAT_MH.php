@@ -1,7 +1,7 @@
 <?php
-namespace VICTR\REDCAP\CAT_MH;
+namespace VICTR\REDCAP\CAT_MH_CHA;
 
-class CAT_MH extends \ExternalModules\AbstractExternalModule {
+class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	// public $testAPI = true;
 	// public $debug = true;
 	public $convertTestAbbreviation = [
@@ -1254,7 +1254,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
-	$catmh = new CAT_MH();
+	$catmh = new CAT_MH_CHA();
 	$json = json_decode(file_get_contents("php://input"), true);
 	if (isset($json['args']['interviewID'])) $json['args']['interviewID'] = db_escape($json['args']['interviewID']);
 	if (isset($json['args']['subjectID'])) $json['args']['subjectID'] = db_escape($json['args']['subjectID']);

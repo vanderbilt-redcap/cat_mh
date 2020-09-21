@@ -1,7 +1,7 @@
 {
-	"name": "CAT_MH",
+	"name": "CAT_MH_CHA",
 
-	"namespace": "VICTR\\REDCAP\\CAT_MH",
+	"namespace": "VICTR\\REDCAP\\CAT_MH_CHA",
 
 	"description": "Add this module to a project and configure it to allow survey participants to take CAT-MH interviews and store their responses in REDCap.",
 
@@ -46,7 +46,7 @@
 
 	"no-auth-pages": [
 		"interview",
-		"CAT_MH"
+		"CAT_MH_CHA"
 	],
 
 	"project-settings": [

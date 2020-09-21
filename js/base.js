@@ -1,6 +1,6 @@
 var catmh = {};
 catmh.bridgeUrl = window.location.href;
-catmh.bridgeUrl = catmh.bridgeUrl.replace('interview', 'CAT_MH');
+catmh.bridgeUrl = catmh.bridgeUrl.replace('interview', 'CAT_MH_CHA');
 // catmh.bridgeUrl = catmh.bridgeUrl.replace('&NOAUTH', '');
 
 catmh.testTypes = {
