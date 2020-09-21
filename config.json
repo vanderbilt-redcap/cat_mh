@@ -146,9 +146,9 @@
 
 	"crons": [
 		{
-			"cron_name": "CAT-MH Scheduled Sequence Invitation and Reminder Emailer",
+			"cron_name": "emailer_cron",
 			"cron_description": "Cron that runs every minute to send automatic interview invites and reminder emails",
-			"method": "cron",
+			"method": "emailer_cron",
 			"cron_frequency": "60",
 			"cron_max_run_time": "3540"
 		}

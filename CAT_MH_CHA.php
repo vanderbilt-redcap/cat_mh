@@ -2,8 +2,6 @@
 namespace VICTR\REDCAP\CAT_MH_CHA;
 
 class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
-	// public $testAPI = true;
-	// public $debug = true;
 	public $convertTestAbbreviation = [
 		'mdd' => "mdd",
 		'dep' => "dep",
@@ -31,9 +29,9 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'ss' => "Suicide Scale"
 	];
 	
-	public $debug = true;
-	// public $api_host_name = "www.cat-mh.com";	// non-test
-	public $api_host_name = "test.cat-mh.com";		// test
+	public $debug = false;
+	public $api_host_name = "www.cat-mh.com";	// non-test
+	// public $api_host_name = "test.cat-mh.com";		// test
 	
 	// hooks
 	public function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
@@ -80,11 +78,11 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	// crons
-	public function cron() {
+	public function emailer_cron() {
 		$originalPid = $_GET['pid'];
 		foreach($this->framework->getProjectsWithModuleEnabled() as $localProjectId) {
 			$this->sendScheduledSequenceEmails();
-			// $this->sendReminderEmails();
+			$this->sendReminderEmails();
 		}
 		$_GET['pid'] = $originalPid;
 	}
@@ -337,7 +335,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// determine which sequences need to be sent this minute
 		$ymd_hi = date("Y-m-d H:i");
 		$seq_logs = $this->queryLogs("SELECT message, name, scheduled_datetime, sent, log_id WHERE message='scheduleSequence' and scheduled_datetime='$ymd_hi' ORDER BY timestamp desc");
-		
 		
 		$sequences = [];
 		$sequenceURLs = [];
