@@ -82,7 +82,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$originalPid = $_GET['pid'];
 		foreach($this->framework->getProjectsWithModuleEnabled() as $localProjectId) {
 			$_GET['pid'] = $localProjectId;
-			\REDCap::logEvent("CAT-MH External Module", "Called emailer_cron", NULL, NULL, NULL, $localProjectId);
 			$this->sendScheduledSequenceEmails();
 			$this->sendReminderEmails();
 		}
