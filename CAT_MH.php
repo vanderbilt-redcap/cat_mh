@@ -307,7 +307,8 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 		
 		$log_id = $this->log("scheduleSequence", [
 			"name" => $seq_name,
-			"scheduled_datetime" => $datetime
+			"scheduled_datetime" => $datetime,
+			"sent" => false
 		]);
 		
 		if (!empty($log_id)) {
@@ -322,11 +323,11 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function getScheduledSequences() {
-		$result = $this->queryLogs("SELECT message, name, scheduled_datetime WHERE message='scheduleSequence' ORDER BY scheduled_datetime asc");
+		$result = $this->queryLogs("SELECT message, name, scheduled_datetime, sent WHERE message='scheduleSequence' ORDER BY scheduled_datetime asc");
 		
 		$sequences = [];
 		while ($row = db_fetch_array($result)) {
-			$sequences[] = ['', $row['scheduled_datetime'], $row['name'], '0/0'];
+			$sequences[] = ['', $row['scheduled_datetime'], $row['name']];
 		}
 		
 		return $sequences;
@@ -335,9 +336,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	function sendScheduledSequenceEmails() {
 		// determine which sequences need to be sent this minute
 		$ymd_hi = date("Y-m-d H:i");
-		// // // // // // method testing override
-		$ymd_hi = "2020-09-15 00:00";
-		$seq_logs = $this->queryLogs("SELECT message, name, scheduled_datetime, log_id WHERE message='scheduleSequence' and scheduled_datetime='$ymd_hi' ORDER BY timestamp desc");
+		$seq_logs = $this->queryLogs("SELECT message, name, scheduled_datetime, sent, log_id WHERE message='scheduleSequence' and scheduled_datetime='$ymd_hi' ORDER BY timestamp desc");
 		
 		
 		$sequences = [];
@@ -550,8 +549,6 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	function sendReminderEmails() {
 		// determine which sequences need to be sent this minute
 		$ymd_hi = date("Y-m-d H:i");
-		// // // // // // method testing override
-		$ymd_hi = "2020-09-27 05:00";
 		$reminders = $this->queryLogs("SELECT message, name, scheduled_datetime, reminder_datetime WHERE message='scheduleReminder' and reminder_datetime='$ymd_hi' ORDER BY timestamp desc");
 		
 		$sequences = [];

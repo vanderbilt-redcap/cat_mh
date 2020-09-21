@@ -63,7 +63,6 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 			<th>Select</th>
 			<th>Date</th>
 			<th>Sequence</th>
-			<th>Completed</th>
 		</thead>
 		<tbody>
 		</tbody>
