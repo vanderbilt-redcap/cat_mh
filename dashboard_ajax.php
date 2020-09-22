@@ -62,7 +62,7 @@ foreach($data as $rid => $record) {
 				}
 			}
 		}
-		if (empty($interview_index)) {
+		if (!$module->sequenceCompleted($rid, $seq['name'], $seq['scheduled_datetime'])) {
 			// none completed, append gray circle img
 			$row[] = "<img src='" . APP_PATH_IMAGES . "circle_gray.png' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";
 		} else {
