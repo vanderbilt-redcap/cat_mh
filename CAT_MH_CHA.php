@@ -29,9 +29,9 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'ss' => "Suicide Scale"
 	];
 	
-	public $debug = true;
-	// public $api_host_name = "www.cat-mh.com";	// non-test
-	public $api_host_name = "test.cat-mh.com";		// test
+	// public $debug = true;
+	public $api_host_name = "www.cat-mh.com";	// non-test
+	// public $api_host_name = "test.cat-mh.com";		// test
 	
 	// hooks
 	public function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
