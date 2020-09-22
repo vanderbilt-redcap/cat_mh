@@ -29,11 +29,15 @@ Interviews can be scheduled by interval or calendar.
 2. Specify interval duration/frequency/delay or select a date and time on the calendar widget
 3. Click 'Add to Schedule'. You will now see the scheduled sequence appear in the "Sequences" table.
 
+![Scheduling Interface](/docs/scheduling.PNG)
+
 You may select sequences in the table and delete them by clicking "Delete"
 
 You may also enable reminder emails and specify how many days in succession, how far apart, and after how many days these emails are sent.
 
 All emails sent (scheduled sequence, reminders, and provider emails) are logged to the project's log_event table which can be read by REDCap administrators via the Logging page available in the project sidebar.
+
+![Emails logged](/docs/logging.PNG)
 
 ### Provider Email Note
 Providers must have a REDCap account and be able to login before viewing patient results.
