@@ -48,4 +48,4 @@ You must provide the module with both of the following CAT-MH API registration d
 * Application ID
 * Organization ID
 
-![System Configuration Details](/images/systemLevel.PNG)
+![System Configuration Details](/docs/systemLevel.PNG)
