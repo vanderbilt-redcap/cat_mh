@@ -29,7 +29,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'ss' => "Suicide Scale"
 	];
 	
-	public $debug = false;
+	// public $debug = true;
 	public $api_host_name = "www.cat-mh.com";	// non-test
 	// public $api_host_name = "test.cat-mh.com";		// test
 	
@@ -318,7 +318,24 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function unscheduleSequence($seq_name, $datetime) {
-		return $this->removeLogs("message='scheduleSequence' AND name='$seq_name' AND scheduled_datetime='$datetime'");
+		// removes associated invitations AND reminders
+		return $this->removeLogs("name='$seq_name' AND scheduled_datetime='$datetime'");
+	}
+	
+	function markScheduledSequenceAsSent($sequence) {
+		$this->llog("marking sequence as sent: " . print_r($sequence, true));
+		
+		$log_id = $sequence['log_id'];
+		$datetime = $sequence['scheduled_datetime'];
+		$name = $sequence['name'];
+		
+		$this->removeLogs("message='scheduleSequence' AND log_id=$log_id");
+		$this->log("scheduleSequence", [
+			"name" => $name,
+			"scheduled_datetime" => $datetime,
+			"sent" => true
+		]);
+		return true;
 	}
 	
 	function getScheduledSequences() {
@@ -329,23 +346,29 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$sequences[] = ['', $row['scheduled_datetime'], $row['name']];
 		}
 		
+		// $this->llog('scheduled seqs: ' . print_r($sequences, true));
+		
 		return $sequences;
 	}
 	
 	function sendScheduledSequenceEmails() {
 		// determine which sequences need to be sent this minute
 		$ymd_hi = date("Y-m-d H:i");
-		$seq_logs = $this->queryLogs("SELECT message, name, scheduled_datetime, sent, log_id WHERE message='scheduleSequence' and scheduled_datetime='$ymd_hi' ORDER BY timestamp desc");
+		$seq_logs = $this->queryLogs("SELECT message, name, scheduled_datetime, sent, log_id WHERE message='scheduleSequence' and sent=false ORDER BY scheduled_datetime desc");
 		
 		$sequences = [];
 		$sequenceURLs = [];
 		
+		// add sequences that
+			// 1 - haven't been sent
+			// 2 - whose scheduled_datetime are before time() (now)
+		$ts_now = time();
 		while ($row = db_fetch_assoc($seq_logs)) {
-			// make double sure
-			// $this->llog("seq log row: " . print_r($row, true));
-			if ($row['message'] == 'scheduleSequence' and $row['scheduled_datetime'] == $ymd_hi) {
+			$seq_sched_ts = strtotime($row['scheduled_datetime']);
+			if ($row['message'] == 'scheduleSequence' and !$row['sent'] and $ts_now > $seq_sched_ts) {
 				$sequences[] = $row['name'];
 				$sequenceURLs[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=" . urlencode($row['name']) . "&sched_dt=" . urlencode($ymd_hi);
+				$this->markScheduledSequenceAsSent($row);
 			}
 		}
 		
@@ -457,7 +480,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function clearQueuedReminderEmails() {
-		return $this->removeLogs("message='scheduleReminder'");
+		return $this->removeLogs("message='scheduleReminder' and sent=false");		// need to keep log sent reminders
 	}
 	
 	function queueAllReminderEmails() {
@@ -488,16 +511,47 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				$next_datetime = date("Y-m-d H:i", strtotime($seq_datetime . " +" . $day_offset . " days"));
 				$this->llog("\$next_datetime: $next_datetime");
 				
+				// if a reminder for this sequence/sched_time/rem_time already exists, skip
+				$result = $this->queryLogs("SELECT message, name, scheduled_datetime, reminder_datetime WHERE message='scheduleReminder' and name='$seq_name' and scheduled_datetime='$seq_datetime' and reminder_datetime='$next_datetime'");
+				if ($result->num_rows != 0) {
+					$this->llog('skipping a reminder log due to one existing: ' . print_r($result, true));
+					continue;
+				}
+				
 				$log_id = $this->log("scheduleReminder", [
 					"name" => $seq_name,
 					"scheduled_datetime" => $seq_datetime,
-					"reminder_datetime" => $next_datetime
+					"reminder_datetime" => $next_datetime,
+					"sent" => false
 				]);
 				if (!$log_id) {
 					$this->llog("error scheduling reminder");
 				}
 			}
 		}
+		
+		$result = $this->queryLogs("SELECT message WHERE message='scheduleReminder'");
+		while ($reminder = db_fetch_assoc($result)) {
+			"reminder set: " . print_r($reminder, true);
+		}
+	}
+	
+	function markReminderEmailAsSent($reminder) {
+		$this->llog("marking reminder as sent: " . print_r($reminder, true));
+		
+		$log_id = $reminder['log_id'];
+		$sched_time = $reminder['scheduled_datetime'];
+		$reminder_time = $reminder['reminder_datetime'];
+		$name = $reminder['name'];
+		
+		$this->removeLogs("message='scheduleReminder' AND log_id=$log_id");
+		$this->log("scheduleReminder", [
+			"name" => $name,
+			"scheduled_datetime" => $sched_time,
+			"reminder_datetime" => $reminder_time,
+			"sent" => true
+		]);
+		return true;
 	}
 	
 	function sendProviderEmail() {
@@ -547,17 +601,19 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	function sendReminderEmails() {
 		// determine which sequences need to be sent this minute
 		$ymd_hi = date("Y-m-d H:i");
-		$reminders = $this->queryLogs("SELECT message, name, scheduled_datetime, reminder_datetime WHERE message='scheduleReminder' and reminder_datetime='$ymd_hi' ORDER BY timestamp desc");
+		$reminders = $this->queryLogs("SELECT message, name, scheduled_datetime, reminder_datetime, sent, log_id WHERE message='scheduleReminder' and sent=false ORDER BY timestamp desc");
 		
 		$sequences = [];
 		$sequenceURLs = [];
 		$sequenceScheduledDatetimes = [];
+		$ts_now = time();
 		while ($row = db_fetch_assoc($reminders)) {
 			// make double sure
-			if ($row['message'] == 'scheduleReminder' and $row['reminder_datetime'] == $ymd_hi) {
+			if ($row['message'] == 'scheduleReminder' and !$row['sent'] and $ts_now > strtotime($row['reminder_datetime'])) {
 				$sequences[] = $row['name'];
 				$sequenceScheduledDatetimes[] = $row['scheduled_datetime'];
-				$sequenceURLs[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=" . $row['name'] . "&sched_dt=" . $row['scheduled_datetime'];
+				$sequenceURLs[] = $this->getUrl("interview.php") . "&NOAUTH&sequence=" . urlencode($row['name']) . "&sched_dt=" . urlencode($row['scheduled_datetime']);
+				$this->markReminderEmailAsSent($row);
 			}
 		}
 		
@@ -659,7 +715,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$email->setBody($participant_email_body);
 			
 			$success = $email->send();
-			$this->llog("success: " . print_r($success, true));
+			// $this->llog("success: " . print_r($success, true));
 			if ($success) {
 				$result_log_message .= "Record $rid: Sent interview invitation email\n";
 			} else {
@@ -684,12 +740,12 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		foreach ($interviews as $i => $interview) {
 			if ($interview->sequence == $seq_name and $interview->scheduled_datetime == $datetime) {
 				if ($interview->status == 4) {
-					$this->llog("seeing if sequence complete: $record, $seq_name, $datetime - TRUE");
+					// $this->llog("seeing if sequence complete: $record, $seq_name, $datetime - TRUE");
 					return true;
 				}
 			}
 		}
-		$this->llog("seeing if sequence complete: $record, $seq_name, $datetime - FALSE");
+		// $this->llog("seeing if sequence complete: $record, $seq_name, $datetime - FALSE");
 		return false;
 	}
 	
