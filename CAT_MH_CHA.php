@@ -410,6 +410,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		];
 		$data = \REDCap::getData($this->getProjectId(), 'array');
 		foreach($data as $rid => $record) {
+			unset($subjectID, $eid, $addressTo, $cat_mh_data, $save_results, $participantURLs, $participantLinks, $sequenceURLs, $success);
+			
 			// ensure we have an email value to use
 			$eid = array_keys($record)[0];
 			$email_address_field = 'catmh_email';
@@ -656,6 +658,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		];
 		$data = \REDCap::getData($this->getProjectId(), 'array');
 		foreach($data as $rid => $record) {
+			unset($subjectID, $eid, $addressTo, $cat_mh_data, $save_results, $participantURLs, $participantLinks, $sequenceURLs, $success);
+			
 			// ensure we have an email value to use
 			$eid = array_keys($record)[0];
 			$email_address_field = 'catmh_email';
@@ -667,7 +671,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$email->setTo($addressTo);
 			
 			// generate subject ID and interviews for [cat_mh_data] if missing
-			$subjectID = null;
 			if (empty($record[$eid]['subjectid'])) {
 				$subjectID = $this->generateSubjectID();
 				$cat_mh_data = json_encode(["interviews" => []]);
