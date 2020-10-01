@@ -30,8 +30,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	];
 	
 	// public $debug = true;
-	public $api_host_name = "www.cat-mh.com";	// non-test
 	// public $api_host_name = "test.cat-mh.com";		// test
+	public $api_host_name = "www.cat-mh.com";	// non-test
 	
 	// hooks
 	public function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
@@ -410,7 +410,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		];
 		$data = \REDCap::getData($this->getProjectId(), 'array');
 		foreach($data as $rid => $record) {
-			unset($subjectID, $eid, $addressTo, $cat_mh_data, $save_results, $participantURLs, $participantLinks, $sequenceURLs, $success);
+			unset($subjectID, $eid, $addressTo, $cat_mh_data, $save_results, $participantURLs, $participantLinks, $success);
 			
 			// ensure we have an email value to use
 			$eid = array_keys($record)[0];
@@ -658,7 +658,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		];
 		$data = \REDCap::getData($this->getProjectId(), 'array');
 		foreach($data as $rid => $record) {
-			unset($subjectID, $eid, $addressTo, $cat_mh_data, $save_results, $participantURLs, $participantLinks, $sequenceURLs, $success);
+			unset($subjectID, $eid, $addressTo, $cat_mh_data, $save_results, $participantURLs, $participantLinks, $success);
 			
 			// ensure we have an email value to use
 			$eid = array_keys($record)[0];
@@ -797,7 +797,14 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$out['labels'] = [];
 			foreach ($args['tests'] as $arr) {
 				$out['types'][] = $arr['type'];
-				$out['labels'][] = $this->testTypes[$arr['type']];
+				
+				// see if we need to apply alternate label from project level settings
+				$alt_label_arr = $this->getProjectSetting($arr['type'] . "_label");
+				if (!empty($alt_label_arr[0])) {
+					$out['labels'][] = $alt_label_arr[0];
+				} else {
+					$out['labels'][] = $this->testTypes[$arr['type']];
+				}
 			}
 			
 			$out['success'] = true;
@@ -805,6 +812,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$out['moduleError'] = true;
 			$out['moduleMessage'] = "REDCap couldn't get interview information from CAT-MH API." . "<br />\n" . $e;
 		}
+		
 		return $out;
 	}
 	
