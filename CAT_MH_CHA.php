@@ -1178,6 +1178,11 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		// now remove results from curl response as necessary
 		foreach ($results['tests'] as &$test) {
+			// convert test label if alt label is configured
+			if (!empty($alt_label = $this->getProjectSetting($test['type'] . "_label")[0])) {
+				$test['label'] = $alt_label;
+			}
+			
 			$abbreviation = strtolower($test['type']);
 			if ($keepResults[$abbreviation] !== true) {
 				$test['diagnosis'] = "The results for this test have been saved in REDCap for your test provider to review.";
