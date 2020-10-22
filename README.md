@@ -23,6 +23,9 @@ To do so, go to the "External Modules" page and click "Configure" for the CAT-MH
 You may enable/disable the provider email feature here.
 You may also specify scheduled invitation and reminder email subject and body texts here. The module will replace`[interview-links]` and `[interview-urls]` with the actual patient-specific interview link/URLs at the time the emails are sent.
 
+You may also configure an alternate label for any sequence. This alternate label will be shown as the test name to the participant during the interview. Below is an image of an interview results page showing "Wellness Test" as the alternate label for the CAT-MH 'Depression' test type.
+![Alternate Label Example](/docs/alternate_test_label_results.PNG)
+
 ### Scheduling Interviews and Reminders
 Interviews can be scheduled by interval or calendar.
 1. Select a sequence that has been previously created/configured in the project's external module settings page.
