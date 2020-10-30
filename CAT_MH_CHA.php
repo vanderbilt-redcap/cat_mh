@@ -84,6 +84,21 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$_GET['pid'] = $localProjectId;
 			$this->sendScheduledSequenceEmails();
 			$this->sendReminderEmails();
+			
+			$result = $this->queryLogs("SELECT timestamp WHERE message='cron_ran_today'");
+			$cron_ran_today = null;
+			while ($row = db_fetch_assoc($result)) {
+				$date1 = date("Y-m-d");
+				$date2 = date("Y-m-d", strtotime($row['timestamp']));
+				if ($date1 == $date2) {
+					$cron_ran_today = true;
+					break;
+				}
+			}
+			if (!$cron_ran_today) {
+				\REDCap::logEvent("CAT-MH External Module", "Ran 'emailer_cron' method today", NULL, NULL, NULL, $this->getProjectId());
+				$this->log("cron_ran_today");
+			}
 		}
 		$_GET['pid'] = $originalPid;
 	}
