@@ -245,6 +245,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		}
 		
 		$interview = $this->createInterview($args);
+		$this->llog("interview from module->createInterview(\$args): " . print_r($interview, true));
 		$interview['subjectID'] = $sid;
 		
 		if (!isset($interview['moduleError'])) {
@@ -293,9 +294,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	function llog($text) {
 		if ($this->debug !== true)
 			return;
-		if (file_exists("C:/vumc/log.txt")) {
-			file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
-		}
+		echo "<pre>$text\n</pre>";
 	}
 	
 	// dashboard
@@ -813,6 +812,13 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// send request via curl
 		$curl = $this->curl($curlArgs);
 		if ($this->debug) $out['curl'] = $curl;
+		
+		// show error if cURL error occured
+		if (!empty($curl['error'])) {
+			$out['moduleError'] = true;
+			$out['moduleMessage'] = "REDCap couldn't get interview information from CAT-MH API." . "<br />\n" . $curl['error'];
+			return $out;
+		}
 		
 		// handle response
 		try {
