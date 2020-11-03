@@ -395,8 +395,12 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		// prepare email invitation using project settings
 		$email = new \Message();
-		global $project_contact_email;
-		$email->setFrom($project_contact_email);
+		$from_address = $this->getProjectSetting('email-from');
+		if (empty($from_address)) {
+			global $project_contact_email;
+			$from_address = $project_contact_email;
+		}
+		$email->setFrom($from_address);
 		
 		$email_subject = "CAT-MH Interview Invitation";
 		if (!empty($this->getProjectSetting('email-subject')))
@@ -599,8 +603,12 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$seq = urlencode($_GET['sequence']);
 		$sched_dt = urlencode($_GET['sched_dt']);
 		$email = new \Message();
-		global $project_contact_email;
-		$email->setFrom($project_contact_email);
+		$from_address = $this->getProjectSetting('email-from');
+		if (empty($from_address)) {
+			global $project_contact_email;
+			$from_address = $project_contact_email;
+		}
+		$email->setFrom($from_address);
 		$email->setTo($provider_address);
 		$email->setSubject("CAT-MH Interview Completed by Patient");
 		
@@ -645,8 +653,12 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		// prepare email invitation using project settings
 		$email = new \Message();
-		global $project_contact_email;
-		$email->setFrom($project_contact_email);
+		$from_address = $this->getProjectSetting('email-from');
+		if (empty($from_address)) {
+			global $project_contact_email;
+			$from_address = $project_contact_email;
+		}
+		$email->setFrom($from_address);
 		
 		$email_subject = "CAT-MH Interview Reminder";
 		if (!empty($this->getProjectSetting('reminder-email-subject')))

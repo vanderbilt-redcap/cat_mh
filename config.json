@@ -61,6 +61,11 @@
 			"type": "rich-text"
 		},
 		{
+			"key": "email-from",
+			"name": "Set the 'from' address emails will be sent from",
+			"type": "text"
+		},
+		{
 			"key": "reminder-email-subject",
 			"name": "Subject line for reminder emails",
 			"type": "text"
