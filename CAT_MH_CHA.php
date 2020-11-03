@@ -395,7 +395,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		// prepare email invitation using project settings
 		$email = new \Message();
-		$email->setFrom("redcap.services@vumc.org");
+		global $project_contact_email;
+		$email->setFrom($project_contact_email);
 		
 		$email_subject = "CAT-MH Interview Invitation";
 		if (!empty($this->getProjectSetting('email-subject')))
@@ -598,7 +599,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$seq = urlencode($_GET['sequence']);
 		$sched_dt = urlencode($_GET['sched_dt']);
 		$email = new \Message();
-		$email->setFrom("redcap.services@vumc.org");
+		global $project_contact_email;
+		$email->setFrom($project_contact_email);
 		$email->setTo($provider_address);
 		$email->setSubject("CAT-MH Interview Completed by Patient");
 		
@@ -643,7 +645,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		// prepare email invitation using project settings
 		$email = new \Message();
-		$email->setFrom("redcap.services@vumc.org");
+		global $project_contact_email;
+		$email->setFrom($project_contact_email);
 		
 		$email_subject = "CAT-MH Interview Reminder";
 		if (!empty($this->getProjectSetting('reminder-email-subject')))
