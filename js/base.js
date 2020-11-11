@@ -25,13 +25,10 @@ catmh.testStatuses = [
 catmh.setAnswerOptions = function(answers) {
 	$(".answerSelector").remove()
 	answers.forEach(answer => {
-		$("#submitAnswer").before(`
-			<button data-ordinal='` + answer.answerOrdinal + `' data-weight='` + answer.answerWeight + `' class='answerSelector'>` + answer.answerDescription + `</button>`);
+		$("#submitAnswer").before("<button data-ordinal='" + answer.answerOrdinal + "' data-weight='" + answer.answerWeight + "' class='answerSelector'>" + answer.answerDescription + "</button>");
 	});
-	$("button.answerSelector").on('focus', function() {
+	$("button.answerSelector").on('touchstart mousedown', function() {
 		$("#submitAnswer").removeClass('disabled');
-	}).on('blur', function() {
-		$("#submitAnswer").addClass('disabled');
 	});
 }
 catmh.setInterviewOptions = function() {
@@ -44,8 +41,7 @@ catmh.setInterviewOptions = function() {
 	
 	$("#buttonInstructions, #beginInterview").css('display', 'inherit');
 	catmh.interview.labels.forEach(label => {
-		$("ol").append(`
-				<li class='interviewLabel'>${label}</li>`);
+		$("ol").append("<li class='interviewLabel'>" + label + "</li>");
 	});
 }
 
@@ -58,33 +54,18 @@ catmh.showError = function(message) {
 catmh.showResults = function() {
 	$("table > tr:not(first-child").remove();
 	catmh.testResults.tests.forEach(function(test) {
-		// if (test.hideResults == true) {
-			// $("table").append(`
-					// <tr>
-						// <td>${test.label}</td>
-						// <td>The results for this test have been saved in REDCap for your test provider to review.</td>
-						// <td></td>
-						// <td></td>
-						// <td></td>
-						// <td></td>
-						// <td></td>
-						// <td></td>
-					// </tr>
-// `);
-		// } else {
-			$("table").append(`
-					<tr>
-						<td>${test.label}</td>
-						<td>${test.diagnosis==null ? 'N/A' : test.diagnosis}</td>
-						<td>${test.confidence==null ? 'N/A' : test.confidence + '%'}</td>
-						<td>${test.severity==null ? 'N/A' : test.severity + '%'}</td>
-						<td>${test.category==null ? 'N/A' : test.category}</td>
-						<td>${test.precision==null ? 'N/A' : test.precision + '%'}</td>
-						<td>${test.prob==null ? 'N/A' : (test.prob.toPrecision(3)*100) + '%'}</td>
-						<td>${test.percentile==null ? 'N/A' : test.percentile + '%'}</td>
-					</tr>
-`);
-		// }
+		$("table").append("\
+				<tr>\
+					<td>" + (test.label) + "</td>\
+					<td>" + (test.diagnosis===null ? 'N/A' : test.diagnosis) + "</td>\
+					<td>" + (test.confidence===null ? 'N/A' : test.confidence + '%') + "</td>\
+					<td>" + (test.severity===null ? 'N/A' : test.severity + '%') + "</td>\
+					<td>" + (test.category===null ? 'N/A' : test.category) + "</td>\
+					<td>" + (test.precision===null ? 'N/A' : test.precision + '%') + "</td>\
+					<td>" + (test.prob===null ? 'N/A' : (test.prob.toPrecision(3)*100) + '%') + "</td>\
+					<td>" + (test.percentile===null ? 'N/A' : test.percentile + '%') + "</td>\
+				</tr>\
+		");
 	});
 	$("body > div:visible").fadeOut(100, function() {
 		$("#interviewResults").fadeIn(100);
@@ -189,9 +170,12 @@ catmh.getQuestion = function() {
 }
 catmh.submitAnswer = function() {
 	// console.log('answer');
-	let i = $('.answerSelector:focus').index('.answerSelector');
+	let i = $('.answerSelector.selected').index('.answerSelector');
 	if (i < 0) return;
 	i++;
+	
+	$("#submitAnswer").addClass('disabled')
+	$("#submitAnswer").blur()
 	
 	let now = +new Date();
 	catmh.interview.questionID = parseInt(catmh.currentQuestion.questionID);
@@ -254,7 +238,7 @@ catmh.getResults = function() {
 	});
 }
 catmh.endInterview = function() {
-	console.log('end');
+	// console.log('end');
 	let data = {
 		action: 'endInterview',
 		args: catmh.interview
@@ -269,7 +253,7 @@ catmh.endInterview = function() {
 		complete: function(xhr) {
 			catmh.lastXhr = xhr;
 		}
-	});
+	})
 }
 
 var getUrlParameter = function getUrlParameter(sParam) {

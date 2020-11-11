@@ -906,7 +906,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			}
 		} else {
 			$out['moduleError'] = true;
-			$out['moduleMessage'] = "REDCap failed to retrieve authorization details from the CAT-MH API server for the interview.";
+			$out['moduleMessage'] = "REDCap failed to retrieve authorization details from the CAT-MH API server for the interview." . "<br>" . json_encode($out, JSON_UNESCAPED_SLASHES + JSON_PRETTY_PRINT);
 		}
 		
 		return $out;
