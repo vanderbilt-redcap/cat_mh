@@ -835,7 +835,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				$out['types'][] = $arr['type'];
 				
 				// see if we need to apply alternate label from project level settings
-				$alt_label_arr = $this->getProjectSetting($arr['type'] . "_label");
+				$stripped = array_search($arr['type'], $this->convertTestAbbreviation, true);
+				$alt_label_arr = $this->getProjectSetting($stripped . "_label");
 				if (!empty($alt_label_arr[0])) {
 					$out['labels'][] = $alt_label_arr[0];
 				} else {
