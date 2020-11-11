@@ -3,8 +3,9 @@ namespace VICTR\REDCAP\CAT_MH;
 
 class CAT_MH extends \ExternalModules\AbstractExternalModule {
 	// public $testAPI = true;
-	public $debug = true;
-	public $catmh_hostname = "https://test.cat-mh.com/";
+	// public $debug = true;
+	// public $catmh_hostname = "https://test.cat-mh.com/";
+	public $catmh_hostname = "https://www.cat-mh.com/";
 	public $convertTestAbbreviation = [
 		'mdd' => "mdd",
 		'dep' => "dep",

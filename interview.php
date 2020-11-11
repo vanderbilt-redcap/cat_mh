@@ -3,9 +3,13 @@
 	<head>
 		<!-- Required meta tags -->
 		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=yes">
 		
-		<link rel="stylesheet" href="<?php echo($module->getUrl('css/base.css')); ?>">
+		<link rel="stylesheet" href="<?php
+			$ref = $module->getUrl('css/base.css');
+			// $ref = str_replace("localhost", "192.168.0.15", $ref);
+			echo($ref);
+		?>">
 		<title>CAT-MH Interview</title>
 	</head>
 	<body>
@@ -19,7 +23,7 @@
 		</div>
 		<div id='interviewTest'>
 			<span class='question'></span>
-			<button id='submitAnswer' type='button' class='disabled submit' onMouseDown='catmh.submitAnswer()'>Submit</button>
+			<button id='submitAnswer' type='button' class='disabled submit'>Submit</button>
 		</div>
 		<div id='interviewResults'>
 			<h2>Your interview is complete.</h2>
@@ -67,10 +71,16 @@
 			// catmh.interview.labels = JSON.parse(catmh.interview.labels);
 			catmh.setInterviewOptions();
 		}
+		
+		$('#submitAnswer').on('mousedown', catmh.submitAnswer);
+		$('body').on('mousedown', '.answerSelector', function() {
+			$('.answerSelector').removeClass('selected');
+			$(this).addClass('selected');
+		});
 	})
 </script>
 			";
 		?>
-		<script src="<?php echo($module->getUrl('js/base.js')); ?>"></script>
+		<script type="text/javascript"><?php echo file_get_contents($module->getUrl('js/base.js')); ?></script>
 	</body>
 </html>
