@@ -40,7 +40,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 	];
 	
 	// filter by record, sequence, and datetime if applicable
-	$recordFilter = (int) $_GET['record'];
+	$recordFilter = $_GET['record'];
 	if (!empty($recordFilter))
 		$params['records'] = $recordFilter;
 	if (isset($_GET['seq']))

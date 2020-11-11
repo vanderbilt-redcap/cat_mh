@@ -292,9 +292,16 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function llog($text) {
-		if ($this->debug !== true)
-			return;
-		echo "<pre>$text\n</pre>";
+		// if ($this->debug !== true)
+			// return;
+		// echo "<pre>$text\n</pre>";
+		
+		// if ($this->log_ran) {
+			// file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
+		// } else {
+			// file_put_contents("C:/vumc/log.txt", "$text\n");
+			// $this->log_ran = true;
+		// }
 	}
 	
 	// dashboard
