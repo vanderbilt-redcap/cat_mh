@@ -1,3 +1,8 @@
+<?php
+$interview = $module->getInterview();
+if (empty($interview))
+	$interview = $module->makeInterview();
+?>
 <!doctype html>
 <html lang="en">
 	<head>
@@ -53,12 +58,6 @@
 		</div>
 		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 		<?php
-			// // pull all interview info from logs
-			// $subjectID = $_GET['sid'];
-			// $interview = $module->newInterview($subjectID);
-			// $interview['subjectID'] = $subjectID;
-			
-			$interview = $module->getInterview();
 			
 			// give js this info
 			echo "
@@ -70,9 +69,8 @@
 		
 		catmh.interview = " . json_encode($interview) . ";
 		if (typeof(catmh.interview) == 'object') {
-			// catmh.interview.types = JSON.parse(catmh.interview.types);
-			// catmh.interview.labels = JSON.parse(catmh.interview.labels);
-			catmh.setInterviewOptions();
+			catmh.init();
+			// catmh.setInterviewOptions();
 		}
 		
 		$('#submitAnswer').on('mousedown', catmh.submitAnswer);

@@ -1,7 +1,6 @@
 var catmh = {};
 catmh.bridgeUrl = window.location.href;
 catmh.bridgeUrl = catmh.bridgeUrl.replace('interview', 'CAT_MH_CHA');
-// catmh.bridgeUrl = catmh.bridgeUrl.replace('&NOAUTH', '');
 
 catmh.testTypes = {
 	mdd: "Major Depressive Disorder",
@@ -21,6 +20,20 @@ catmh.testStatuses = [
 	'in progress',
 	'complete'
 ];
+
+catmh.init = function() {
+	console.log('catmh.init -- interview.status:', catmh.interview.status);
+	if (catmh.interview.status == 1) {
+		catmh.setInterviewOptions();
+	} else if (catmh.interview.status == 2) {
+		catmh.getQuestion();
+	} else if (catmh.interview.status == 3) {
+		catmh.getResults();
+	} else if (catmh.interview.status == 4) {
+		catmh.testResults = catmh.interview.results
+		catmh.showResults();
+	}
+}
 
 catmh.setAnswerOptions = function(answers) {
 	$(".answerSelector").remove()

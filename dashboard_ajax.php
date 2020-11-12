@@ -20,7 +20,6 @@ $params = [
 	"fields" => ["cat_mh_data", $record_id_field]
 ];
 $data = \REDCap::getData($params);
-// $module->llog("got data: " . print_r($data, true));
 
 // get scheduled sequence information
 $sequences = $module->getScheduledSequences();
@@ -30,8 +29,6 @@ foreach ($sequences as $i => $seq) {
 		"scheduled_datetime" => $seq[1]
 	];
 }
-
-// $module->llog("got sequences: " . print_r($sequences, true));
 
 $json = new \stdClass();
 $table_data = [];
@@ -44,7 +41,6 @@ foreach($data as $rid => $record) {
 	// prepare interviews array
 	$catmh = json_decode($record[$eid]['cat_mh_data']);
 	$interviews = $catmh->interviews;
-	// $module->llog("got interviews: " . print_r($interviews, true));
 	
 	// append icon/links for each sequence
 	foreach ($sequences as $i => $seq) {

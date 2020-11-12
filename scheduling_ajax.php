@@ -2,7 +2,6 @@
 
 // sanitize inputs
 $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
-// $module->llog("\$_POST:\n" . print_r($_POST, true));
 
 // initialize functions/properties
 $sequenceNames = $module->getProjectSetting('sequence');
@@ -21,7 +20,6 @@ $json = new \stdClass();
 $user_sequence = $_POST['sequence'];
 
 if ($_POST['schedulingMethod'] == 'calendar') {
-	// $module->llog("\$_POST['schedulingMethod'] == 'calendar'");
 	
 	if (!isValidSequenceName($user_sequence))
 		$json->error = "'$user_sequence' is not the name of a valid sequence.";
@@ -43,7 +41,6 @@ if ($_POST['schedulingMethod'] == 'calendar') {
 		$json->sequences = $module->getScheduledSequences();
 	}
 } elseif ($_POST['schedulingMethod'] == 'interval') {
-	// $module->llog("\$_POST['schedulingMethod'] == 'interval'");
 		
 	$frequency = (int) $_POST['frequency'];
 	$duration = (int) $_POST['duration'];
@@ -68,7 +65,6 @@ if ($_POST['schedulingMethod'] == 'calendar') {
 	if (!empty($delay)) {
 		$start_date = date("Y-m-d", strtotime($start_date . " +" . $delay . " days"));
 	}
-	// $module->llog("start_date: $start_date");
 	
 	for ($day_offset = 0; $day_offset < $duration; $day_offset += $frequency) {
 		$next_datetime = date("Y-m-d", strtotime($start_date . " +" . $day_offset . " days"));
@@ -80,19 +76,15 @@ if ($_POST['schedulingMethod'] == 'calendar') {
 	}
 	
 	$json->sequences = $module->getScheduledSequences();
-	// $module->llog("seqs: " . print_r($json->sequences, true));
 } elseif ($_POST['schedulingMethod'] == 'delete') {
-	// $module->llog("\$_POST['schedulingMethod'] == 'delete'");
 	
 	$sequences = $_POST['sequencesToDelete'];
 	foreach($sequences as $seq_index => $sequence) {
 		$return_value = $module->unscheduleSequence($sequence['name'], $sequence['datetime']);
-		// $module->llog("unschedule result: " . print_r($return_value, true));
 	}
 	
 	$json->sequences = $module->getScheduledSequences();
 } elseif ($_POST['schedulingMethod'] == 'setReminderSettings') {
-	// $module->llog("\$_POST['schedulingMethod'] == 'setReminderSettings'");
 	
 	$settings = [];
 	if ($_POST['enabled'] == 'on') {
@@ -107,7 +99,6 @@ if ($_POST['schedulingMethod'] == 'calendar') {
 	
 	$module->setReminderSettings($settings);
 	$json->reminderSettings = $module->getReminderSettings();
-	// $module->llog("\$json->reminderSettings\n" . print_r($json->reminderSettings, true));
 	
 } else {
 	$json->error = 'No scheduling method specified (must be calendar or interval).';
@@ -120,5 +111,4 @@ if (array_search($_POST['schedulingMethod'], ['interval', 'calendar', 'delete', 
 }
 
 // send response
-// $module->llog("json: " . print_r($json, true));
 exit(json_encode($json));

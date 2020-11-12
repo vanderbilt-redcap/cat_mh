@@ -192,12 +192,14 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	public function getRecordBySID($sid) {
+		$sid = preg_replace("/\W|_/", '', $sid);
 		$pid = $this->getProjectId();
 		$data = \REDCap::getData($pid, 'array', NULL, NULL, NULL, NULL, NULL, NULL, NULL, "[subjectid]=\"$sid\"");
 		return $data;
 	}
 	
 	public function getRecordIDBySID($sid) {
+		$sid = preg_replace("/\W|_/", '', $sid);
 		$ridfield = $this->framework->getRecordIDField();
 		$params = [
 			"project_id" => $this->getProjectId(),
@@ -213,6 +215,22 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	public function getInterview() {
+		$sequence = $_GET['sequence'];
+		$sched_dt = $_GET['sched_dt'];
+		$sid = $_GET['sid'];
+		$sid = preg_replace("/\W|_/", '', $sid);
+		
+		$record = $this->getRecordBySID($sid);
+		$data = json_decode(reset(reset($record))['cat_mh_data']);
+		foreach ($data->interviews as $interview) {
+			if ($interview->scheduled_datetime == $sched_dt AND $interview->sequence == $sequence) {
+				$interview->subjectID = $sid;
+				return $interview;
+			}
+		}
+	}
+	
+	public function makeInterview() {
 		// If no sequence given in url parameters, default to first sequence configured
 		$projectSettings = $this->getProjectSettings();
 		$sequence = $_GET['sequence'];
@@ -245,7 +263,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		}
 		
 		$interview = $this->createInterview($args);
-		$this->llog("interview from module->createInterview(\$args): " . print_r($interview, true));
 		$interview['subjectID'] = $sid;
 		
 		if (!isset($interview['moduleError'])) {
@@ -299,7 +316,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// if ($this->log_ran) {
 			// file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
 		// } else {
-			// file_put_contents("C:/vumc/log.txt", "$text\n");
+			// file_put_contents("C:/vumc/log.txt", "starting CAT_MH_CHA log:\n$text\n");
 			// $this->log_ran = true;
 		// }
 	}
@@ -344,8 +361,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function markScheduledSequenceAsSent($sequence) {
-		$this->llog("marking sequence as sent: " . print_r($sequence, true));
-		
 		$log_id = $sequence['log_id'];
 		$datetime = $sequence['scheduled_datetime'];
 		$name = $sequence['name'];
@@ -366,8 +381,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		while ($row = db_fetch_array($result)) {
 			$sequences[] = ['', $row['scheduled_datetime'], $row['name']];
 		}
-		
-		// $this->llog('scheduled seqs: ' . print_r($sequences, true));
 		
 		return $sequences;
 	}
@@ -392,8 +405,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				$this->markScheduledSequenceAsSent($row);
 			}
 		}
-		
-		// $this->llog("\$sequences: " . print_r($sequences, true));
 		
 		// return early if there are no sequences to send invitations for
 		if (empty($sequences))
@@ -488,7 +499,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$email->setBody($participant_email_body);
 			
 			$success = $email->send();
-			// $this->llog("success: " . print_r($success, true));
 			if ($success) {
 				$result_log_message .= "Record $rid: Sent interview invitation email\n";
 			} else {
@@ -514,20 +524,16 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	function queueAllReminderEmails() {
 		// use reminder email settings to queue
 		$rem_settings = $this->getReminderSettings();
-		$this->llog("reminder settings:" . print_r($rem_settings, true));
 		
 		// check if reminder emails disabled
 		if (empty($rem_settings['enabled']) or empty($rem_settings['duration']) or empty($rem_settings['frequency']))
 			return;
 		
 		$sequences = $this->getScheduledSequences();
-		// $this->llog("sequences:" . print_r($sequences, true));
 		
 		foreach ($sequences as $seq_i => $seq_arr) {
 			$seq_datetime = $seq_arr[1];
 			$seq_name = $seq_arr[2];
-			
-			$this->llog("setting reminder emails for seq/datetime: $seq_name / $seq_datetime");
 			
 			// delay at least 1 day
 			$delay = 1;
@@ -537,12 +543,10 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			
 			for ($day_offset = $delay; $day_offset < $rem_settings['duration'] + $delay; $day_offset += $rem_settings['frequency']) {
 				$next_datetime = date("Y-m-d H:i", strtotime($seq_datetime . " +" . $day_offset . " days"));
-				$this->llog("\$next_datetime: $next_datetime");
 				
 				// if a reminder for this sequence/sched_time/rem_time already exists, skip
 				$result = $this->queryLogs("SELECT message, name, scheduled_datetime, reminder_datetime WHERE message='scheduleReminder' and name='$seq_name' and scheduled_datetime='$seq_datetime' and reminder_datetime='$next_datetime'");
 				if ($result->num_rows != 0) {
-					$this->llog('skipping a reminder log due to one existing: ' . print_r($result, true));
 					continue;
 				}
 				
@@ -552,9 +556,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 					"reminder_datetime" => $next_datetime,
 					"sent" => false
 				]);
-				if (!$log_id) {
-					$this->llog("error scheduling reminder");
-				}
 			}
 		}
 		
@@ -565,8 +566,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function markReminderEmailAsSent($reminder) {
-		$this->llog("marking reminder as sent: " . print_r($reminder, true));
-		
 		$log_id = $reminder['log_id'];
 		$sched_time = $reminder['scheduled_datetime'];
 		$reminder_time = $reminder['reminder_datetime'];
@@ -649,8 +648,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				$this->markReminderEmailAsSent($row);
 			}
 		}
-		
-		// $this->llog("\$sequences: " . print_r($sequences, true));
 		
 		// return early if there are no sequences to send invitations for
 		if (empty($sequences)) {
@@ -754,7 +751,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$email->setBody($participant_email_body);
 			
 			$success = $email->send();
-			// $this->llog("success: " . print_r($success, true));
 			if ($success) {
 				$result_log_message .= "Record $rid: Sent interview invitation email\n";
 			} else {
@@ -775,16 +771,13 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$catmh = json_decode($data[0]->cat_mh_data);
 		$interviews = $catmh->interviews;
 		
-		$this->llog("interviews: " . print_r($interviews, true));
 		foreach ($interviews as $i => $interview) {
 			if ($interview->sequence == $seq_name and $interview->scheduled_datetime == $datetime) {
 				if ($interview->status == 4) {
-					$this->llog("seeing if sequence complete: $record, $seq_name, $datetime - TRUE");
 					return true;
 				}
 			}
 		}
-		$this->llog("seeing if sequence complete: $record, $seq_name, $datetime - FALSE");
 		return false;
 	}
 	
@@ -862,7 +855,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	
 	public function authInterview($args) {
 		// args needed: subjectID, identifier, signature, interviewID
-		
 		$args['interviewID'] = intval($args['interviewID']);
 		$out = [];
 		if ($this->debug) $out['args'] = $args;
@@ -908,7 +900,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			
 			if (!empty($result['errors'])) {
 				$out['moduleError'] = true;
-				$out['moduleMessage'] = "Errors saving to REDCap:<br />" . print_r($result, true) . "<br />sid:<br />" . $args['subjectID'];
+				$out['moduleMessage'] = "Errors saving to REDCap:\n" . print_r($result, true);
 			} else {
 				$out['success'] = true;
 			}
@@ -1391,7 +1383,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 	}
 	$action = db_escape($json['action']);
 	
-	// $catmh->llog("json: " . print_r($json, true));
 	
 	switch ($action) {
 		// case 'createInterview':
