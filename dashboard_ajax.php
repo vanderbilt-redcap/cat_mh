@@ -58,10 +58,14 @@ foreach($data as $rid => $record) {
 				}
 			}
 		}
-		if (!$module->sequenceCompleted($rid, $seq['name'], $seq['scheduled_datetime'])) {
-			// none completed, append gray circle img
+		$seq_status = $module->getSequenceStatus($rid, $seq['name'], $seq['scheduled_datetime']);
+		if ($seq_status === false) {	// unstarted
+			// not started or completed, append gray circle img
 			$row[] = "<img src='" . APP_PATH_IMAGES . "circle_gray.png' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";
-		} else {
+		} elseif ($seq_status != 4) {
+			// started but not completed, append yellow circle img
+			$row[] = "<img src='" . APP_PATH_IMAGES . "circle_yellow.png' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";
+		} elseif ($seq_status == 4) {
 			// append green circle (which itself, is a link to filtered results report)
 			$interview = $interviews[$interview_index];
 			$img = "<img src='" . APP_PATH_IMAGES . "circle_green_tick.png' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";

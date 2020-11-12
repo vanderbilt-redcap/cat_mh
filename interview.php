@@ -2,6 +2,7 @@
 $interview = $module->getInterview();
 if (empty($interview))
 	$interview = $module->makeInterview();
+
 ?>
 <!doctype html>
 <html lang="en">

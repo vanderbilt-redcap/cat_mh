@@ -724,7 +724,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$participantLinks = [];
 			foreach($sequenceURLs as $i => $url) {
 				// skip this participant if they've already completed this interview sequence
-				if ($this->sequenceCompleted($rid, $sequences[$i], $sequenceScheduledDatetimes[$i]) == false) {
+				if ($this->getSequenceStatus($rid, $sequences[$i], $sequenceScheduledDatetimes[$i]) != 4) {
 					$url_with_sid = $url . "&sid=$subjectID";
 					$participantURLs[$i] = $url_with_sid;
 					$participantLinks[$i] = "<a href=\"$url_with_sid\">CAT-MH Interview ($i)</a>";
@@ -760,7 +760,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		\REDCap::logEvent("CAT-MH External Module", $result_log_message, NULL, NULL, NULL, $this->getProjectId());
 	}
 	
-	function sequenceCompleted($record, $seq_name, $datetime) {
+	function getSequenceStatus($record, $seq_name, $datetime) {
 		$params = [
 			"project_id" => $this->getProjectId(),
 			"return_format" => "json",
@@ -773,9 +773,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		foreach ($interviews as $i => $interview) {
 			if ($interview->sequence == $seq_name and $interview->scheduled_datetime == $datetime) {
-				if ($interview->status == 4) {
-					return true;
-				}
+				return $interview->status;
 			}
 		}
 		return false;
