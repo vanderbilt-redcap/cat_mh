@@ -3,6 +3,12 @@ $interview = $module->getInterview();
 if (empty($interview))
 	$interview = $module->makeInterview();
 
+if (!empty($interview->results->tests)) {
+	$seq = $_GET['sequence'];
+	foreach ($interview->results->tests as $test) {
+		$test->label = $module->getTestLabel($seq, $test->type);
+	}
+}
 ?>
 <!doctype html>
 <html lang="en">

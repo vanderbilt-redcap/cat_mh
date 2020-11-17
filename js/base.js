@@ -30,8 +30,11 @@ catmh.init = function() {
 	} else if (catmh.interview.status == 3) {
 		catmh.getResults();
 	} else if (catmh.interview.status == 4) {
-		catmh.testResults = catmh.interview.results
-		catmh.showResults();
+		$("#interviewResults").empty()
+		$("#interviewResults").append("<h1>This computerized questionnaire has already been completed. Thank you!</h1>")
+		$("body > div:visible").fadeOut(100, function() {
+			$("#interviewResults").fadeIn(100);
+		});
 	}
 }
 
