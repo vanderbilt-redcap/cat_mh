@@ -36,6 +36,17 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'a/adhd' => "Adult ADHD",
 		'psy-s' => "Psychosis - Self-Report"
 	];
+	public $dashboardColumns = [
+		'Record ID',
+		'Completed',
+		'Within Window',
+		'Date Scheduled',
+		'Date to Complete',
+		'Date Taken',
+		'Elapsed Time',
+		'Missed Surveys',
+		'Reviewed'
+	];
 	
 	// public $api_host_name = "test.cat-mh.com";		// test
 	public $api_host_name = "www.cat-mh.com";	// non-test
@@ -350,17 +361,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	// dashboard
-	function getDashboardColumns() {
-		$columns = ['Record ID'];
-		
-		// append a column name for each scheduled sequence
-		$seqs = $this->getScheduledSequences();
-		foreach ($seqs as $i => $seq) {
-			$columns[] = $seq[2] . "<br>" . $seq[1];
-		}
-		
-		return $columns;
-	}
 	
 	// scheduling
 	function scheduleSequence($seq_name, $datetime) {

@@ -16,7 +16,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
     <thead>
         <tr>
 			<?php
-			$cols = $module->getDashboardColumns();
+			$cols = $module->dashboardColumns;
 			foreach($cols as $i => $name) {
 				echo "<th>$name</th>\n";
 			}

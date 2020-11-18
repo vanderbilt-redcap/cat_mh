@@ -29,6 +29,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 					<th>Precision</th>
 					<th>Probability</th>
 					<th>Percentile</th>
+					<th>Reviewed</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -74,6 +75,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 						<td>{$test['precision']}</td>
 						<td>{$test['prob']}</td>
 						<td>{$test['percentile']}</td>
+						<td>" . ($interview['reviewed'] ? "Y" : "N") . "</td>
 					</tr>");
 				}
 			}
