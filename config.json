@@ -140,7 +140,19 @@
 			{"type": "text", "key": "cssrs_label", "name": "Alternate Label"},
 			{"type": "checkbox", "key": "ss", "name": "Suicide Scale"},
 			{"type": "checkbox", "key": "ss_show_results", "name": "Show Results"},
-			{"type": "text", "key": "ss_label", "name": "Alternate Label"}
+			{"type": "text", "key": "ss_label", "name": "Alternate Label"},
+			{"type": "checkbox", "key": "phq9", "name": "PHQ-9"},
+			{"type": "checkbox", "key": "phq9_show_results", "name": "Show Results"},
+			{"type": "text", "key": "phq9_label", "name": "Alternate Label"},
+			{"type": "checkbox", "key": "aadhd", "name": "Adult ADHD"},
+			{"type": "checkbox", "key": "aadhd_show_results", "name": "Show Results"},
+			{"type": "text", "key": "aadhd_label", "name": "Alternate Label"},
+			{"type": "checkbox", "key": "psys", "name": "Psychosis - Self-Report"},
+			{"type": "checkbox", "key": "psys_show_results", "name": "Show Results"},
+			{"type": "text", "key": "psys_label", "name": "Alternate Label"},
+			{"type": "checkbox", "key": "sdoh", "name": "Social Determinants of Health"},
+			{"type": "checkbox", "key": "sdoh_show_results", "name": "Show Results"},
+			{"type": "text", "key": "sdoh_label", "name": "Alternate Label"}
          ]
         }
 	],

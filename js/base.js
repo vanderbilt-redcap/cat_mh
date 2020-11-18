@@ -2,25 +2,6 @@ var catmh = {};
 catmh.bridgeUrl = window.location.href;
 catmh.bridgeUrl = catmh.bridgeUrl.replace('interview', 'CAT_MH_CHA');
 
-catmh.testTypes = {
-	mdd: "Major Depressive Disorder",
-	dep: "Depression",
-	anx: "Anxiety Disorder",
-	mhm: "Mania/Hypomania",
-	pdep: "Depression (Perinatal)",
-	panx: "Anxiety Disorder (Perinatal)",
-	pmhm: "Mania/Hypomania (Perinatal)",
-	sa: "Substance Abuse",
-	ptsd: "Post-Traumatic Stress Disorder",
-	cssrs: "C-SSRS Suicide Screen",
-	ss: "Suicide Scale"
-};
-catmh.testStatuses = [
-	'incomplete',
-	'in progress',
-	'complete'
-];
-
 catmh.init = function() {
 	console.log('catmh.init -- interview.status:', catmh.interview.status);
 	if (catmh.interview.status == 1) {

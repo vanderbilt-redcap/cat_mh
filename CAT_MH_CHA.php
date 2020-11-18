@@ -13,7 +13,11 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'sa' => "sa",
 		'ptsd' => "ptsd",
 		'cssrs' => "c-ssrs",
-		'ss' => "ss"
+		'ss' => "ss",
+		'phq9' => "phq-9",
+		'aadhd' => "a/adhd",
+		'sdoh' => "sdoh",
+		'psys' => "psy-s"
 	];
 	public $testTypes = [
 		'mdd' => "Major Depressive Disorder",
@@ -26,7 +30,11 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'sa' => "Substance Abuse",
 		'ptsd' => "Post-Traumatic Stress Disorder",
 		'c-ssrs' => "C-SSRS Suicide Screen",
-		'ss' => "Suicide Scale"
+		'ss' => "Suicide Scale",
+		'phq-9' => "PHQ-9",
+		'sdoh' => "Social Determinants of Health",
+		'a/adhd' => "Adult ADHD",
+		'psy-s' => "Psychosis - Self-Report"
 	];
 	
 	// public $api_host_name = "test.cat-mh.com";		// test
