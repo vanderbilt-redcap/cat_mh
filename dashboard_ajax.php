@@ -56,7 +56,7 @@ foreach($data as $rid => $record) {
 	
 	// append icon/links for each sequence
 	foreach ($sequences as $i => $seq) {
-		$interview = $module->getInterview($sid, $seq['name'], $seq['scheduled_datetime']);
+		$interview = $module->getInterview($seq['name'], $seq['scheduled_datetime'], $sid);
 		$module->llog("RID $rid seq $i interview type: " . gettype($interview));
 		
 		// preparation/calculation

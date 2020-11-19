@@ -45,7 +45,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'Date Taken',
 		'Elapsed Time',
 		'Missed Surveys',
-		'Reviewed'
+		'Acknowledged'
 	];
 	
 	// public $api_host_name = "test.cat-mh.com";		// test
@@ -254,10 +254,13 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		return $alt_label;
 	}
 	
-	public function getInterview() {
-		$sequence = $_GET['sequence'];
-		$sched_dt = $_GET['sched_dt'];
-		$sid = $_GET['sid'];
+	public function getInterview($sequence="", $sched_dt="", $sid="") {
+		if (empty($sequence))
+			$sequence = $_GET['sequence'];
+		if (empty($sched_dt))
+			$sched_dt = $_GET['sched_dt'];
+		if (empty($sid))
+			$sid = $_GET['sid'];
 		$sid = preg_replace("/\W|_/", '', $sid);
 		
 		$record = $this->getRecordBySID($sid);
@@ -854,7 +857,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			// create types and labels arrays
 			$out['types'] = [];
 			$out['labels'] = [];
-			// $this->llog("sequence in createInterview: " . $_GET['sequence']);
 			foreach ($args['tests'] as $arr) {
 				$out['types'][] = $arr['type'];
 				$out['labels'][] = $this->getTestLabel($_GET['sequence'], $arr['type']);
@@ -871,7 +873,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	
 	public function authInterview($args) {
 		// args needed: subjectID, identifier, signature, interviewID
-		$this->llog('authInterview call -- args: ' . print_r($args, true));
 		$args['interviewID'] = intval($args['interviewID']);
 		$out = [];
 		
@@ -893,7 +894,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		if (isset($curl['cookies']['JSESSIONID']) and isset($curl['cookies']['AWSELB'])) {
 			// update redcap record data
 			$data = $this->getRecordBySID($args['subjectID']);
-			$this->llog("data in authInterview: " . print_r($data, true));
 			$rid = array_keys($data)[0];
 			$eid = array_keys($data[$rid])[0];
 			$catmh_data = json_decode($data[$rid][$eid]['cat_mh_data'], true);
@@ -906,7 +906,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			}
 			
 			$data[$rid][$eid]['cat_mh_data'] = json_encode($catmh_data);
-			$this->llog("data right before save in authInterview: " . print_r($data, true));
 			$result = \REDCap::saveData($this->getProjectId(), 'array', $data);
 			
 			if (!empty($result['errors'])) {

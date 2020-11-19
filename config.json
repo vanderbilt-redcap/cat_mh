@@ -104,6 +104,11 @@
 			   ]
             },
             {
+				"key": "expected_complete",
+				"name": "Expected number of days to complete interview",
+				"type": "text"
+			},
+            {
 			   "key": "tests",
 			   "name": "Tests included in interview",
 			   "type": "descriptive"
