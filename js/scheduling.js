@@ -35,7 +35,7 @@ CATMH.submitReminderSettings = function() {
 		data: post_data,
 		success: function(response) {
 			if (CATMH.debug)
-				console.log('scheduleByCalendar ajax returned successfully', response)
+				console.log('scheduleSingle ajax returned successfully', response)
 			if (response.error) {
 				alert(response.error)
 			}
@@ -71,21 +71,15 @@ CATMH.updateReminderInputs = function() {
 	}
 }
 
-// initialize schedule (datatable) and calendar (datetimepicker)
+// initialize schedule (datatable)
 $(function() {
-	$('#calendar').datetimepicker({
-		inline: true,
-		dateFormat: "yy-mm-dd"
-	})
-	
-	
 	CATMH.schedule = $("#seq_schedule").DataTable({
 		data: CATMH.scheduledSequences,
 		pageLength: 50,
 		columnDefs: [
 			{className: 'dt-center', targets: '_all'}
 		],
-		order: [[1, 'asc']]
+		order: [[2, 'asc'], [3, 'asc']]
 	})
 	
 	// add select checkboxes for each sequence in table
@@ -105,21 +99,22 @@ $('body').on('click', '.dropdown-menu a', function() {
 	CATMH.selectedSequence = $(this).text()
 })
 
-// send user's calendar scheduling request to the server
-$('body').on('click', '#scheduleByCalendar', function() {
+// send user's single scheduling request to the server
+$('body').on('click', '#scheduleSingle', function() {
 	if (CATMH.debug)
-		console.log('scheduleByCalendar')
+		console.log('scheduleSingle')
 	
 	if (!CATMH.selectedSequence) {
 		alert('Please select a sequence')
 		return
 	}
 	
-	var	chosen_datetime = $("#calendar").val()
+	var	chosen_offset = $("#offset").val()
 	var post_data = {
 		sequence: CATMH.selectedSequence,
-		datetime: chosen_datetime,
-		schedulingMethod: "calendar"
+		offset: chosen_offset,
+		time_of_day: $("#time_of_day_b").val(),
+		schedulingMethod: "single"
 	}
 	
 	$.ajax({
@@ -128,7 +123,7 @@ $('body').on('click', '#scheduleByCalendar', function() {
 		data: post_data,
 		success: function(response) {
 			if (CATMH.debug)
-				console.log('scheduleByCalendar ajax returned successfully', response)
+				console.log('scheduleSingle ajax returned successfully', response)
 			if (response.error) {
 				alert(response.error)
 			}
@@ -141,9 +136,9 @@ $('body').on('click', '#scheduleByCalendar', function() {
 })
 
 // send user's interval scheduling request to the server
-$('body').on('click', '#scheduleByInterval', function() {
+$('body').on('click', '#scheduleInterval', function() {
 	if (CATMH.debug)
-		console.log('scheduleByInterval')
+		console.log('scheduleInterval')
 	
 	if (!CATMH.selectedSequence) {
 		alert('Please select a sequence')
@@ -166,7 +161,7 @@ $('body').on('click', '#scheduleByInterval', function() {
 		data: post_data,
 		success: function(response) {
 			if (CATMH.debug)
-				console.log('scheduleByInterval ajax returned successfully', response)
+				console.log('scheduleInterval ajax returned successfully', response)
 			if (response.error) {
 				alert(response.error)
 			}
@@ -201,8 +196,9 @@ $('body').on('click', '#deleteScheduledSequence', function() {
 	$(".sequence_cbox:checked").each(function(i, e) {
 		var row = $(this).closest('tr')
 		var seq = {
-			name: row.children('td:eq(2)').html(),
-			datetime: row.children('td:eq(1)').html()
+			name: row.children('td:eq(1)').html(),
+			offset: row.children('td:eq(2)').html(),
+			time_of_day: row.children('td:eq(3)').html()
 		}
 		post_data.sequencesToDelete.push(seq)
 	})

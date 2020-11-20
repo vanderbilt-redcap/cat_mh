@@ -23,7 +23,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 	</div>
 	<div class='row mt-3'>
 		<div class='col-6'>
-			<h5>Schedule By Interval</h5>
+			<h5>Schedule (Interval)</h5>
 			<form>
 				<div class="form-group">
 					<label for="frequency">Invitation frequency (number of days)</label>
@@ -45,13 +45,24 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 					<input type="time" class="form-control w-50" id="time_of_day" aria-describedby="time_of_day_note">
 					<small id="time_of_day_note" class="form-text text-muted">For example, send invitations at 10:30 AM</small>
 				</div>
-				<button id="scheduleByInterval" type="button" class="btn btn-primary">Add to Schedule</button>
+				<button id="scheduleInterval" type="button" class="btn btn-primary">Add to Schedule</button>
 			</form>
 		</div>
 		<div class='col-6'>
-			<h5 class='mb-3'>Schedule By Calendar</h5>
-			<div id="calendar" class='dt-picker'></div>
-			<button id="scheduleByCalendar" type="button" class="btn btn-primary mt-4">Add to Schedule</button>
+			<h5 class='mb-3'>Schedule (Single)</h5>
+			<form>
+				<div class="form-group">
+					<label for="offset">Offset (number of days)</label>
+					<input type="text" class="form-control w-25" id="offset" aria-describedby="offset_note">
+					<small id="offset_note" class="form-text text-muted">Wait [x] days to send invitation after participant enrollment</small>
+				</div>
+				<div class="form-group">
+					<label for="time_of_day_b">Time of day to send invitations</label>
+					<input type="time" class="form-control w-50" id="time_of_day_b" aria-describedby="time_of_day_note">
+					<small id="time_of_day_note_b" class="form-text text-muted">For example, send invitations at 10:30 AM</small>
+				</div>
+				<button id="scheduleSingle" type="button" class="btn btn-primary">Add to Schedule</button>
+			</form>
 		</div>
 	</div>
 </div>
@@ -61,8 +72,9 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 	<table id='seq_schedule'>
 		<thead>
 			<th>Select</th>
-			<th>Date</th>
 			<th>Sequence</th>
+			<th>Offset</th>
+			<th>Time of Day</th>
 		</thead>
 		<tbody>
 		</tbody>

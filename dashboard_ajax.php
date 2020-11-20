@@ -57,7 +57,6 @@ foreach($data as $rid => $record) {
 	// append icon/links for each sequence
 	foreach ($sequences as $i => $seq) {
 		$interview = $module->getInterview($seq['name'], $seq['scheduled_datetime'], $sid);
-		$module->llog("RID $rid seq $i interview type: " . gettype($interview));
 		
 		// preparation/calculation
 		$date_to_complete = date("Y-m-d H:i", strtotime("+$reminder_delay days", strtotime($seq['scheduled_datetime'])));
@@ -138,7 +137,6 @@ foreach($data as $rid => $record) {
 		$table_data[] = $row;
 	}
 }
-// $module->llog("table data: " . print_r($table_data, true));
 
 $json->data = $table_data;
 exit(json_encode($json));

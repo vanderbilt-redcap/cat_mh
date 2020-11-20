@@ -1,5 +1,4 @@
 <?php
-
 // sanitize inputs
 $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
 
@@ -19,21 +18,25 @@ function isValidSequenceName($name) {
 $json = new \stdClass();
 $user_sequence = $_POST['sequence'];
 
-if ($_POST['schedulingMethod'] == 'calendar') {
-	
-	if (!isValidSequenceName($user_sequence))
+if (empty($_POST['time_of_day'])) {
+	$time_of_day = "00:00";
+} else {
+	$time_of_day = preg_replace("/[^\d:]/", "", $_POST['time_of_day']);
+}
+
+if ($_POST['schedulingMethod'] == 'single') {
+	if (!isValidSequenceName($user_sequence)) {
 		$json->error = "'$user_sequence' is not the name of a valid sequence.";
-	
-	$timestamp = strtotime($_POST['datetime']);
-	if ($timestamp === false)
-		$json->error = $_POST['datetime'] . " is not a valid datetime.";
-	
-	if (!empty($json->error))
 		exit(json_encode($json));
+	}
 	
-	$user_datetime = date('Y-m-d H:i', $timestamp);
-	
-	list($ok, $msg) = $module->scheduleSequence($user_sequence, $user_datetime);
+	$offset = intval($_POST['offset']);
+	if ($offset != $_POST['offset'] or $offset < 0) {
+		$json->error = $_POST['offset'] . " is not a valid offset -- must be an integer greater than or equal to 0.";
+		exit(json_encode($json));
+	}
+		
+	list($ok, $msg) = $module->scheduleSequence($user_sequence, $offset, $time_of_day);
 	
 	if (!$ok) {
 		$json->error = $msg;
@@ -41,34 +44,27 @@ if ($_POST['schedulingMethod'] == 'calendar') {
 		$json->sequences = $module->getScheduledSequences();
 	}
 } elseif ($_POST['schedulingMethod'] == 'interval') {
-		
+	if (!isValidSequenceName($user_sequence)) {
+		$json->error = "'$user_sequence' is not the name of a valid sequence.";
+		exit(json_encode($json));
+	}
 	$frequency = (int) $_POST['frequency'];
 	$duration = (int) $_POST['duration'];
 	$delay = (int) $_POST['delay'];
-	if (empty($_POST['time_of_day'])) {
-		$time_of_day = "00:00";
-	} else {
-		$time_of_day = $_POST['time_of_day'];
-	}
 	
 	// require frequency and duration
 	if (empty($frequency) or empty($duration)) {
 		$json->error = "The CAT-MH module can't schedule sequences by interval without valid frequency and duration parameters.";
 		exit(json_encode($json));
 	}
-	if ($duration > 999) {
-		$json->error = "The maximum allowed duration value is 999.";
+	if ($duration > 9998) {
+		$json->error = "The maximum allowed duration value is 9998.";
 		exit(json_encode($json));
 	}
 	
-	$start_date = date("Y-m-d");
-	if (!empty($delay)) {
-		$start_date = date("Y-m-d", strtotime($start_date . " +" . $delay . " days"));
-	}
-	
-	for ($day_offset = 0; $day_offset < $duration; $day_offset += $frequency) {
-		$next_datetime = date("Y-m-d", strtotime($start_date . " +" . $day_offset . " days"));
-		list($ok, $id_or_msg) = $module->scheduleSequence($_POST['sequence'], $next_datetime . " $time_of_day");
+	for ($day_offset = $delay; $day_offset < $duration + $delay; $day_offset += $frequency) {
+		
+		list($ok, $id_or_msg) = $module->scheduleSequence($user_sequence, $day_offset, $time_of_day);
 		if (!$ok) {
 			$json->error = $id_or_msg;
 			exit(json_encode($json));
@@ -79,8 +75,16 @@ if ($_POST['schedulingMethod'] == 'calendar') {
 } elseif ($_POST['schedulingMethod'] == 'delete') {
 	
 	$sequences = $_POST['sequencesToDelete'];
+	
 	foreach($sequences as $seq_index => $sequence) {
-		$return_value = $module->unscheduleSequence($sequence['name'], $sequence['datetime']);
+		if (!isValidSequenceName($sequence['name'])) {
+			$json->error = "'$user_sequence' is not the name of a valid sequence.";
+			exit(json_encode($json));
+		}
+		$name = $sequence['name'];
+		$offset = intval($sequence['offset']);
+		$time_of_day = preg_replace("/[^\d:]/", "", $sequence['time_of_day']);
+		$return_value = $module->unscheduleSequence($name, $offset, $time_of_day);
 	}
 	
 	$json->sequences = $module->getScheduledSequences();
@@ -101,11 +105,11 @@ if ($_POST['schedulingMethod'] == 'calendar') {
 	$json->reminderSettings = $module->getReminderSettings();
 	
 } else {
-	$json->error = 'No scheduling method specified (must be calendar or interval).';
+	$json->error = 'No scheduling method specified (must be single or interval).';
 }
 
 // clear and re-queue reminder emails if needed
-if (array_search($_POST['schedulingMethod'], ['interval', 'calendar', 'delete', 'setReminderSettings'], true)) {
+if (array_search($_POST['schedulingMethod'], ['interval', 'single', 'delete', 'setReminderSettings'], true)) {
 	$module->clearQueuedReminderEmails();
 	$module->queueAllReminderEmails();
 }

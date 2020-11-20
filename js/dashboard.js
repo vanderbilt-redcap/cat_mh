@@ -20,7 +20,7 @@ $(document).ready(
 				data: post_data,
 				success: function(response) {
 					if (CATMH.debug)
-						console.log('scheduleByCalendar ajax returned successfully', response)
+						// console.log('reviewInterview ajax returned successfully', response)
 					if (response.error) {
 						alert(response.error)
 					}
