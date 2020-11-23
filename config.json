@@ -51,7 +51,7 @@
 
 	"project-settings": [
 		{
-			"key": "enroll_field",
+			"key": "enrollment_field",
 			"name": "Choose an Enrollment Date/Time field -- participants will start receiving interview invitations after enrollment",
 			"type": "field-list"
 		},

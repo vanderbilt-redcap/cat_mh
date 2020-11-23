@@ -96,13 +96,14 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	// crons
-	public function emailer_cron($current_time=null) {
+	public function emailer_cron($cronInfo, $current_time=null) {
 		$originalPid = $_GET['pid'];
 		foreach($this->framework->getProjectsWithModuleEnabled() as $localProjectId) {
 			$_GET['pid'] = $localProjectId;
 			
 			if (empty($current_time))
 				$current_time = time();
+			
 			$this->sendScheduledSequenceEmails($current_time);
 			$this->sendReminderEmails($current_time);
 			
@@ -423,6 +424,12 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function sendScheduledSequenceEmails($current_time) {
+		// ensure an Enrollment Field has been defined
+		if (empty($this->getProjectSetting('enrollment_field'))) {
+			$this->llog('send no reminder emails.. no enrollment_field selected');
+			return;
+		}
+		
 		// determine which sequences need to be sent this minute
 		$ymd_hi = date("Y-m-d H:i");
 		$seq_logs = $this->queryLogs("SELECT message, name, offset, time_of_day, sent, log_id WHERE message='scheduleSequence' and sent=false");
@@ -676,6 +683,11 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function sendReminderEmails($current_time) {
+		// ensure an Enrollment Field has been defined
+		if (empty($this->getProjectSetting('enrollment_field'))) {
+			$this->llog('send no reminder emails.. no enrollment_field selected');
+			return;
+		}
 		// determine which sequences need to be sent this minute
 		$ymd_hi = date("Y-m-d H:i");
 		$reminders = $this->queryLogs("SELECT message, name, scheduled_datetime, reminder_datetime, sent, log_id WHERE message='scheduleReminder' and sent=false ORDER BY timestamp desc");

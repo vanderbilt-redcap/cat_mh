@@ -5,6 +5,16 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 ?>
 <script type='text/javascript' src="//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
 <link rel='stylesheet' href='//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css'>
+<?php
+	if (empty($module->getProjectSetting('enrollment_field'))) {
+		echo '
+<div class="alert alert-warning w-50" role="alert">
+	<h5>The CAT-MH module does not have an Enrollment Field configured!</h5>
+	
+	<p>No invitations or reminder emails will be sent to participants until an Enrollment Field has been chosen via the External Modules page\'s Configure modal.</p>
+</div>';
+	}
+?>
 <div class="card card-body w-75">
 	<h3>Schedule a Sequence</h3>
 	<div class="dropdown">
