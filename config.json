@@ -53,7 +53,14 @@
 		{
 			"key": "enrollment_field",
 			"name": "Choose an Enrollment Date/Time field -- participants will start receiving interview invitations after enrollment",
+			"required": true,
 			"type": "field-list"
+		},
+		{
+			"key": "email-from",
+			"name": "Set the 'from' address emails will be sent from",
+			"required": true,
+			"type": "text"
 		},
 		{
 			"key": "email-subject",
@@ -63,21 +70,6 @@
 		{
 			"key": "email-body",
 			"name": "Body text for automated interview invitations",
-			"type": "rich-text"
-		},
-		{
-			"key": "email-from",
-			"name": "Set the 'from' address emails will be sent from",
-			"type": "text"
-		},
-		{
-			"key": "reminder-email-subject",
-			"name": "Subject line for reminder emails",
-			"type": "text"
-		},
-		{
-			"key": "reminder-email-body",
-			"name": "Body text for reminder emails",
 			"type": "rich-text"
 		},
 		{
@@ -199,7 +191,7 @@
 		"redcap-version-max": ""
 	},
 	
-	"framework-version": 2,
+	"framework-version": 5,
 	
 	"versions": {
 		"0.1.1": "Fixed issue where interview URLs sent via cron task had missing subject IDs. Updated logging to be more helpful for scheduled emails (cronEmail)."

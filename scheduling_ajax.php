@@ -35,7 +35,7 @@ if ($_POST['schedulingMethod'] == 'single') {
 		$json->error = $_POST['offset'] . " is not a valid offset -- must be an integer greater than or equal to 0.";
 		exit(json_encode($json));
 	}
-		
+	
 	list($ok, $msg) = $module->scheduleSequence($user_sequence, $offset, $time_of_day);
 	
 	if (!$ok) {
@@ -93,13 +93,22 @@ if ($_POST['schedulingMethod'] == 'single') {
 	$settings = [];
 	if ($_POST['enabled'] == 'on') {
 		$settings['enabled'] = true;
+		$settings['frequency'] = (int) $_POST['frequency'];
+		$settings['duration'] = (int) $_POST['duration'];
+		$settings['delay'] = (int) $_POST['delay'];
+		
+		if (empty($settings['frequency']))
+			$settings['frequency'] = 1;
+		if (empty($settings['duration']))
+			$settings['duration'] = 1;
+		if (empty($settings['delay']))
+			$settings['delay'] = 1;
 	} else {
 		$settings['enabled'] = false;
+		$settings['frequency'] = null;
+		$settings['duration'] = null;
+		$settings['delay'] = null;
 	}
-	
-	$settings['frequency'] = (int) $_POST['frequency'];
-	$settings['duration'] = (int) $_POST['duration'];
-	$settings['delay'] = (int) $_POST['delay'];
 	
 	$module->setReminderSettings($settings);
 	$json->reminderSettings = $module->getReminderSettings();
@@ -108,11 +117,6 @@ if ($_POST['schedulingMethod'] == 'single') {
 	$json->error = 'No scheduling method specified (must be single or interval).';
 }
 
-// clear and re-queue reminder emails if needed
-if (array_search($_POST['schedulingMethod'], ['interval', 'single', 'delete', 'setReminderSettings'], true)) {
-	$module->clearQueuedReminderEmails();
-	$module->queueAllReminderEmails();
-}
-
+$module->llog('sending back schduling json: ' . print_r($json, true));
 // send response
 exit(json_encode($json));

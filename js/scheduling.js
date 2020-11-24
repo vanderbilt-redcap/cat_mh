@@ -122,7 +122,7 @@ $('body').on('click', '#scheduleSingle', function() {
 		url: CATMH.scheduling_ajax_url,
 		data: post_data,
 		success: function(response) {
-			if (CATMH.debug)
+			// if (CATMH.debug)
 				console.log('scheduleSingle ajax returned successfully', response)
 			if (response.error) {
 				alert(response.error)
