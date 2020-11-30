@@ -17,7 +17,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 <div class="alert alert-warning w-50" role="alert">
 	<h5>The CAT-MH module does not have an Enrollment Field configured!</h5>
 	
-	<p>No invitations or reminder emails will be sent to participants until an Enrollment Field has been chosen via the External Modules page\'s Configure modal.</p>
+	<p>No participant interview data will be tabulated until an Enrollment Field has been chosen via the External Modules page\'s Configure modal.</p>
 </div>';
 	}
 ?>

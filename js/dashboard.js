@@ -5,6 +5,10 @@ $(document).ready(
 			pageLength: 25,
 			columnDefs: [
 				{className: 'dt-center', targets: '_all'}
+			],
+			order: [
+				[0, 'asc'],
+				[3, 'asc']
 			]
 		});
 	

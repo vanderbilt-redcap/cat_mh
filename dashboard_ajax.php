@@ -4,6 +4,8 @@ $pid = $module->getProjectId();
 $project = new \Project($pid);
 $eid = $project->firstEventId;
 $record_id_field = \REDCap::getRecordIdField();
+$time_now = time();
+// $time_now = strtotime("+13 days");
 
 // determine record home page link address
 if (strpos(APP_PATH_WEBROOT_FULL, "/redcap/") !== false) {	// dev
@@ -39,6 +41,7 @@ foreach($data as $rid => $record) {
 	$enroll_date = date("Y-m-d", $enrollment_timestamp);
 	
 	// get scheduled sequence information
+	$missed_surveys = 0;
 	$sequences = $module->getScheduledSequences();
 	foreach ($sequences as $i => $seq) {
 		$seq_name = $seq[1];
@@ -54,20 +57,19 @@ foreach($data as $rid => $record) {
 			"scheduled_datetime" => date("Y-m-d H:i", $sched_dt),
 			"days_to_complete" => $days_to_complete
 		];
-	}
-	
-	$sid = $record[$eid]['subjectid'];
-	$reminderSettings = $module->getReminderSettings();
-	$reminder_delay = $reminderSettings['delay'];
-	if (empty($reminder_delay))
-		$reminder_delay = 0;
-	
-	$missed_surveys = 0;
-	foreach ($sequences as $seq) {
-		if ($module->getSequenceStatus($rid, $seq['name'], $seq['scheduled_datetime']) != 4) {
+		$sequences[$i]['status'] = $module->getSequenceStatus($rid, $sequences[$i]['name'], $sequences[$i]['scheduled_datetime']);
+		$sequences[$i]['date_to_complete'] = date("Y-m-d H:i", strtotime("+$days_to_complete days", strtotime($sequences[$i]['scheduled_datetime'])));
+		
+		if (
+			$sequences[$i]['status'] != 4
+			&&
+			strtotime($sequences[$i]['date_to_complete']) <= $time_now
+		) {
 			$missed_surveys++;
 		}
 	}
+	
+	$sid = $record[$eid]['subjectid'];
 	
 	// append icon/links for each sequence
 	foreach ($sequences as $i => $seq) {
@@ -99,7 +101,7 @@ foreach($data as $rid => $record) {
 		// Within Window column
 		$completed_within_window = "";
 		
-		if (time() > strtotime($date_to_complete))
+		if ($time_now > strtotime($date_to_complete))
 			$completed_within_window = "N";
 		
 		if (!empty($interview) and ($interview->status == 4)) {
@@ -128,7 +130,7 @@ foreach($data as $rid => $record) {
 		// Elapsed Time column
 		$elapsed_time = "";
 		if ($completed_within_window == "N") {
-			$dt1 = date_create(date("Y-m-d", time()));
+			$dt1 = date_create(date("Y-m-d", $time_now));
 			$dt2 = date_create($date_to_complete);
 			$interval = date_diff($dt1, $dt2);
 			$elapsed_time = $interval->format("%d days");
