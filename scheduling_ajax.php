@@ -117,6 +117,5 @@ if ($_POST['schedulingMethod'] == 'single') {
 	$json->error = 'No scheduling method specified (must be single or interval).';
 }
 
-$module->llog('sending back schduling json: ' . print_r($json, true));
 // send response
 exit(json_encode($json));

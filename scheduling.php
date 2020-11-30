@@ -126,6 +126,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 <?php
 $js_url = $module->getUrl('js/scheduling.js');
 $sched_ajax_url = $module->getUrl('scheduling_ajax.php');
+$dash_ajax_url = $module->getUrl('dashboard_ajax.php');
 
 $scheduled = json_encode($module->getScheduledSequences());
 $reminderSettings = json_encode((object) $module->getReminderSettings());
@@ -133,6 +134,7 @@ $reminderSettings = json_encode((object) $module->getReminderSettings());
 echo "<script type='text/javascript' src='$js_url'></script>";
 echo "<script type='text/javascript'>
 	CATMH.scheduling_ajax_url = '$sched_ajax_url'
+	CATMH.dashboard_ajax_url = '$dash_ajax_url'
 	CATMH.debug = false;
 	CATMH.scheduledSequences = JSON.parse('$scheduled')
 	CATMH.reminderSettings = JSON.parse('$reminderSettings')

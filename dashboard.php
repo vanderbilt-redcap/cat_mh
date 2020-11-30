@@ -11,7 +11,16 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 	}
 </script>
 <script type="text/javascript" charset="utf8" src="<?php echo $module->getUrl('js/dashboard.js'); ?>"></script>
-
+<?php
+	if (empty($module->getProjectSetting('enrollment_field'))) {
+		echo '
+<div class="alert alert-warning w-50" role="alert">
+	<h5>The CAT-MH module does not have an Enrollment Field configured!</h5>
+	
+	<p>No invitations or reminder emails will be sent to participants until an Enrollment Field has been chosen via the External Modules page\'s Configure modal.</p>
+</div>';
+	}
+?>
 <table id="records" class="display compact nowrap">
     <thead>
         <tr>

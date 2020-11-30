@@ -48,8 +48,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'Acknowledged'
 	];
 	
-	public $api_host_name = "test.cat-mh.com";		// test
-	// public $api_host_name = "www.cat-mh.com";	// non-test
+	// public $api_host_name = "test.cat-mh.com";		// test
+	public $api_host_name = "www.cat-mh.com";	// non-test
 	
 	// hooks
 	public function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
@@ -104,7 +104,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			if (empty($current_time))
 				$current_time = time();
 			
-			// $this->llog("emailer_cron current_time date: " . date("Y-m-d H:i:s", $current_time));
 			// $this->sendInvitations($current_time);
 			
 			$result = $this->queryLogs("SELECT timestamp WHERE message='cron_ran_today'");
@@ -280,9 +279,9 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	public function makeInterview() {
 		// If no sequence given in url parameters, default to first sequence configured
 		$projectSettings = $this->getProjectSettings();
-		$sequence = $_GET['sequence'];
+		$sequence = urldecode($_GET['sequence']);
 		$sid = $_GET['sid'];
-		$sched_dt = $_GET['sched_dt'];
+		$sched_dt = urldecode($_GET['sched_dt']);
 		
 		// get system configuration details
 		$args = [];
@@ -295,13 +294,13 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$args['subjectID'] = $sid;
 		
 		// determine sequence tests and language
-		foreach ($projectSettings['sequence']['value'] as $i => $seq) {
+		foreach ($projectSettings['sequence'] as $i => $seq) {
 			if ($seq == $sequence) {
 				// tests array
 				$args['tests'] = [];
 				$testTypeKeys = array_keys($this->convertTestAbbreviation);
 				foreach ($testTypeKeys as $j => $testAbbreviation) {
-					if ($projectSettings[$testAbbreviation]['value'][$i] == 1) {
+					if ($projectSettings[$testAbbreviation][$i] == 1) {
 						$args['tests'][] = ["type" => $this->convertTestAbbreviation[$testAbbreviation]];
 					}
 				}
@@ -320,11 +319,11 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$catmh_data = json_decode($data[$rid][$eid]['cat_mh_data'], true);
 			
 			// remove previous unfinished interviews with same seq/datetime
-			$max_i = count($catmh_date['interviews']) - 1;
-			for ($i = $max_i; $i > 0; $i--) {
-				if ($interview['sequence'] == $sequence and $interview['scheduled_datetime'] == $sched_dt and $interview['status'] != 4)
-					array_splice($catmh_date['interviews'], $i, 1);
-			}
+			// $max_i = count($catmh_date['interviews']) - 1;
+			// for ($i = $max_i; $i > 0; $i--) {
+				// if ($interview['sequence'] == $sequence and $interview['scheduled_datetime'] == $sched_dt and $interview['status'] != 4)
+					// array_splice($catmh_date['interviews'], $i, 1);
+			// }
 			
 			$interview2 = [
 				"sequence" => $sequence,
@@ -391,12 +390,12 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	public function llog($text) {
 		// echo "<pre>$text\n</pre>";
 		
-		if ($this->log_ran) {
-			file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
-		} else {
-			file_put_contents("C:/vumc/log.txt", "starting CAT_MH_CHA log:\n$text\n");
-			$this->log_ran = true;
-		}
+		// if ($this->log_ran) {
+			// file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
+		// } else {
+			// file_put_contents("C:/vumc/log.txt", "starting CAT_MH_CHA log:\n$text\n");
+			// $this->log_ran = true;
+		// }
 	}
 	
 	// scheduling
@@ -436,7 +435,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$seq_name = $row['name'];
 			if (array_search($seq_name, $valid_seq_names, true) === false) {
 				// this is no longer a valid sequence to be scheduled since it was taken out of configuration
-				$this->llog("this is no longer a valid sequence to be scheduled since it was taken out of configuration : $seq_name");
 				$this->removeLogs("message='scheduleSequence' AND name='$seq_name'");
 			}
 		}
@@ -523,7 +521,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	public function sendInvitations($current_time) {
-		$this->llog("sendInvitations");
 		if (empty($enrollment_field_name = $this->getProjectSetting('enrollment_field')))
 			return;
 		
@@ -539,8 +536,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			]
 		];
 		$data = json_decode(\REDCap::getData($params));
-		
-		$this->llog("sendInvitations data: " . print_r($data, true));
 		
 		// prepare email invitation using project settings
 		$from_address = $this->getProjectSetting('email-from');
@@ -563,7 +558,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$append_urls = true;
 		
 		$email = new \Message();
-		$this->llog("sendInvitations setting from address: " . $from_address);
 		$email->setFrom($from_address);
 		$email->setSubject($email_subject);
 		
@@ -600,10 +594,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$invitations_to_send = $this->getInvitationsDue($record, $current_time);
 			if (empty($invitations_to_send)) {
 				// $result_log_message .= "No emails sent -- no invitations due."; // trivial case
-				$this->llog("sendInvitations - no invitations due for record $rid");
 				continue;
 			}
-			$this->llog("sendInvitations - invitations due for record $rid:\n" . print_r($invitations_to_send, true));
 			
 			// at least one participant with invitations to send
 			$actually_log_message = true;
@@ -613,11 +605,13 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$urls = [];
 			$links = [];
 			$base_url = $this->getUrl("interview.php") . "&NOAUTH&sid=$sid";
-			foreach ($invitations_to_send as $sequence_name => $invitation) {
-				if (!isset($sequences_already_included[$sequence_name])) {
-					$sequences_already_included[$sequence_name] = true;
-					$seq_url = $base_url . "&seq=" . urlencode($sequence_name) . "&sched_dt=" . urlencode($invitation->sched_dt);
-					$seq_link = "<a href=\"$seq_url\">CAT-MH Interview - $sequence_name</a>";
+			foreach ($invitations_to_send as $invitation) {
+				$seq_name = $invitation->sequence;
+				$seq_date = date("Y-m-d H:i", $invitation->sched_dt);
+				if (!isset($sequences_already_included[$seq_name])) {
+					$sequences_already_included[$seq_name] = true;
+					$seq_url = $base_url . "&sequence=" . urlencode($seq_name) . "&sched_dt=" . urlencode($seq_date);
+					$seq_link = "<a href=\"$seq_url\">CAT-MH Interview - $seq_name</a>";
 					$urls[] = $seq_url;
 					$links[] = $seq_link;
 				}
@@ -636,7 +630,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				$participant_email_body = str_replace("[interview-urls]", implode($urls, "<br>"), $participant_email_body);
 			}
 			$email->setBody($participant_email_body);
-			$this->llog("sendInvitations - setting email to address for record $rid:\n" . $record->catmh_email);
 			$email->setTo($record->catmh_email);
 			
 			$success = $email->send();
@@ -651,14 +644,12 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		}
 		
 		if ($actually_log_message) {
-			$this->llog("CAT-MH External Module:\n " . $result_log_message);
 			\REDCap::logEvent("CAT-MH External Module", $result_log_message, NULL, NULL, NULL, $this->getProjectId());
 		}
 	}
 	
 	public function getInvitationsDue($record, $current_time) {
 		$rid = $record->{$this->getRecordIdField()};
-		$this->llog("getInvitationsDue - $rid, $current_time");
 		// return an array with sequence names as keys, values as scheduled_datetimes
 		$enrollment_timestamp = strtotime($record->{$this->getProjectSetting('enrollment_field')});
 		
@@ -677,18 +668,13 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$time_of_day = $seq[3];
 			
 			// check scheduled event
-			// $this->llog("about to use enrollment_timestamp: $enrollment_timestamp");
 			$enroll_date = date("Y-m-d", $enrollment_timestamp);
-			// $this->llog("about to use enroll_date: $enroll_date");
 			$enroll_and_time = "$enroll_date " . $time_of_day;
-			// $this->llog("about to use enroll_and_time: $enroll_and_time");
-			// $this->llog("about to use offset: $offset");
 			$sched_time = strtotime("+$offset days", strtotime($enroll_and_time));
 			$first_sched_time = $sched_time;
 			
 			// check if interview is completed
 			if ($this->getSequenceStatus($rid, $name, $sched_time) == 4) {
-				$this->llog("getInvitationsDue sequence $name already complete");
 				continue;
 			}
 			
@@ -709,10 +695,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$invitation->time_of_day = $time_of_day;
 			$invitation->sched_dt = $first_sched_time;
 			
-			$this->llog("getInvitationsDue comparing sched_time $sched_time with current timestamp $current_time, used enroll_date ($enroll_date), sent_count: $sent_count, seq: " . print_r($seq, true));
 			if ($sched_time <= $current_time && $sent_count === 0) {
 				$invites[] = $invitation;
-				$this->llog("getInvitationsDue - added invitation [$name] => $first_sched_time");
 			}
 			
 			// send reminders if applicable
@@ -730,10 +714,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 						$offset,
 						$time_of_day
 					]);
-					$this->llog("getInvitationsDue comparing sched_time $sched_time with current timestamp $current_time for reminder - sent_count: $sent_count, seq: " . print_r($seq, true));
 					if ($sched_time <= $current_time && $sent_count === 0) {
 						$invites[] = $invitation;
-						$this->llog("getInvitationsDue - added reminder invitation [$name] => $first_sched_time");
 					}
 				}
 			}

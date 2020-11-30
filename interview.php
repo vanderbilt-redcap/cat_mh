@@ -1,7 +1,8 @@
 <?php
 $interview = $module->getInterview();
-if (empty($interview))
+if (empty($interview)) {
 	$interview = $module->makeInterview();
+}
 
 if (!empty($interview->results->tests)) {
 	$seq = $_GET['sequence'];
@@ -9,6 +10,7 @@ if (!empty($interview->results->tests)) {
 		$test->label = $module->getTestLabel($seq, $test->type);
 	}
 }
+
 ?>
 <!doctype html>
 <html lang="en">

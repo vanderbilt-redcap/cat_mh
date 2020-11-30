@@ -13,6 +13,9 @@ if (strpos(APP_PATH_WEBROOT_FULL, "/redcap/") !== false) {	// dev
 }
 
 $record_link = $link_base . "DataEntry/record_home.php?pid=$pid&arm=1&id=";
+if (empty($enrollment_field_name = $module->getProjectSetting('enrollment_field'))) {
+	exit("{}");
+}
 
 $params = [
 	"project_id" => $pid,
@@ -20,27 +23,39 @@ $params = [
 	"fields" => [
 		"subjectid",
 		"cat_mh_data",
-		$record_id_field
+		$record_id_field,
+		$enrollment_field_name
 	]
 ];
 $data = \REDCap::getData($params);
 
-// get scheduled sequence information
-$sequences = $module->getScheduledSequences();
-foreach ($sequences as $i => $seq) {
-	$sequences[$i] = [
-		"name" => $seq[2],
-		"scheduled_datetime" => $seq[1]
-	];
-}
-
 $json = new \stdClass();
 $table_data = [];
 foreach($data as $rid => $record) {
+	// determine sheduled date for this participant
+	if (!$enrollment_timestamp = strtotime($record[$eid][$enrollment_field_name]))
+		continue;
 	
-	// prepare interviews array
-	$catmh = json_decode($record[$eid]['cat_mh_data']);
-	$interviews = $catmh->interviews;
+	$enroll_date = date("Y-m-d", $enrollment_timestamp);
+	
+	// get scheduled sequence information
+	$sequences = $module->getScheduledSequences();
+	foreach ($sequences as $i => $seq) {
+		$seq_name = $seq[1];
+		$seq_offset = $seq[2];
+		$seq_time_of_day = $seq[3];
+		
+		$days_to_complete = $module->getProjectSetting('expected_complete')[$module->getSequenceIndex($seq_name)];
+		
+		$enroll_and_time = "$enroll_date " . $seq_time_of_day;
+		$sched_dt = strtotime("+$seq_offset days", strtotime($enroll_and_time));
+		$sequences[$i] = [
+			"name" => $seq_name,
+			"scheduled_datetime" => date("Y-m-d H:i", $sched_dt),
+			"days_to_complete" => $days_to_complete
+		];
+	}
+	
 	$sid = $record[$eid]['subjectid'];
 	$reminderSettings = $module->getReminderSettings();
 	$reminder_delay = $reminderSettings['delay'];
@@ -56,11 +71,9 @@ foreach($data as $rid => $record) {
 	
 	// append icon/links for each sequence
 	foreach ($sequences as $i => $seq) {
-		$interview = $module->getInterview($seq['name'], $seq['scheduled_datetime'], $sid);
-		
 		// preparation/calculation
-		$date_to_complete = date("Y-m-d H:i", strtotime("+$reminder_delay days", strtotime($seq['scheduled_datetime'])));
-		//
+		$interview = $module->getInterview($seq['name'], $seq['scheduled_datetime'], $sid);
+		$date_to_complete = date("Y-m-d H:i", strtotime("+{$seq['days_to_complete']} days", strtotime($seq['scheduled_datetime'])));
 		
 		$row = [];
 		
@@ -114,7 +127,7 @@ foreach($data as $rid => $record) {
 		
 		// Elapsed Time column
 		$elapsed_time = "";
-		if ($completed_within_window = "N") {
+		if ($completed_within_window == "N") {
 			$dt1 = date_create(date("Y-m-d", time()));
 			$dt2 = date_create($date_to_complete);
 			$interval = date_diff($dt1, $dt2);
@@ -139,4 +152,5 @@ foreach($data as $rid => $record) {
 }
 
 $json->data = $table_data;
+
 exit(json_encode($json));
