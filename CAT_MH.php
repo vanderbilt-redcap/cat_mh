@@ -154,8 +154,7 @@ class CAT_MH extends \ExternalModules\AbstractExternalModule {
 					$save_results = \REDCap::saveData($this->getProjectId(), 'array', [$record]);
 				}
 				
-				if (empty($subjectID))
-					$subjectID = $record[$eid]["subjectid"];
+				$subjectID = $record[$eid]["subjectid"];
 				
 				// invite participant to complete CAT-MH interview sequences
 				if (empty($addressTo)) {
