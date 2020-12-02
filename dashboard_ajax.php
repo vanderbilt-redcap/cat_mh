@@ -4,8 +4,8 @@ $pid = $module->getProjectId();
 $project = new \Project($pid);
 $eid = $project->firstEventId;
 $record_id_field = \REDCap::getRecordIdField();
-$time_now = time();
-// $time_now = strtotime("+13 days");
+// $time_now = time();
+$time_now = strtotime("+12 days");
 
 // determine record home page link address
 if (strpos(APP_PATH_WEBROOT_FULL, "/redcap/") !== false) {	// dev
@@ -23,8 +23,6 @@ $params = [
 	"project_id" => $pid,
 	"return_format" => 'array',
 	"fields" => [
-		"subjectid",
-		"cat_mh_data",
 		$record_id_field,
 		$enrollment_field_name
 	]
@@ -69,13 +67,16 @@ foreach($data as $rid => $record) {
 		}
 	}
 	
-	$sid = $record[$eid]['subjectid'];
+	$sid = $module->getSubjectID($rid);
 	
 	// append icon/links for each sequence
 	foreach ($sequences as $i => $seq) {
 		// preparation/calculation
-		$interview = $module->getInterview($seq['name'], $seq['scheduled_datetime'], $sid);
+		$interview = $module->getSequence($seq['name'], $seq['scheduled_datetime'], $sid);
 		$date_to_complete = date("Y-m-d H:i", strtotime("+{$seq['days_to_complete']} days", strtotime($seq['scheduled_datetime'])));
+		$completed_within_window = "";
+		if ($time_now > strtotime($date_to_complete))
+			$completed_within_window = "N";
 		
 		$row = [];
 		
@@ -85,8 +86,13 @@ foreach($data as $rid => $record) {
 		// Completed column
 		$completed_icon = null;
 		if (empty($interview) or ($interview->status == false)) {	// unstarted
-			// not started or completed, append gray circle img
-			$completed_icon = "<img src='" . APP_PATH_IMAGES . "circle_gray.png' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";
+			if ($completed_within_window == 'N') {
+				// not started or completed, AND overdue: red circle icon
+				$completed_icon = "<img src='" . APP_PATH_IMAGES . "circle_red.png' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";
+			} else {
+				// not started or completed, append gray circle img
+				$completed_icon = "<img src='" . APP_PATH_IMAGES . "circle_gray.png' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";
+			}
 		} elseif ($interview->status != 4) {
 			// started but not completed, append yellow circle img
 			$completed_icon = "<img src='" . APP_PATH_IMAGES . "circle_yellow.png' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";
@@ -99,10 +105,6 @@ foreach($data as $rid => $record) {
 		$row[] = $completed_icon;
 		
 		// Within Window column
-		$completed_within_window = "";
-		
-		if ($time_now > strtotime($date_to_complete))
-			$completed_within_window = "N";
 		
 		if (!empty($interview) and ($interview->status == 4)) {
 			if ($interview->timestamp < strtotime($date_to_complete)) {
@@ -145,10 +147,15 @@ foreach($data as $rid => $record) {
 		// Missed Surveys column
 		$row[] = $missed_surveys;
 		
-		// Reviewed column
-		$seq_name = $seq['name'];
-		$seq_date = $seq['scheduled_datetime'];
-		$row[] = "<button class='review' data-rid='$rid' data-seq='$seq_name' data-date='$seq_date'>Mark Reviewed</button>";
+		// Acknowledged/Mark Reviewed column
+		if ($completed_within_window == 'N') {
+			$seq_name = $seq['name'];
+			$seq_date = $seq['scheduled_datetime'];
+			$row[] = "<button class='review' data-rid='$rid' data-seq='$seq_name' data-date='$seq_date'>Mark Reviewed</button>";
+		} else {
+			$row[] = '';
+		}
+		
 		$table_data[] = $row;
 	}
 }

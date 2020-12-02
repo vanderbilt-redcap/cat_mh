@@ -53,13 +53,13 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	
 	// hooks
 	public function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
+		/* NOTE: this functionality is obsolete until a scheduled_datetime parameter can be correctly appended to the link below
+		// to figure that out, we need to understand how module admins will expect this to work
+		
 		// if user did not consent, then do not forward to interview, instead notify them that they were rejected and that they may now close this window
 		$userConsent = \REDCap::getData($project_id, 'array', $record, 'consent')[$record][$event_id]['consent'];
 		if ($userConsent != 1) {
 			echo("You did not consent to the adaptive testing interview and may now close this tab/window.");
-			// delete record that REDCap created
-			$tpk = \Records::getTablePK($project_id);
-			$ret = \Records::deleteRecord($record, $tpk, null, null, null, null, null, "CAT-MH module removed record for consent==0", true);
 			return;
 		}
 		
@@ -85,7 +85,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$sequence = $projectSettings['sequence']['value'][0];
 		}
 		if ($sequence == NULL) {
-			echo("There are no CAT-MH tests configured. Please contact your administrator and have them configure the CAT-MH module in REDCap.");
+			echo("REDCap's CAT-MH module couldn't find the configured ($sequence) interview for you. Please contact your program administrator.");
 			return;
 		}
 		
@@ -93,6 +93,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$page = $this->getUrl("interview.php") . "&NOAUTH&sid=" . $subjectID . "&sequence=$sequence";
 		header('Location: ' . $page, true, 302);
 		$this->exitAfterHook();
+		*/
 	}
 	
 	// crons
@@ -194,21 +195,15 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	
 	public function getAuthValues($args) {
 		// args should have: subjectID, interviewID, identifier, signature
-		try {
-			$data = $this->getRecordBySID($args['subjectID']);
-			$rid = array_keys($data)[0];
-			$eid = array_keys($data[$rid])[0];
-			$catmh_data = json_decode($data[$rid][$eid]['cat_mh_data'], true);
-			foreach($catmh_data['interviews'] as $i => $interview) {
-				if ($interview['interviewID'] == $args['interviewID'] and $interview['signature'] == $args['signature'] and $interview['identifier'] == $args['identifier']) {
-					return [
-						"jsessionid" => $interview['jsessionid'],
-						"awselb" => $interview['awselb']
-					];
-				}
-			}
-		} catch (\Exception $e) {
-			echo("REDCap couldn't get authorization values from logged interview data -- please contact REDCap administrator.<br />$e");
+		
+		$interview = $this->getInterview($args['subjectID'], $args['interviewID'], $args['identifier'], $args['signature']);
+		if (empty($interview)) {
+			echo("REDCap couldn't get authorization values from logged interview data -- please contact REDCap administrator.");
+		} else {
+			return [
+				'jsessionid' => $interview->jsessionid,
+				'awselb' => $interview->awselb
+			];
 		}
 	}
 	
@@ -235,6 +230,14 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		return false;
 	}
 	
+	public function getSubjectID($record_id) {
+		$r = $this->query("SELECT value FROM redcap_data WHERE record = ? AND field_name='subjectid' AND project_id = ?", [
+			$record_id,
+			$this->getProjectId()
+		]);
+		return db_fetch_assoc($r)['value'];
+	}
+	
 	public function getSequenceIndex($seq_name) {
 		foreach ($this->getProjectSetting('sequence') as $i => $name) {
 			if ($name === $seq_name)
@@ -255,25 +258,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		}
 		
 		return $alt_label;
-	}
-	
-	public function getInterview($sequence="", $sched_dt="", $sid="") {
-		if (empty($sequence))
-			$sequence = $_GET['sequence'];
-		if (empty($sched_dt))
-			$sched_dt = $_GET['sched_dt'];
-		if (empty($sid))
-			$sid = $_GET['sid'];
-		$sid = preg_replace("/\W|_/", '', $sid);
-		
-		$record = $this->getRecordBySID($sid);
-		$data = json_decode(reset(reset($record))['cat_mh_data']);
-		foreach ($data->interviews as $interview) {
-			if ($interview->scheduled_datetime == $sched_dt AND $interview->sequence == $sequence) {
-				$interview->subjectID = $sid;
-				return $interview;
-			}
-		}
 	}
 	
 	public function makeInterview() {
@@ -311,61 +295,30 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$interview = $this->createInterview($args);
 		$interview['subjectID'] = $sid;
 		
-		if (!isset($interview['moduleError'])) {
-			// save newly created interview info in redcap
-			$data = $this->getRecordBySID($sid);
-			$rid = array_keys($data)[0];
-			$eid = array_keys($data[$rid])[0];
-			$catmh_data = json_decode($data[$rid][$eid]['cat_mh_data'], true);
-			
-			// remove previous unfinished interviews with same seq/datetime
-			// $max_i = count($catmh_date['interviews']) - 1;
-			// for ($i = $max_i; $i > 0; $i--) {
-				// if ($interview['sequence'] == $sequence and $interview['scheduled_datetime'] == $sched_dt and $interview['status'] != 4)
-					// array_splice($catmh_date['interviews'], $i, 1);
-			// }
-			
-			$interview2 = [
-				"sequence" => $sequence,
-				"scheduled_datetime" => $sched_dt,
-				"interviewID" => $interview['interviewID'],
-				"identifier" => $interview['identifier'],
-				"signature" => $interview['signature'],
-				"types" => $interview['types'],
-				"labels" => $interview['labels'],
-				"status" => 1,
-				"timestamp" => time(),
-				"subjectID" => $sid
-			];
-			$catmh_data['interviews'][] = $interview2;
-			
-			$data[$rid][$eid]['cat_mh_data'] = json_encode($catmh_data);
-			$result = \REDCap::saveData($this->getProjectId(), 'array', $data);
-			if (!empty($result['errors'])) {
-				echo("<pre>");
-				echo("Errors saving to REDCap:\n");
-				print_r($result);
-				echo("<pre>");
-				return false;
-			}
-			return $interview2;
-		} else {
+		$new_interview = [
+			"sequence" => $sequence,
+			"scheduled_datetime" => $sched_dt,
+			"interviewID" => $interview['interviewID'],
+			"identifier" => $interview['identifier'],
+			"signature" => $interview['signature'],
+			"types" => $interview['types'],
+			"labels" => $interview['labels'],
+			"status" => 1,
+			"timestamp" => time(),
+			"subjectID" => $sid
+		];
+		$log_id = $this->updateInterview($new_interview);
+		
+		if (!$log_id) {
 			echo("CAT-MH encountered an error with the API:<br />" . $interview['moduleMessage']);
 			return false;
+		} else {
+			return $new_interview;
 		}
 	}
 	
 	public function getSequenceStatus($record, $seq_name, $datetime) {
-		$params = [
-			"project_id" => $this->getProjectId(),
-			"return_format" => "json",
-			"records" => $record,
-			"fields" => ["cat_mh_data", "record_id"]
-		];
-		$data = json_decode(\REDCap::getData($params));
-		$catmh = json_decode($data[0]->cat_mh_data);
-		$interviews = $catmh->interviews;
-		
+		$interviews = $this->getInterviewsByRecordID($record);
 		foreach ($interviews as $i => $interview) {
 			if ($interview->sequence == $seq_name and $interview->scheduled_datetime == $datetime) {
 				return $interview->status;
@@ -374,21 +327,22 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		return false;
 	}
 	
-	function initRecord(&$record) {
+	public function initRecord(&$record) {
 		if (gettype($record) !== 'object')
 			throw new \Exception("First argument to sendEmails must be an object -- type: " . gettype($record));
 		if (empty($rid = $record->{$this->getRecordIdField()}))
 			throw new \Exception("\$record argument is missing a record ID field (in initRecord)");
 		
 		$record->subjectid = $this->generateSubjectID();
-		$record->cat_mh_data = json_encode(["interviews" => []]);
 		$data = json_encode([$record]);
 		$save_results = \REDCap::saveData($this->getProjectId(), 'json', $data, 'overwrite');
-		\REDCap::logEvent("CAT-MH External Module", "Initialized subject ID and CAT-MH interview data field for record: $rid", NULL, NULL, NULL, $this->getProjectId());
+		\REDCap::logEvent("CAT-MH External Module", "Initialized CAT-MH subjectID for record: $rid", NULL, NULL, NULL, $this->getProjectId());
 	}
 	
 	public function llog($text) {
 		// echo "<pre>$text\n</pre>";
+		
+		// $this->log_ran = true;
 		
 		// if ($this->log_ran) {
 			// file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
@@ -396,6 +350,109 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			// file_put_contents("C:/vumc/log.txt", "starting CAT_MH_CHA log:\n$text\n");
 			// $this->log_ran = true;
 		// }
+	}
+	
+	// interview data object/log functions
+	public function getSequence($sequence, $scheduled_datetime, $subjectID) {	// change to fetchInterview? or getOrMakeInterview?
+		// queryLogs, convert interview object to array?
+		$result = $this->queryLogs("SELECT interview WHERE sequence = ? AND scheduled_datetime = ? AND subjectID = ?", [
+			"sequence" => $sequence,
+			"scheduled_datetime" => $scheduled_datetime,
+			"subjectID" => $subjectID
+		]);
+		
+		// return $interview or false;
+		$interview = json_decode(db_fetch_assoc($result)['interview']);
+		if (empty($interview))
+			return false;
+		return $interview;
+	}
+	
+	public function getInterview($subjectID, $interviewID, $identifier, $signature) {
+		// queryLogs, convert interview object to array?
+		$result = $this->queryLogs("SELECT interview, timestamp WHERE message='catmh_interview' AND subjectID = ? AND interviewID = ? AND identifier = ? AND signature = ?", [
+			$subjectID, $interviewID, $identifier, $signature
+		]);
+		$db_result = db_fetch_assoc($result);
+		$interview = json_decode($db_result['interview']);
+		$interview->db_timestamp = $db_result['timestamp'];
+		
+		return $interview;
+	}
+	
+	public function updateInterview($interview) {
+		if (gettype($interview) == 'array')
+			$interview = (object) $interview;
+		
+		// build parameters array
+		$rid = $this->getRecordIDBySID($interview->subjectID);
+		$parameters = [
+			"subjectid" => $interview->subjectID,
+			"sequence" => $interview->sequence,
+			"interviewID" => $interview->interviewID,
+			"identifier" => $interview->identifier,
+			"signature" => $interview->signature,
+			"scheduled_datetime" => $interview->scheduled_datetime,
+			'interview' => json_encode($interview)
+		];
+		$parameters["record_id"] = $rid;
+		
+		// assert all params are present
+		foreach($parameters as $name => $value) {
+			if(empty($value))
+				throw new \Exception("Can't update interview with empty $name parameter");
+		}
+		
+		// fetch existing interview with these parameters (if it exists)
+		$existing_interview = $this->getInterview($interview->subjectID, $interview->interviewID, $interview->identifier, $interview->signature);
+		
+		// log with message 'catmh_interview'
+		$log_id = $this->log('catmh_interview', $parameters);
+		
+		// success:
+			// remove old interview data
+			// then return log_id
+		// fail:
+			// logEvent, revert, return false
+		if (!empty($log_id)) {
+			if ($existing_interview) {
+				$this->removeLogs("message = ? AND subjectID = ? AND interviewID = ? AND identifier = ? AND signature = ? AND timestamp = ?", [
+					'catmh_interview',
+					$existing_interview->subjectID,
+					$existing_interview->interviewID,
+					$existing_interview->identifier,
+					$existing_interview->signature,
+					$existing_interview->db_timestamp
+				]);
+			}
+			return $log_id;
+		}
+		
+		if (!empty($existing_interview)) {
+			// revert
+			$log_id = $this->updateInterview($existing_interview);
+			if (empty($log_id)) {
+				\REDCap::logEvent("CAT-MH External Module", "Record $rid: Failed to save interview object AND failed to revert to old interview data (updateInterview)", NULL, NULL, NULL, $this->getProjectId());
+			} else {
+				\REDCap::logEvent("CAT-MH External Module", "Record $rid: Failed to save interview object but succesfully reverted to old interview data (updateInterview)", NULL, NULL, NULL, $this->getProjectId());
+				return $log_id;
+			}
+		} else {
+			\REDCap::logEvent("CAT-MH External Module", "Record $rid: Failed to save new interview object! (updateInterview)", NULL, NULL, NULL, $this->getProjectId());
+			return false;
+		}
+	}
+	
+	public function getInterviewsByRecordID($record_id) {
+		$interviews = [];
+		
+		$result = $this->queryLogs("SELECT interview WHERE message='catmh_interview' AND record_id = ?", [$record_id]);
+		while ($row = db_fetch_assoc($result)) {
+			$interviews[] = json_decode($row['interview']);
+		}
+		
+		if (!empty($interviews))
+			return $interviews;
 	}
 	
 	// scheduling
@@ -806,25 +863,15 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$curl = $this->curl($curlArgs);
 		
 		if (isset($curl['cookies']['JSESSIONID']) and isset($curl['cookies']['AWSELB'])) {
-			// update redcap record data
-			$data = $this->getRecordBySID($args['subjectID']);
-			$rid = array_keys($data)[0];
-			$eid = array_keys($data[$rid])[0];
-			$catmh_data = json_decode($data[$rid][$eid]['cat_mh_data'], true);
+			// update security values in interview object
+			$interview = $this->getInterview($args['subjectID'], $args['interviewID'], $args['identifier'], $args['signature']);
+			$interview->jsessionid = $curl['cookies']['JSESSIONID'];
+			$interview->awselb = $curl['cookies']['AWSELB'];
+			$result = $this->updateInterview($interview);
 			
-			foreach($catmh_data['interviews'] as $i => $interview) {
-				if (intval($interview['interviewID']) == $args['interviewID'] and $interview['signature'] == $args['signature'] and $interview['identifier'] == $args['identifier']){
-					$catmh_data['interviews'][$i]['jsessionid'] = $curl['cookies']['JSESSIONID'];
-					$catmh_data['interviews'][$i]['awselb'] = $curl['cookies']['AWSELB'];
-				}
-			}
-			
-			$data[$rid][$eid]['cat_mh_data'] = json_encode($catmh_data);
-			$result = \REDCap::saveData($this->getProjectId(), 'array', $data);
-			
-			if (!empty($result['errors'])) {
+			if (empty($result)) {
 				$out['moduleError'] = true;
-				$out['moduleMessage'] = "Errors saving to REDCap:\n" . print_r($result, true);
+				$out['moduleMessage'] = "Errors saving authorization values to REDCap. Please contact your program administrator.";
 			} else {
 				$out['success'] = true;
 			}
@@ -842,6 +889,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		try {
 			$authValues = $this->getAuthValues($args);
+			$this->llog("authValues: " . print_r($authValues, true));
 			if (!isset($authValues['jsessionid']) or !isset($authValues['awselb'])) {
 				throw new \Exception("Auth values not set.");
 			}
@@ -868,23 +916,14 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			if (gettype($json) != 'array') throw new \Exception("json error");
 			
 			// update timestamp and status for this interview
-			$data = $this->getRecordBySID($args['subjectID']);
-			$rid = array_keys($data)[0];
-			$eid = array_keys($data[$rid])[0];
-			$catmh_data = json_decode($data[$rid][$eid]['cat_mh_data'], true);
+			$interview = $this->getInterview($args['subjectID'], $args['interviewID'], $args['identifier'], $args['signature']);
+			$interview->status = 2;
+			$interview->timestamp = time();
+			$result = $this->updateInterview($interview);
 			
-			foreach($catmh_data['interviews'] as $i => $interview) {
-				if ($interview['interviewID'] == $args['interviewID'] and $interview['signature'] == $args['signature'] and $interview['identifier'] == $args['identifier']) {
-					$catmh_data['interviews'][$i]['status'] = 2;
-					$catmh_data['interviews'][$i]['timestamp'] = time();
-				}
-			}
-			
-			$data[$rid][$eid]['cat_mh_data'] = json_encode($catmh_data);
-			$result = \REDCap::saveData($this->getProjectId(), 'array', $data);
-			if (!empty($result['errors'])) {
+			if (empty($result)) {
 				$out['moduleError'] = true;
-				$out['moduleMessage'] = "Errors saving to REDCap:" . print_r($result, true);
+				$out['moduleMessage'] = "Errors saving to REDCap. Please contact your program administrator.";
 			} else {
 				$out['success'] = true;
 			}
@@ -1078,26 +1117,18 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$results = json_decode($curl['body'], true);
 		
 		// update redcap record data
-		$data = $this->getRecordBySID($args['subjectID']);
-		$rid = array_keys($data)[0];
-		$eid = array_keys($data[$rid])[0];
-		$catmh_data = json_decode($data[$rid][$eid]['cat_mh_data'], true);
+		$interview = $this->getInterview($args['subjectID'], $args['interviewID'], $args['identifier'], $args['signature']);
+		$interview->results = $results;
+		$interview->status = 4;
+		$interview->timestamp = time();
 		
-		foreach($catmh_data['interviews'] as $i => $interview) {
-			if ($interview['interviewID'] == $args['interviewID'] and $interview['signature'] == $args['signature'] and $interview['identifier'] == $args['identifier']) {
-				$catmh_data['interviews'][$i]['results'] = $results;
-				$catmh_data['interviews'][$i]['status'] = 4;
-				$catmh_data['interviews'][$i]['timestamp'] = time();
-				$sequence = $catmh_data['interviews'][$i]['sequence'];
-				$testTypes = $catmh_data['interviews'][$i]['types'];
-			}
-		}
+		$result = $this->updateInterview($interview);
+		$sequence = $interview->sequence;
+		$testTypes = $interview->types;
 		
-		$data[$rid][$eid]['cat_mh_data'] = json_encode($catmh_data);
-		$result = \REDCap::saveData($this->getProjectId(), 'array', $data);
-		if (!empty($result['errors'])) {
+		if (empty($result)) {
 			$out['moduleError'] = true;
-			$out['moduleMessage'] = "Errors saving to REDCap:" . print_r($result, true);
+			$out['moduleMessage'] = "Errors saving to REDCap. Please contact your program administrator.";
 			return $out;
 		}
 		
@@ -1152,15 +1183,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	public function getInterviewStatus($args) {
 		// need args: applicationid, organizationID, interviewID, identifier, signature
 		$out = [];
-		
-		// get project/system configuration information
-		$config = $this->getInterviewConfig($args['instrument']);
-		
-		if ($interviewConfig === false) {
-			$out['moduleError'] = true;
-			$out['moduleMessage'] = "Failed to create interview -- couldn't find interview settings for this instrument: " . $args['instrument'];
-			return $out;
-		};
 		
 		// build request headers and body
 		$curlArgs = [];

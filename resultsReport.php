@@ -34,10 +34,11 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 			</thead>
 			<tbody>
 <?php
+	// get all record IDs
 	$params = [
 		"project_id" => $module->getProjectId(),
 		"return_format" => 'array',
-		"fields" => ['cat_mh_data']
+		"fields" => [$module->getRecordIDField()]
 	];
 	
 	// filter by record, sequence, and datetime if applicable
@@ -49,33 +50,33 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 	if (isset($_GET['sched_dt']))
 		$schedFilter = $_GET['sched_dt'];
 	
-	// $data = \REDCap::getData($module->getProjectId(), 'array');
 	$data = \REDCap::getData($params);
 	foreach($data as $rid => $record) {
-		$eid = array_keys($record)[0];
-		$catmh = json_decode($data[$rid][$eid]['cat_mh_data'], true);
-		foreach($catmh['interviews'] as $i => $interview) {
-			$seq_ok = (empty($seqFilter) or $seqFilter == $interview['sequence']);
-			$sched_ok = (empty($schedFilter) or $schedFilter == $interview['scheduled_datetime']);
-			
-			if ($interview['status'] == "4" and $interview['results'] != NULL and $sched_ok and $seq_ok) {
-				foreach($interview['results']['tests'] as $j => $test) {
-					$url = $module->getUrl("interview.php") . "&NOAUTH&sid=" . $record[$eid]['subjectid'] . "&sequence=". $interview['sequence'];
+		// get this patients interviews
+		$interviews = $module->getInterviewsByRecordID($rid);
+		
+		foreach($interviews as $i => $interview) {
+			$seq_ok = (empty($seqFilter) or $seqFilter == $interview->sequence);
+			$sched_ok = (empty($schedFilter) or $schedFilter == $interview->scheduled_datetime);
+			$sid = $module->getSubjectID($rid);
+			if ($interview->status == "4" and !empty($interview->results) and $sched_ok and $seq_ok) {
+				foreach($interview->results->tests as $j => $test) {
+					$url = $module->getUrl("interview.php") . "&NOAUTH&sid=" . $sid . "&sequence=". $interview->sequence;
 					echo("
 					<tr>
 						<td>{$rid}</td>
-						<td>" . $interview['scheduled_datetime'] . "</td>
-						<td>" . date("Y-m-d H:i", $interview['timestamp']) . "</td>
-						<td>{$interview['sequence']}</td>
-						<td>{$test['label']}</td>
-						<td>{$test['diagnosis']}</td>
-						<td>{$test['confidence']}</td>
-						<td>{$test['severity']}</td>
-						<td>{$test['category']}</td>
-						<td>{$test['precision']}</td>
-						<td>{$test['prob']}</td>
-						<td>{$test['percentile']}</td>
-						<td>" . ($interview['reviewed'] ? "Y" : "N") . "</td>
+						<td>" . $interview->scheduled_datetime . "</td>
+						<td>" . date("Y-m-d H:i", $interview->timestamp) . "</td>
+						<td>{$interview->sequence}</td>
+						<td>{$test->label}</td>
+						<td>{$test->diagnosis}</td>
+						<td>{$test->confidence}</td>
+						<td>{$test->severity}</td>
+						<td>{$test->category}</td>
+						<td>{$test->precision}</td>
+						<td>{$test->prob}</td>
+						<td>{$test->percentile}</td>
+						<td>" . ($interview->reviewed ? "Y" : "N") . "</td>
 					</tr>");
 				}
 			}

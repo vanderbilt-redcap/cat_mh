@@ -1,5 +1,9 @@
 <?php
-$interview = $module->getInterview();
+$sequence = $_GET['sequence'];
+$sched_dt = $_GET['sched_dt'];
+$sid = $_GET['sid'];
+$sid = preg_replace("/\W|_/", '', $sid);
+$interview = $module->getSequence($sequence, $sched_dt, $sid);
 if (empty($interview)) {
 	$interview = $module->makeInterview();
 }
