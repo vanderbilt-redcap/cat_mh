@@ -3,9 +3,9 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 
 ?>
 
+<link rel="stylesheet" type="text/css" href="<?php echo $module->getUrl('css/dashboard.css'); ?>">
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
-<link rel="stylesheet" type="text/css" href="<?php echo $module->getUrl('css/dashboard.css'); ?>">
 <script type="text/javascript" charset="utf8">
 	CATMH = {
 		dashboard_ajax_url: <?php echo '"' . $module->getUrl("dashboard_ajax.php") . '"'; ?>,
@@ -30,6 +30,10 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 </div>';
 	}
 ?>
+<span>Set dashboard date/time for testing</span>
+<div id="dash_time" class='dt-picker'></div>
+<br>
+
 <table id="records" class="display compact nowrap">
     <thead>
         <tr>

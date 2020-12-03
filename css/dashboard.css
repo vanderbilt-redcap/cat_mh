@@ -5,3 +5,8 @@ table#records {
 table#records a {
 	text-decoration: underline;
 }
+.dash_time_date a {
+	border: 1px solid #dad55e !important;
+    background: #fffa90 !important;
+    color: #777620 !important;
+}
