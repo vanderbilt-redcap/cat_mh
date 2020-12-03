@@ -72,11 +72,19 @@ foreach($data as $rid => $record) {
 	// append icon/links for each sequence
 	foreach ($sequences as $i => $seq) {
 		// preparation/calculation
-		$interview = $module->getSequence($seq['name'], $seq['scheduled_datetime'], $sid);
-		$date_to_complete = date("Y-m-d H:i", strtotime("+{$seq['days_to_complete']} days", strtotime($seq['scheduled_datetime'])));
+		$seq_name = $seq['name'];
+		$seq_date = $seq['scheduled_datetime'];
+		$interview = $module->getSequence($seq_name, $seq_date, $sid);
+		$date_to_complete = date("Y-m-d H:i", strtotime("+{$seq['days_to_complete']} days", strtotime($seq_date)));
 		$completed_within_window = "";
 		if ($time_now > strtotime($date_to_complete))
 			$completed_within_window = "N";
+		$interview_acknowledged_delinquent = $module->countLogs("message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ?", [
+			"acknowledged_delinquent",
+			$seq_name,
+			$seq_date,
+			$sid
+		]);
 		
 		$row = [];
 		
@@ -86,7 +94,11 @@ foreach($data as $rid => $record) {
 		// Completed column
 		$completed_icon = null;
 		if (empty($interview) or ($interview->status == false)) {	// unstarted
-			if ($completed_within_window == 'N') {
+			if ($interview_acknowledged_delinquent) {
+				// acknowledged delinquent, blue circle icon
+				$blue_icon_url = $module->getUrl("images/circle_blue.png");
+				$completed_icon = "<img src='$blue_icon_url' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";
+			} elseif ($completed_within_window == 'N') {
 				// not started or completed, AND overdue: red circle icon
 				$completed_icon = "<img src='" . APP_PATH_IMAGES . "circle_red.png' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";
 			} else {
@@ -99,7 +111,7 @@ foreach($data as $rid => $record) {
 		} elseif ($interview->status == 4) {
 			// append green circle (which itself, is a link to filtered results report)
 			$img = "<img src='" . APP_PATH_IMAGES . "circle_green_tick.png' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";
-			$link = $module->getUrl('resultsReport.php') . "&record=$rid&seq=" . urlencode($seq['name']) . "&sched_dt=" . urlencode($seq['scheduled_datetime']);
+			$link = $module->getUrl('resultsReport.php') . "&record=$rid&seq=" . urlencode($seq_name) . "&sched_dt=" . urlencode($seq_date);
 			$completed_icon = "<a href='$link'>$img</a>";
 		}
 		$row[] = $completed_icon;
@@ -116,7 +128,7 @@ foreach($data as $rid => $record) {
 		$row[] = $completed_within_window;
 		
 		// Date Scheduled column
-		$row[] = date("Y-m-d H:i", strtotime($seq['scheduled_datetime']));
+		$row[] = date("Y-m-d H:i", strtotime($seq_date));
 		
 		// Date to Complete column
 		$row[] = $date_to_complete;
@@ -148,9 +160,9 @@ foreach($data as $rid => $record) {
 		$row[] = $missed_surveys;
 		
 		// Acknowledged/Mark Reviewed column
-		if ($completed_within_window == 'N') {
-			$seq_name = $seq['name'];
-			$seq_date = $seq['scheduled_datetime'];
+		if ($interview_acknowledged_delinquent) {
+			$row[] = 'Y';
+		} elseif ($completed_within_window == 'N') {
 			$row[] = "<button class='review' data-rid='$rid' data-seq='$seq_name' data-date='$seq_date'>Mark Reviewed</button>";
 		} else {
 			$row[] = '';

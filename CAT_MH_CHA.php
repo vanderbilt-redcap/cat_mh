@@ -48,8 +48,17 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'Acknowledged'
 	];
 	
-	// public $api_host_name = "test.cat-mh.com";		// test
-	public $api_host_name = "www.cat-mh.com";	// non-test
+	public function __construct() {
+		parent::__construct();
+		
+		if (file_exists($this->getModulePath() . 'able_test.php')) {
+			$this->local_env = true;
+			$this->api_host_name = "test.cat-mh.com";
+		} else {
+			$this->api_host_name = "www.cat-mh.com";
+		}
+	}
+
 	
 	// hooks
 	public function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
@@ -340,16 +349,18 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	public function llog($text) {
+		if (!$this->local_env)
+			return;
 		// echo "<pre>$text\n</pre>";
 		
 		// $this->log_ran = true;
 		
-		// if ($this->log_ran) {
-			// file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
-		// } else {
-			// file_put_contents("C:/vumc/log.txt", "starting CAT_MH_CHA log:\n$text\n");
-			// $this->log_ran = true;
-		// }
+		if ($this->log_ran) {
+			file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
+		} else {
+			file_put_contents("C:/vumc/log.txt", "starting CAT_MH_CHA log:\n$text\n");
+			$this->log_ran = true;
+		}
 	}
 	
 	// interview data object/log functions

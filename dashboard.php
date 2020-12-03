@@ -7,7 +7,9 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 <link rel="stylesheet" type="text/css" href="<?php echo $module->getUrl('css/dashboard.css'); ?>">
 <script type="text/javascript" charset="utf8">
 	CATMH = {
-		ajax_url: <?php echo '"' . $module->getUrl("dashboard_ajax.php") . '"'; ?>
+		dashboard_ajax_url: <?php echo '"' . $module->getUrl("dashboard_ajax.php") . '"'; ?>,
+		circle_blue_url: <?php echo '"' . $module->getUrl("images/circle_blue.png") . '"'; ?>,
+		review_ajax_url: <?php echo '"' . $module->getUrl("review_ajax.php") . '"'; ?>
 	}
 </script>
 <script type="text/javascript" charset="utf8" src="<?php echo $module->getUrl('js/dashboard.js'); ?>"></script>
