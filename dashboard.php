@@ -1,5 +1,6 @@
 <?php
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
+
 ?>
 
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
@@ -20,6 +21,12 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 	<h5>The CAT-MH module does not have an Enrollment Field configured!</h5>
 	
 	<p>No participant interview data will be tabulated until an Enrollment Field has been chosen via the External Modules page\'s Configure modal.</p>
+</div>';
+	}
+		if ($module->local_env) {
+		echo '
+<div class="alert alert-info w-50" role="alert">
+	<h5>Local environment variable detected.</h5>
 </div>';
 	}
 ?>

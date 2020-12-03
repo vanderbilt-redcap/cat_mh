@@ -74,6 +74,11 @@ foreach($data as $rid => $record) {
 		// preparation/calculation
 		$seq_name = $seq['name'];
 		$seq_date = $seq['scheduled_datetime'];
+		
+		// skip if not scheduled to take yet (invite not sent)
+		if ($time_now < strtotime($seq_date))
+			continue;
+		
 		$interview = $module->getSequence($seq_name, $seq_date, $sid);
 		$date_to_complete = date("Y-m-d H:i", strtotime("+{$seq['days_to_complete']} days", strtotime($seq_date)));
 		$completed_within_window = "";
