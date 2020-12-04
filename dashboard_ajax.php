@@ -43,20 +43,23 @@ foreach($data as $rid => $record) {
 	if (!$enrollment_timestamp = strtotime($record[$eid][$enrollment_field_name]))
 		continue;
 	
+	$sid = $module->getSubjectID($rid);
 	$enroll_date = date("Y-m-d", $enrollment_timestamp);
-	
-	// get scheduled sequence information
 	$missed_surveys = 0;
 	$sequences = $module->getScheduledSequences();
+	
+	// get scheduled sequence information
 	foreach ($sequences as $i => $seq) {
 		$seq_name = $seq[1];
 		$seq_offset = $seq[2];
 		$seq_time_of_day = $seq[3];
-		
-		$days_to_complete = $module->getProjectSetting('expected_complete')[$module->getSequenceIndex($seq_name)];
-		
 		$enroll_and_time = "$enroll_date " . $seq_time_of_day;
 		$sched_dt = strtotime("+$seq_offset days", strtotime($enroll_and_time));
+		$days_to_complete = $module->getProjectSetting('expected_complete')[$module->getSequenceIndex($seq_name)];
+		
+		if (empty($days_to_complete))
+			$days_to_complete = 0;
+		
 		$sequences[$i] = [
 			"name" => $seq_name,
 			"scheduled_datetime" => date("Y-m-d H:i", $sched_dt),
@@ -65,16 +68,25 @@ foreach($data as $rid => $record) {
 		$sequences[$i]['status'] = $module->getSequenceStatus($rid, $sequences[$i]['name'], $sequences[$i]['scheduled_datetime']);
 		$sequences[$i]['date_to_complete'] = date("Y-m-d H:i", strtotime("+$days_to_complete days", strtotime($sequences[$i]['scheduled_datetime'])));
 		
+		// check to see if acknowledged as delinquent
+		$interview_acknowledged_delinquent = $module->countLogs("message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ?", [
+			"acknowledged_delinquent",
+			$seq_name,
+			$sequences[$i]['scheduled_datetime'],
+			$sid
+		]);
+		
 		if (
 			$sequences[$i]['status'] != 4
 			&&
 			strtotime($sequences[$i]['date_to_complete']) <= $time_now
+			&&
+			!$interview_acknowledged_delinquent
 		) {
+			$module->llog("missed survey: sid=$sid, seq: " . print_r($seq, true));
 			$missed_surveys++;
 		}
 	}
-	
-	$sid = $module->getSubjectID($rid);
 	
 	// append icon/links for each sequence
 	foreach ($sequences as $i => $seq) {
@@ -89,7 +101,7 @@ foreach($data as $rid => $record) {
 		$interview = $module->getSequence($seq_name, $seq_date, $sid);
 		$date_to_complete = date("Y-m-d H:i", strtotime("+{$seq['days_to_complete']} days", strtotime($seq_date)));
 		$completed_within_window = "";
-		if ($time_now > strtotime($date_to_complete))
+		if ($time_now >= strtotime($date_to_complete))
 			$completed_within_window = "N";
 		$interview_acknowledged_delinquent = $module->countLogs("message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ?", [
 			"acknowledged_delinquent",
@@ -131,7 +143,7 @@ foreach($data as $rid => $record) {
 		// Within Window column
 		
 		if (!empty($interview) and ($interview->status == 4)) {
-			if ($interview->timestamp < strtotime($date_to_complete)) {
+			if ($interview->timestamp <= strtotime($date_to_complete)) {
 				$completed_within_window = "Y";
 			} else {
 				$completed_within_window = "N";

@@ -26,7 +26,6 @@ $(document).ready(
 				}
 			},
 			beforeShowDay: function(date) {
-				console.log('date vs dash_time', date + ' ' + dash_time)
 				if (dash_time && date.toISOString().split('T')[0] == dash_time) {
 					return [true, 'dash_time_date']
 				}
