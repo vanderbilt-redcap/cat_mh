@@ -765,7 +765,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			
 			if ($sched_time <= $current_time && $sent_count === 0) {
 				$invites[] = $invitation;
-				$this->llog("record $rid - invitation due: " . print_r($invitation, true));
+				// $this->llog("record $rid - invitation due: " . print_r($invitation, true));
 			}
 			
 			// send reminders if applicable
@@ -776,7 +776,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				for ($reminder_offset = $delay; $reminder_offset <= $delay + $duration - 1; $reminder_offset += $frequency) {
 					// recalculate timestamp with reminder offset, to see if current time is after it
 					$this_offset = $reminder_offset + $offset;
-					$this->llog("this_offset: $this_offset");
+					// $this->llog("this_offset: $this_offset");
 					$sched_time = strtotime("+$this_offset days", strtotime($enroll_and_time));
 					$sent_count = $this->countLogs("message=? AND record=? AND sequence=? AND offset=? AND time_of_day=?", [
 						'invitationSent',
@@ -789,7 +789,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 						$invitation->offset = $this_offset;
 						$invitation->reminder = true;
 						$invites[] = $invitation;
-						$this->llog("record $rid - invitation due (reminder): " . print_r($invitation, true));
+						// $this->llog("record $rid - invitation due (reminder): " . print_r($invitation, true));
 					}
 				}
 			}
@@ -993,7 +993,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			}
 		} catch (\Exception $e) {
 			$out['moduleError'] = true;
-			$out['moduleMessage'] = "REDCap failed to retrieve the next question from the CAT-MH API server.";
+			$out['moduleMessage'] = "REDCap failed to retrieve the next question from the CAT-MH API server. Please refresh in the page in a few moments to try again.";
+			$this->llog("exception in getQuestion: $e");
 		}
 		return $out;
 	}

@@ -186,7 +186,7 @@ foreach($data as $rid => $record) {
 		// Acknowledged/Mark Reviewed column
 		if ($interview_acknowledged_delinquent) {
 			$row[] = 'Y';
-		} elseif ($completed_within_window == 'N') {
+		} elseif ($completed_within_window == 'N' && $interview->status != 4) {
 			$row[] = "<button class='review' data-rid='$rid' data-seq='$seq_name' data-date='$seq_date'>Mark Reviewed</button>";
 		} else {
 			$row[] = '';
