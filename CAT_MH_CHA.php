@@ -114,7 +114,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			if (empty($current_time))
 				$current_time = time();
 			
-			// $this->sendInvitations($current_time);
+			$this->sendInvitations($current_time);
 			
 			$result = $this->queryLogs("SELECT timestamp WHERE message='cron_ran_today'");
 			$cron_ran_today = null;
