@@ -765,25 +765,31 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			
 			if ($sched_time <= $current_time && $sent_count === 0) {
 				$invites[] = $invitation;
+				$this->llog("record $rid - invitation due: " . print_r($invitation, true));
 			}
 			
 			// send reminders if applicable
 			if ($reminder_settings->enabled) {
-				$frequency = $reminder_settings->frequency;
-				$duration = $reminder_settings->duration;
-				$delay = $reminder_settings->delay;
-				for ($offset = $delay; $offset <= $delay + $duration - 1; $offset += $frequency) {
+				$frequency = (int) $reminder_settings->frequency;
+				$duration = (int) $reminder_settings->duration;
+				$delay = (int) $reminder_settings->delay;
+				for ($reminder_offset = $delay; $reminder_offset <= $delay + $duration - 1; $reminder_offset += $frequency) {
 					// recalculate timestamp with reminder offset, to see if current time is after it
-					$sched_time = strtotime("+$offset days", strtotime($enroll_and_time));
+					$this_offset = $reminder_offset + $offset;
+					$this->llog("this_offset: $this_offset");
+					$sched_time = strtotime("+$this_offset days", strtotime($enroll_and_time));
 					$sent_count = $this->countLogs("message=? AND record=? AND sequence=? AND offset=? AND time_of_day=?", [
 						'invitationSent',
 						$rid,
 						$name,
-						$offset,
+						$this_offset,
 						$time_of_day
 					]);
 					if ($sched_time <= $current_time && $sent_count === 0) {
+						$invitation->offset = $this_offset;
+						$invitation->reminder = true;
 						$invites[] = $invitation;
+						$this->llog("record $rid - invitation due (reminder): " . print_r($invitation, true));
 					}
 				}
 			}
