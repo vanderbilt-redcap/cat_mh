@@ -38,6 +38,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	];
 	public $dashboardColumns = [
 		'Record ID',
+		'Sequence',
 		'Completed',
 		'Within Window',
 		'Date Scheduled',

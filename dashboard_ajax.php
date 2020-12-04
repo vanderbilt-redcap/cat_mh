@@ -115,6 +115,9 @@ foreach($data as $rid => $record) {
 		// Record ID column
 		$row[] = "<a href='" . $record_link . $rid . "'>$rid</a>";
 		
+		// Sequence column
+		$row[] = $seq_name;
+		
 		// Completed column
 		$completed_icon = null;
 		if (empty($interview) or ($interview->status == false)) {	// unstarted

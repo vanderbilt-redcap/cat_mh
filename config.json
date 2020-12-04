@@ -37,6 +37,11 @@
 				"name": "CAT-MH Interview Results Report",
 				"icon": "report",
 				"url": "resultsReport.php"
+			},
+			{
+				"name": "CAT-MH Interview Data Export",
+				"icon": "report",
+				"url": "export_interview_data.php"
 			}
 		],
 		"control-center": [
