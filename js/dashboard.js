@@ -33,6 +33,7 @@ $(document).ready(
 			}
 		})
 		
+		// custom column sorting
 		jQuery.extend(jQuery.fn.dataTableExt.oSort,{
 			"ack-col-asc": function(a,b){
 				if (a == 'Y' && b != 'Y'){
@@ -53,12 +54,67 @@ $(document).ready(
 				}
 			}
 		});
+		CATMH.completion_ordering = [
+			'blue',
+			'red',
+			'gray',
+			'yellow',
+			'green'
+		];
+		jQuery.extend(jQuery.fn.dataTableExt.oSort,{
+			"completion_status-asc": function(a,b){
+				var a_color_index;
+				var a_match = a.match(/data-color='([^']+)'/);
+				console.log('a_match', a_match);
+				if (a_match) {
+					a_color_index = CATMH.completion_ordering.indexOf(a_match[1]);
+				}
+				
+				var b_color_index;
+				var b_match = b.match(/data-color='([^']+)'/);
+				if (b_match) {
+					b_color_index = CATMH.completion_ordering.indexOf(b_match[1]);
+				}
+				
+				if (a_color_index > b_color_index){
+					return 1;
+				} else if (a_color_index < b_color_index){
+					return -1;
+				}
+				
+				return 0;
+			},
+			"completion_status-desc": function(a,b){
+				var a_color_index;
+				var a_match = a.match(/data-color='([^']+)'/);
+				console.log('a_match', a_match);
+				if (a_match) {
+					a_color_index = CATMH.completion_ordering.indexOf(a_match[1]);
+				}
+				
+				var b_color_index;
+				var b_match = b.match(/data-color='([^']+)'/);
+				if (b_match) {
+					b_color_index = CATMH.completion_ordering.indexOf(b_match[1]);
+				}
+				
+				if (a_color_index > b_color_index){
+					return -1;
+				} else if (a_color_index < b_color_index){
+					return 1;
+				}
+				
+				return 0;
+			}
+		});
+		
 		CATMH.datatable = $('#records').DataTable({
 			ajax: CATMH.dashboard_ajax_url + dash_time_param,
 			pageLength: 25,
 			columnDefs: [
 				{className: 'dt-center', targets: '_all'},
-				{type: 'ack-col', targets: 8}
+				{type: 'ack-col', targets: 8},
+				{type: 'completion_status', targets: 2}
 			],
 			order: [
 				[8, 'asc'],

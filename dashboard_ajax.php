@@ -124,20 +124,20 @@ foreach($data as $rid => $record) {
 			if ($interview_acknowledged_delinquent) {
 				// acknowledged delinquent, blue circle icon
 				$blue_icon_url = $module->getUrl("images/circle_blue.png");
-				$completed_icon = "<img src='$blue_icon_url' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";
+				$completed_icon = "<img src='$blue_icon_url' class='fstatus' data-color='blue' style='width:16px;margin-right:6px;' alt=''>";
 			} elseif ($completed_within_window == 'N') {
 				// not started or completed, AND overdue: red circle icon
-				$completed_icon = "<img src='" . APP_PATH_IMAGES . "circle_red.png' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";
+				$completed_icon = "<img src='" . APP_PATH_IMAGES . "circle_red.png' class='fstatus' data-color='red' style='width:16px;margin-right:6px;' alt=''>";
 			} else {
 				// not started or completed, append gray circle img
-				$completed_icon = "<img src='" . APP_PATH_IMAGES . "circle_gray.png' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";
+				$completed_icon = "<img src='" . APP_PATH_IMAGES . "circle_gray.png' class='fstatus' data-color='gray' style='width:16px;margin-right:6px;' alt=''>";
 			}
 		} elseif ($interview->status != 4) {
 			// started but not completed, append yellow circle img
-			$completed_icon = "<img src='" . APP_PATH_IMAGES . "circle_yellow.png' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";
+			$completed_icon = "<img src='" . APP_PATH_IMAGES . "circle_yellow.png' class='fstatus' data-color='yellow' style='width:16px;margin-right:6px;' alt=''>";
 		} elseif ($interview->status == 4) {
 			// append green circle (which itself, is a link to filtered results report)
-			$img = "<img src='" . APP_PATH_IMAGES . "circle_green_tick.png' class='fstatus' style='width:16px;margin-right:6px;' alt=''>";
+			$img = "<img src='" . APP_PATH_IMAGES . "circle_green_tick.png' class='fstatus' data-color='green' style='width:16px;margin-right:6px;' alt=''>";
 			$link = $module->getUrl('resultsReport.php') . "&record=$rid&seq=" . urlencode($seq_name) . "&sched_dt=" . urlencode($seq_date);
 			$completed_icon = "<a href='$link'>$img</a>";
 		}
