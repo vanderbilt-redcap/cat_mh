@@ -30,9 +30,6 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 </div>';
 	}
 ?>
-<span>Set dashboard date/time for testing</span>
-<div id="dash_time" class='dt-picker'></div>
-<br>
 
 <table id="records" class="display compact nowrap">
     <thead>

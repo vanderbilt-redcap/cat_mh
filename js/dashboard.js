@@ -1,38 +1,5 @@
 $(document).ready(
 	function() {
-		// append time as parameter to ajax call
-		// var dash_time = "";
-		var url = window.location.href
-		var dash_time_param = '';
-		var dash_time = null;
-		if (url.search('&dash_time=') != -1) {
-			var match = url.match(/[?&]dash_time=([^&]+)/);
-			if (match) {
-				dash_time = match[1]
-				dash_time_param = '&dash_time=' + encodeURIComponent(match[1])
-			}
-			
-		}
-		
-		$('#dash_time').datetimepicker({
-			inline: true,
-			dateFormat: "yy-mm-dd",
-			onSelect: function(date) {
-				console.log('date selected: ', date)
-				if (url.search('&dash_time=') == -1) {
-					window.location.href += '&dash_time=' + encodeURIComponent(date);
-				} else {
-					window.location.href = url.replace(/[?&]dash_time=([^&]+)/, '&dash_time=' + encodeURIComponent(date))
-				}
-			},
-			beforeShowDay: function(date) {
-				if (dash_time && date.toISOString().split('T')[0] == dash_time) {
-					return [true, 'dash_time_date']
-				}
-				return [true, '']
-			}
-		})
-		
 		jQuery.extend(jQuery.fn.dataTableExt.oSort,{
 			"ack-col-asc": function(a,b){
 				if (a == 'Y' && b != 'Y'){
@@ -54,7 +21,7 @@ $(document).ready(
 			}
 		});
 		CATMH.datatable = $('#records').DataTable({
-			ajax: CATMH.dashboard_ajax_url + dash_time_param,
+			ajax: CATMH.dashboard_ajax_url,
 			pageLength: 25,
 			columnDefs: [
 				{className: 'dt-center', targets: '_all'},
