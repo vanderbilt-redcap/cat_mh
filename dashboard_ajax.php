@@ -120,23 +120,18 @@ foreach($data as $rid => $record) {
 		
 		// Completed column
 		$completed_icon = null;
-		if (empty($interview) or ($interview->status == false)) {	// unstarted
-			if ($interview_acknowledged_delinquent) {
-				// acknowledged delinquent, blue circle icon
-				$blue_icon_url = $module->getUrl("images/circle_blue.png");
-				$completed_icon = "<img src='$blue_icon_url' class='fstatus' data-color='blue' style='width:16px;margin-right:6px;' alt=''>";
-			} elseif ($completed_within_window == 'N') {
-				// not started or completed, AND overdue: red circle icon
+		if ($interview_acknowledged_delinquent) {		// acknowledged delinquent, blue circle icon
+			$blue_icon_url = $module->getUrl("images/circle_blue.png");
+			$completed_icon = "<img src='$blue_icon_url' class='fstatus' data-color='blue' style='width:16px;margin-right:6px;' alt=''>";
+		} else if (empty($interview) or ($interview->status == false)) {
+			if ($completed_within_window == 'N') {		// not started or completed, AND overdue/delinquent: red circle icon
 				$completed_icon = "<img src='" . APP_PATH_IMAGES . "circle_red.png' class='fstatus' data-color='red' style='width:16px;margin-right:6px;' alt=''>";
-			} else {
-				// not started or completed, append gray circle img
+			} else {									// not started or completed, append gray circle img
 				$completed_icon = "<img src='" . APP_PATH_IMAGES . "circle_gray.png' class='fstatus' data-color='gray' style='width:16px;margin-right:6px;' alt=''>";
 			}
-		} elseif ($interview->status != 4) {
-			// started but not completed, append yellow circle img
+		} elseif ($interview->status != 4) {			// started but not completed, append yellow circle img
 			$completed_icon = "<img src='" . APP_PATH_IMAGES . "circle_yellow.png' class='fstatus' data-color='yellow' style='width:16px;margin-right:6px;' alt=''>";
-		} elseif ($interview->status == 4) {
-			// append green circle (which itself, is a link to filtered results report)
+		} elseif ($interview->status == 4) {			// append green circle (which itself, is a link to filtered results report)
 			$img = "<img src='" . APP_PATH_IMAGES . "circle_green_tick.png' class='fstatus' data-color='green' style='width:16px;margin-right:6px;' alt=''>";
 			$link = $module->getUrl('resultsReport.php') . "&record=$rid&seq=" . urlencode($seq_name) . "&sched_dt=" . urlencode($seq_date);
 			$completed_icon = "<a href='$link'>$img</a>";
