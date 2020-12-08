@@ -125,8 +125,8 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 
 <?php
 $js_url = $module->getUrl('js/scheduling.js');
-$sched_ajax_url = $module->getUrl('scheduling_ajax.php');
-$dash_ajax_url = $module->getUrl('dashboard_ajax.php');
+$sched_ajax_url = $module->getUrl('ajax/scheduling_ajax.php');
+$dash_ajax_url = $module->getUrl('ajax/dashboard_ajax.php');
 
 $scheduled = json_encode($module->getScheduledSequences());
 $reminderSettings = json_encode((object) $module->getReminderSettings());
