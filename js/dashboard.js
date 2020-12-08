@@ -97,7 +97,7 @@ $(document).ready(
 			
 			$.ajax({
 				type: "POST",
-				url: CATMH.acknowledge_ajax_url + dash_time_param,
+				url: CATMH.acknowledge_ajax_url,
 				data: data,
 				complete: function(response) {
 					// console.log('reviewInterview ajax returned successfully. responseText:', response.responseText)
