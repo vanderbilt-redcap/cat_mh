@@ -48,6 +48,12 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'Missed Surveys',
 		'Acknowledged'
 	];
+	public $interviewStatusIconURLs = [
+		'red' => APP_PATH_IMAGES . 'circle_red.png',
+		'gray' => APP_PATH_IMAGES . 'circle_gray.png',
+		'yellow' => APP_PATH_IMAGES . 'circle_yellow.png',
+		'green' => APP_PATH_IMAGES . 'circle_green_tick.png'
+	];
 	
 	public function __construct() {
 		parent::__construct();
@@ -58,6 +64,9 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		} else {
 			$this->api_host_name = "www.cat-mh.com";
 		}
+		
+		
+		$this->interviewStatusIconURLs['blue'] = $this->getUrl("images/circle_blue.png");
 	}
 
 	

@@ -1,6 +1,5 @@
 <?php
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
-
 ?>
 
 <link rel="stylesheet" type="text/css" href="<?php echo $module->getUrl('css/dashboard.css'); ?>">
@@ -8,9 +7,9 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
 <script type="text/javascript" charset="utf8">
 	CATMH = {
-		dashboard_ajax_url: <?php echo '"' . $module->getUrl("dashboard_ajax.php") . '"'; ?>,
-		circle_blue_url: <?php echo '"' . $module->getUrl("images/circle_blue.png") . '"'; ?>,
-		review_ajax_url: <?php echo '"' . $module->getUrl("review_ajax.php") . '"'; ?>
+		dashboard_ajax_url: <?php echo '"' . $module->getUrl("ajax/dashboard_ajax.php") . '"'; ?>,
+		icon_urls: <?php echo json_encode((object) $module->interviewStatusIconURLs); ?>,
+		acknowledge_ajax_url: <?php echo '"' . $module->getUrl("ajax/acknowledge_ajax.php") . '"'; ?>
 	}
 </script>
 <script type="text/javascript" charset="utf8" src="<?php echo $module->getUrl('js/dashboard.js'); ?>"></script>
