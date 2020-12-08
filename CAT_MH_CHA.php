@@ -36,6 +36,25 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'a/adhd' => "Adult ADHD",
 		'psy-s' => "Psychosis - Self-Report"
 	];
+	public $kcat_primary_tests = [
+		'c/anx' => "Child/Anxiety",
+		'c/mania' => "Child/Mania",
+		'c/odd' => "Child/Opp. Defiant Disorder",
+		'c/adhd' => "Child/ADHD",
+		'c/dep' => "Child/Depression",
+		'c/cd' => "Child/Conduct Disorder"
+	];
+	public $kcat_optional_primary_tests = [
+		'c/ss' => "Child/Suicide Scale"
+	];
+	public $kcat_secondary_tests = [
+		'p/anx' => "Parent/Anxiety",
+		'p/mania' => "Parent/Mania",
+		'p/odd' => "Parent/Opp. Defiant Disorder",
+		'p/adhd' => "Parent/ADHD",
+		'p/dep' => "Parent/Depression",
+		'p/cd' => "Parent/Conduct Disorder"
+	];
 	public $dashboardColumns = [
 		'Record ID',
 		'Sequence',
@@ -335,6 +354,132 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		} else {
 			return $new_interview;
 		}
+	}
+
+	// K-CAT methods
+	public function getKCATSequenceIndex($seq_name) {	// or return false if not a kcat sequence
+		if (!$this->kcat_seq_names)
+			$this->kcat_seq_names = $this->getProjectSetting('kcat_sequence');
+		if (gettype($seq_name) != "string")
+			throw new \Exception("isSequenceKCAT first argument must be a string, was type: " . gettype($seq_name));
+		
+		$index = array_search($seq_name, $this->kcat_seq_names, true);
+		if ($index === false)
+			return false;
+		return $index;
+	}
+	
+	public function getKCATTests($seq_name, $which_of_pair) {
+		// return test types depending on if which_of_pair is primary or secondary
+		// also takes into account which optional primary test(s) (like c/ss) should be included
+		if ($which_of_pair == 'primary') {
+			$tests = array_keys($this->kcat_primary_tests);
+			
+			// include c/ss?
+			$seq_index = $this->getKCATSequenceIndex($seq_name);
+			if($this->getProjectSetting('include_css')[$seq_index])
+				$tests[] = 'c/ss';
+		} elseif ($which_of_pair == 'secondary') {
+			$tests = array_keys($this->kcat_secondary_tests);
+		} else {
+			throw new \Exception("CAT-MH module's 'getKCATTests' method expected \$which_of_pair argument to be 'primary' or 'secondary', but it was: " . json_encode($which_of_pair));
+		}
+		return $tests;
+	}
+	
+	public function getKCATTestLabels($tests, $seq_name, $which_of_pair) {
+		if (empty($tests) or gettype($tests) != 'array')
+			throw new \Exception("The CAT-MH module 'getKCATTestLabels' expects it's only argument to be a non-empty array of test abbreviations (like 'c/anx'). Instead the argument was: " . json_encode($tests));
+		
+		$labels = [];
+		$seq_index = $this->getKCATSequenceIndex($seq_name);
+		if ($which_of_pair == 'primary') {
+			foreach ($tests as $test_index => $test_abbrev) {
+				$test_underscore = str_replace('/', '_', $test_abbrev);
+				$alt_label = $this->getProjectSetting($test_underscore . "_label")[$seq_index];
+				if (empty($alt_label)) {
+					$label = $this->kcat_primary_tests[$test_abbrev];
+				} else {
+					$label = $alt_label;
+				}
+
+				// handle optional primary test abbrev
+				if ($test_abbrev == 'c/ss') {
+					$alt_label = $this->getProjectSetting($test_underscore . "_label")[$seq_index];
+					if (empty($alt_label)) {
+						$label = $this->kcat_optional_primary_tests[$test_abbrev];
+					} else {
+						$label = $alt_label;
+					}
+				}
+				
+				if (empty($label))
+					throw new \Exception("The CAT-MH module couldn't find a label for test type: $test_abbrev");
+				
+				$labels[$test_index] = $label;
+			}
+		} elseif ($which_of_pair == 'secondary') {
+			foreach ($tests as $test_index => $test_abbrev) {
+				$test_underscore = str_replace('/', '_', $test_abbrev);
+				$alt_label = $this->getProjectSetting($test_underscore . "_label")[$seq_index];
+				if (empty($alt_label)) {
+					$label = $this->kcat_secondary_tests[$test_abbrev];
+				} else {
+					$label = $alt_label;
+				}
+				
+				if (empty($label))
+					throw new \Exception("The CAT-MH module couldn't find a label for test type: $test_abbrev");
+				
+				$labels[$test_index] = $label;
+			}
+		} else {
+			throw new \Exception("CAT-MH module's 'getKCATTestLabels' method expected \$which_of_pair argument to be 'primary' or 'secondary', but it was: " . json_encode($which_of_pair));
+		}
+		
+		return $labels;
+	}
+	
+	public function makeKCATInterviews($sid, $sequence, $sched_dt) {
+		$result = $this->createInterviewPair($sid, $sequence);
+		$time_now = time();
+		
+		// make tests and labels arrays for this interview
+		$primary_tests = $this->getKCATTests($sequence, 'primary');
+		$secondary_tests = $this->getKCATTests($sequence, 'secondary');
+		$primary_labels = $this->getKCATTestLabels($sequence, 'secondary');
+		$secondary_labels = $this->getKCATTestLabels($sequence, 'secondary');
+		
+		// make primary interview object
+		$primary = $result['primary'];
+		$primary->kcat = 'primary';
+		$primary->subjectID = $sid;
+		$primary->sequence = $sequence;
+		$primary->scheduled_datetime = $sched_dt;
+		$primary->status = 1;
+		$primary->timestamp = $time_now;
+		$primary->types = $this->getKCATTests($sequence, 'primary');
+		$primary->labels = $this->getKCATTestLabels($primary->tests, $sequence, 'primary');
+		if (empty($this->updateInterview($primary)))
+			throw new \Exception("The CAT-MH module failed to create primary interview");
+		
+		// make secondary interview object
+		$secondary = $result['secondary'];
+		$secondary->kcat = 'secondary';
+		$secondary->subjectID = $sid;
+		$secondary->sequence = $sequence;
+		$secondary->scheduled_datetime = $sched_dt;
+		$secondary->status = 1;
+		$secondary->timestamp = $time_now;
+		$secondary->types = $this->getKCATTests($sequence, 'secondary');
+		$secondary->labels = $this->getKCATTestLabels($secondary->tests, $sequence, 'secondary');
+		if (empty($this->updateInterview($secondary)))
+			throw new \Exception("The CAT-MH module failed to create primary interview");
+		
+		return [
+			'primaryInterview' => $primary,
+			'secondaryInterview' => $secondary
+		];
 	}
 	
 	public function getSequenceStatus($record, $seq_name, $datetime) {
@@ -809,6 +954,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	// CAT-MH API methods
 	public function createInterview($args) {
 		// args needed: applicationid, organizationid, subjectID, language, tests[]
+		$this->llog("createInterview args: " . print_r($args, true));
 		$out = [];
 		
 		// build request headers and body
@@ -849,6 +995,98 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$out['interviewID'] = $json['interviews'][0]['interviewID'];
 			$out['identifier'] = $json['interviews'][0]['identifier'];
 			$out['signature'] = $json['interviews'][0]['signature'];
+			
+			// create types and labels arrays
+			$out['types'] = [];
+			$out['labels'] = [];
+			foreach ($args['tests'] as $arr) {
+				$out['types'][] = $arr['type'];
+				$out['labels'][] = $this->getTestLabel($_GET['sequence'], $arr['type']);
+			}
+			
+			$out['success'] = true;
+		} catch (\Exception $e) {
+			$out['moduleError'] = true;
+			$out['moduleMessage'] = "REDCap couldn't get interview information from CAT-MH API." . "<br />\n" . $e;
+		}
+		
+		return $out;
+	}
+	
+	public function createInterviewPair($subjectID, $sequence_name) {
+		$out = [];
+		
+		// validate sequence is KCAT
+		$seq_index = $this->getKCATSequenceIndex($sequence_name);
+		if (!$seq_index)
+			throw new \Exception("Cannot create a new interview pair since this sequence ($sequence_name) isn't configured to be a paired interview.");
+		
+		// validate subjectID
+		if (!$this->getRecordIDBySID($subjectID))
+			throw new \Exception("Cannot create a new interview pair since this subjectID ($subjectID) isn't associated with an existing record.");
+		
+		// ensure system configured
+		$orgID = $this->getSystemSetting('organizationid');
+		$appID = $this->getSystemSetting('applicationid');
+		if (empty($appID) or empty($orgID)) {
+			throw new \Exception("Cannot create a new interview pair. Please have the REDCap administrator configure the system-level application and organization IDs for CAT-MH use.");
+			return;
+		}
+		
+		// build request headers and body
+		$curlArgs = [];
+		$curlArgs['headers'] = [
+			"applicationid: " . $appID,
+			"Accept: application/json",
+			"Content-Type: application/json"
+		];
+		$curlArgs['body'] = json_encode([
+			"organizationID" => intval($orgID),
+			"userFirstName" => "Automated",
+			"userLastName" => "Creation",
+			"subjectID" => $subjectID,
+			"language" => 1,
+			"pairType" => 1,
+			"primaryTests" => []
+		]);
+		
+		// append optional test if configured
+		if ($this->getProjectSetting('include_css')[$seq_index]) {
+			$optional_test = new \stdClass();
+			$optional_test->type = 'c/ss';
+			$curlArgs['body']['primaryTests'][] = $optional_test;
+		}
+		
+		$curlArgs['post'] = true;
+		$curlArgs['address'] = "https://" . $this->api_host_name . "/portal/secure/interview/create-pair";
+		
+		// send request via curl
+		$curl = $this->curl($curlArgs);
+		
+		// show error if cURL error occured
+		if (!empty($curl['error'])) {
+			throw new \Exception("REDCap couldn't get interview pair information from CAT-MH API." . "<br />\n" . $curl['error']);
+		}
+		
+		// handle response
+		try {
+			// extract json
+			$response = json_decode($curl['body']);
+			$primary = new \stdClass();
+			$primary->interviewID = $json->primaryInterviewID;
+			$primary->identifier = $json->primaryIdentifer;
+			$primary->signature = $json->primarySignature;
+			$primary = new \stdClass();
+			$secondary->interviewID = $json->secondaryInterviewID;
+			$secondary->identifier = $json->secondaryIdentifer;
+			$secondary->signature = $json->secondarySignature;
+			
+			$out['primary'] = $primary;
+			$out['secondary'] = $secondary;
+			
+			// $out['interviewID'] = $json['interviews'][0]['interviewID'];
+			// $out['identifier'] = $json['interviews'][0]['identifier'];
+			// $out['signature'] = $json['interviews'][0]['signature'];
 			
 			// create types and labels arrays
 			$out['types'] = [];

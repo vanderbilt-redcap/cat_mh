@@ -161,6 +161,40 @@
 			{"type": "checkbox", "key": "sdoh_show_results", "name": "Show Results"},
 			{"type": "text", "key": "sdoh_label", "name": "Alternate Label"}
          ]
+        },
+		{
+         "key": "kcat_sequences",
+         "name": "K-CAT Sequences",
+         "required": false,
+         "type": "sub_settings",
+         "repeatable":true,
+         "sub_settings":[
+            {
+				"key": "kcat_sequence",
+				"name": "Name for this sequence of K-CAT CAT-MH tests",
+				"required": true,
+				"type": "text"
+			},
+            {
+				"key": "kcat_expected_complete",
+				"name": "Expected number of days to complete interview",
+				"type": "text"
+			},
+            {"type": "checkbox", "key": "include_css", "name": "Include optional Child Suicide-Scale test"},
+            {"type": "text", "key": "c_anx_label", "name": "Child/Anxiety test alternate label"},
+            {"type": "text", "key": "c_mania_label", "name": "Child/Mania test alternate label"},
+            {"type": "text", "key": "c_odd_label", "name": "Child/Opp. Defiant Disorder test alternate label"},
+            {"type": "text", "key": "c_adhd_label", "name": "Child/ADHD test alternate label"},
+            {"type": "text", "key": "c_dep_label", "name": "Child/Depression test alternate label"},
+            {"type": "text", "key": "c_cd_label", "name": "Child/Conduct Disorder test alternate label"},
+            {"type": "text", "key": "c_ss_label", "name": "Child/Suicide Scale test alternate label"},
+            {"type": "text", "key": "p_anx_label", "name": "Parent/Anxiety test alternate label"},
+            {"type": "text", "key": "p_mania_label", "name": "Parent/Mania test alternate label"},
+            {"type": "text", "key": "p_odd_label", "name": "Parent/Opp. Defiant Disorder test alternate label"},
+            {"type": "text", "key": "p_adhd_label", "name": "Parent/ADHD test alternate label"},
+            {"type": "text", "key": "p_dep_label", "name": "Parent/Depression test alternate label"},
+            {"type": "text", "key": "p_cd_label", "name": "Parent/Conduct Disorder test alternate label"}
+         ]
         }
 	],
 
