@@ -18,7 +18,7 @@ $(document).ready(
 			inline: true,
 			dateFormat: "yy-mm-dd",
 			onSelect: function(date) {
-				console.log('date selected: ', date)
+				// console.log('date selected: ', date)
 				if (url.search('&dash_time=') == -1) {
 					window.location.href += '&dash_time=' + encodeURIComponent(date);
 				} else {
@@ -35,15 +35,15 @@ $(document).ready(
 		
 		// custom column sorting for 'Completed' and 'Acknowledged'
 		$.fn.dataTable.ext.order['dom-checkbox'] = function  ( settings, col ) {
-			console.log('sorting cboxes');
+			// console.log('sorting cboxes');
 			return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
 				return $('input', td).prop('checked') ? '1' : '0';
 			} );
 		}
 		CATMH.completion_ordering = [
 			'blue',
-			'red',
 			'gray',
+			'red',
 			'yellow',
 			'green'
 		];
@@ -62,9 +62,9 @@ $(document).ready(
 				}
 				
 				if (a_color_index > b_color_index){
-					return 1;
-				} else if (a_color_index < b_color_index){
 					return -1;
+				} else if (a_color_index < b_color_index){
+					return 1;
 				}
 				
 				return 0;
@@ -83,9 +83,9 @@ $(document).ready(
 				}
 				
 				if (a_color_index > b_color_index){
-					return -1;
-				} else if (a_color_index < b_color_index){
 					return 1;
+				} else if (a_color_index < b_color_index){
+					return -1;
 				}
 				
 				return 0;
@@ -109,17 +109,17 @@ $(document).ready(
 					}
 				})
 				// re-order and re-draw
-				CATMH.datatable.order([
+				var this_table = this.api();
+				this_table.order([
 					[9, 'asc'],
 					[0, 'asc'],
 					[4, 'asc'],
 				]);
-				CATMH.datatable.draw();
+				this_table.draw();
 			}
 		});
 	
 		$('body').on('change', '.ack_cbox', function() {
-			console.log('ack_cbox changed, ajax url: ' + CATMH.acknowledge_ajax_url)
 			var data = {
 				rid: $(this).attr('data-rid'),
 				seq: $(this).attr('data-seq'),
@@ -136,7 +136,7 @@ $(document).ready(
 					// console.log('reviewInterview ajax returned successfully. responseText:', response.responseText)
 					if (response.responseJSON) {
 						var data = response.responseJSON
-						console.log('response data:', data)
+						// console.log('response data:', data)
 						if (data.error) {
 							alert(data.error)
 						} else if (data.success) {

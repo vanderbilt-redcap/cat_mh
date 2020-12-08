@@ -53,6 +53,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'gray' => APP_PATH_IMAGES . 'circle_gray.png',
 		'yellow' => APP_PATH_IMAGES . 'circle_yellow.png',
 		'green' => APP_PATH_IMAGES . 'circle_green_tick.png'
+		// blue added in __construct
 	];
 	
 	public function __construct() {
