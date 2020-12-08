@@ -5,7 +5,6 @@ $project = new \Project($pid);
 $eid = $project->firstEventId;
 $record_id_field = \REDCap::getRecordIdField();
 $time_now = time();
-$time_now = strtotime("+12 days");
 
 // determine record home page link address
 if (strpos(APP_PATH_WEBROOT_FULL, "/redcap/") !== false) {	// dev
