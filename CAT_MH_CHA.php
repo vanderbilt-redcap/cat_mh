@@ -680,20 +680,17 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$actually_log_message = true;
 			
 			// make urls and links to pipe into email body
-			$sequences_already_included = [];
 			$urls = [];
 			$links = [];
 			$base_url = $this->getUrl("interview.php") . "&NOAUTH&sid=$sid";
 			foreach ($invitations_to_send as $invitation) {
 				$seq_name = $invitation->sequence;
 				$seq_date = date("Y-m-d H:i", $invitation->sched_dt);
-				if (!isset($sequences_already_included[$seq_name])) {
-					$sequences_already_included[$seq_name] = true;
-					$seq_url = $base_url . "&sequence=" . urlencode($seq_name) . "&sched_dt=" . urlencode($seq_date);
-					$seq_link = "<a href=\"$seq_url\">CAT-MH Interview - $seq_name</a>";
-					$urls[] = $seq_url;
-					$links[] = $seq_link;
-				}
+				$month_day_only = date("m/d", strtotime($seq_date));
+				$seq_url = $base_url . "&sequence=" . urlencode($seq_name) . "&sched_dt=" . urlencode($seq_date);
+				$seq_link = "<a href=\"$seq_url\">CAT-MH Interview - $seq_name ($month_day_only)</a>";
+				$urls[] = $seq_url;
+				$links[] = $seq_link;
 			}
 			
 			// prepare email body by replacing [interview-links] and [interview-urls] (or appending)
@@ -775,7 +772,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$invitation->sched_dt = $first_sched_time;
 			
 			if ($sched_time <= $current_time && $sent_count === 0) {
-				$invites[] = $invitation;
+				$invites["$name $first_sched_time"] = $invitation;
 				// $this->llog("record $rid - invitation due: " . print_r($invitation, true));
 			}
 			
@@ -799,7 +796,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 					if ($sched_time <= $current_time && $sent_count === 0) {
 						$invitation->offset = $this_offset;
 						$invitation->reminder = true;
-						$invites[] = $invitation;
+						$invites["$name $first_sched_time"] = $invitation;
 						// $this->llog("record $rid - invitation due (reminder): " . print_r($invitation, true));
 					}
 				}
@@ -1004,7 +1001,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			}
 		} catch (\Exception $e) {
 			$out['moduleError'] = true;
-			$out['moduleMessage'] = "REDCap failed to retrieve the next question from the CAT-MH API server. Please refresh in the page in a few moments to try again.";
+			$out['moduleMessage'] = "REDCap failed to retrieve the next question from the CAT-MH API server. Please refresh the page in a few moments to try again.";
 			$this->llog("exception in getQuestion: $e");
 		}
 		return $out;
