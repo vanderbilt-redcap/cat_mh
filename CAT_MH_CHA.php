@@ -165,6 +165,30 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	//utility
+	public function extractCURLHeaders($headerContent) {
+		// get headers as arrays
+		$headers = [];
+		
+		// Split the string on every "double" new line.
+		$arrRequests = explode("\r\n\r\n", $headerContent);
+		
+		// Loop of response headers. The "count() -1" is to 
+		//avoid an empty row for the extra line break before the body of the response.
+		for ($index = 0; $index < count($arrRequests) -1; $index++) {
+			foreach (explode("\r\n", $arrRequests[$index]) as $i => $line)
+			{
+				if ($i === 0)
+					$headers[$index]['http_code'] = $line;
+				else
+				{
+					list ($key, $value) = explode(': ', $line);
+					$headers[$index][$key] = $value;
+				}
+			}
+		}
+		return $headers;
+	}
+	
 	public function curl($args) {
 		// required args:
 		// address
@@ -204,31 +228,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		}
 		$output['cookies'] = $cookies;
 		
-		// get headers as arrays
-		function extractHeaders($headerContent) {
-			$headers = [];
-			
-			// Split the string on every "double" new line.
-			$arrRequests = explode("\r\n\r\n", $headerContent);
-			
-			// Loop of response headers. The "count() -1" is to 
-			//avoid an empty row for the extra line break before the body of the response.
-			for ($index = 0; $index < count($arrRequests) -1; $index++) {
-				foreach (explode("\r\n", $arrRequests[$index]) as $i => $line)
-				{
-					if ($i === 0)
-						$headers[$index]['http_code'] = $line;
-					else
-					{
-						list ($key, $value) = explode(': ', $line);
-						$headers[$index][$key] = $value;
-					}
-				}
-			}
-			return $headers;
-		}
-		
-		$output['headers'] = extractHeaders($rawHeaders);
+		$output['headers'] = $this->extractCURLHeaders($rawHeaders);
 		return $output;
 	}
 	
@@ -358,12 +358,14 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 
 	// K-CAT methods
 	public function getKCATSequenceIndex($seq_name) {	// or return false if not a kcat sequence
-		if (!$this->kcat_seq_names)
+		if (empty($this->kcat_seq_names))
 			$this->kcat_seq_names = $this->getProjectSetting('kcat_sequence');
 		if (gettype($seq_name) != "string")
-			throw new \Exception("isSequenceKCAT first argument must be a string, was type: " . gettype($seq_name));
+			throw new \Exception("getKCATSequenceIndex first argument must be a string, was type: " . gettype($seq_name));
 		
+		$this->llog("\$this->kcat_seq_names: " . print_r($this->kcat_seq_names, true));
 		$index = array_search($seq_name, $this->kcat_seq_names, true);
+		$this->llog("\$index: " . print_r($index, true));
 		if ($index === false)
 			return false;
 		return $index;
@@ -379,6 +381,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$seq_index = $this->getKCATSequenceIndex($seq_name);
 			if($this->getProjectSetting('include_css')[$seq_index])
 				$tests[] = 'c/ss';
+			
 		} elseif ($which_of_pair == 'secondary') {
 			$tests = array_keys($this->kcat_secondary_tests);
 		} else {
@@ -393,6 +396,10 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		$labels = [];
 		$seq_index = $this->getKCATSequenceIndex($seq_name);
+		
+		if ($seq_index === false)
+			throw new \Exception("'$seq_name' is not a valid name for a configured K-CAT interview sequence");
+		
 		if ($which_of_pair == 'primary') {
 			foreach ($tests as $test_index => $test_abbrev) {
 				$test_underscore = str_replace('/', '_', $test_abbrev);
@@ -444,11 +451,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$result = $this->createInterviewPair($sid, $sequence);
 		$time_now = time();
 		
-		// make tests and labels arrays for this interview
-		$primary_tests = $this->getKCATTests($sequence, 'primary');
-		$secondary_tests = $this->getKCATTests($sequence, 'secondary');
-		$primary_labels = $this->getKCATTestLabels($sequence, 'secondary');
-		$secondary_labels = $this->getKCATTestLabels($sequence, 'secondary');
+		$this->llog('createInterviewPair ersult: ' . print_r($result, true));
 		
 		// make primary interview object
 		$primary = $result['primary'];
@@ -459,7 +462,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$primary->status = 1;
 		$primary->timestamp = $time_now;
 		$primary->types = $this->getKCATTests($sequence, 'primary');
-		$primary->labels = $this->getKCATTestLabels($primary->tests, $sequence, 'primary');
+		$primary->labels = $this->getKCATTestLabels($primary->types, $sequence, 'primary');
 		if (empty($this->updateInterview($primary)))
 			throw new \Exception("The CAT-MH module failed to create primary interview");
 		
@@ -472,7 +475,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$secondary->status = 1;
 		$secondary->timestamp = $time_now;
 		$secondary->types = $this->getKCATTests($sequence, 'secondary');
-		$secondary->labels = $this->getKCATTestLabels($secondary->tests, $sequence, 'secondary');
+		$secondary->labels = $this->getKCATTestLabels($secondary->types, $sequence, 'secondary');
 		if (empty($this->updateInterview($secondary)))
 			throw new \Exception("The CAT-MH module failed to create primary interview");
 		
@@ -520,13 +523,22 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	// interview data object/log functions
-	public function getSequence($sequence, $scheduled_datetime, $subjectID) {	// change to fetchInterview? or getOrMakeInterview?
-		// queryLogs, convert interview object to array?
-		$result = $this->queryLogs("SELECT interview WHERE sequence = ? AND scheduled_datetime = ? AND subjectID = ?", [
-			"sequence" => $sequence,
-			"scheduled_datetime" => $scheduled_datetime,
-			"subjectID" => $subjectID
-		]);
+	public function getSequence($sequence, $scheduled_datetime, $subjectID, $kcat=null) {	// change to fetchInterview? or getOrMakeInterview?
+		// queryLogs, convert interview object to array
+		if (!empty($kcat)) {
+			$result = $this->queryLogs("SELECT interview WHERE sequence = ? AND scheduled_datetime = ? AND subjectID = ? AND kcat = ?", [
+				"sequence" => $sequence,
+				"scheduled_datetime" => $scheduled_datetime,
+				"subjectID" => $subjectID,
+				"kcat" => $kcat
+			]);
+		} else {
+			$result = $this->queryLogs("SELECT interview WHERE sequence = ? AND scheduled_datetime = ? AND subjectID = ?", [
+				"sequence" => $sequence,
+				"scheduled_datetime" => $scheduled_datetime,
+				"subjectID" => $subjectID
+			]);
+		}
 		
 		// return $interview or false;
 		$interview = json_decode(db_fetch_assoc($result)['interview']);
@@ -535,11 +547,17 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		return $interview;
 	}
 	
-	public function getInterview($subjectID, $interviewID, $identifier, $signature) {
-		// queryLogs, convert interview object to array?
-		$result = $this->queryLogs("SELECT interview, timestamp WHERE message='catmh_interview' AND subjectID = ? AND interviewID = ? AND identifier = ? AND signature = ?", [
-			$subjectID, $interviewID, $identifier, $signature
-		]);
+	public function getInterview($subjectID, $interviewID, $identifier, $signature, $kcat=null) {
+		// queryLogs, convert interview object to array
+		if (!empty($kcat)) {
+			$result = $this->queryLogs("SELECT interview, timestamp WHERE message='catmh_interview' AND subjectID = ? AND interviewID = ? AND identifier = ? AND signature = ? AND kcat = ?", [
+				$subjectID, $interviewID, $identifier, $signature, $kcat
+			]);
+		} else {
+			$result = $this->queryLogs("SELECT interview, timestamp WHERE message='catmh_interview' AND subjectID = ? AND interviewID = ? AND identifier = ? AND signature = ?", [
+				$subjectID, $interviewID, $identifier, $signature
+			]);
+		}
 		$db_result = db_fetch_assoc($result);
 		$interview = json_decode($db_result['interview']);
 		$interview->db_timestamp = $db_result['timestamp'];
@@ -551,6 +569,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		if (gettype($interview) == 'array')
 			$interview = (object) $interview;
 		
+		$this->llog('updating interview:  ' . print_r($interview, true));
+		
 		// build parameters array
 		$rid = $this->getRecordIDBySID($interview->subjectID);
 		$parameters = [
@@ -560,9 +580,11 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			"identifier" => $interview->identifier,
 			"signature" => $interview->signature,
 			"scheduled_datetime" => $interview->scheduled_datetime,
-			'interview' => json_encode($interview)
+			"interview" => json_encode($interview)
 		];
 		$parameters["record_id"] = $rid;
+		if ($interview->kcat)
+			$parameters['kcat']= $interview->kcat;
 		
 		// assert all params are present
 		foreach($parameters as $name => $value) {
@@ -654,7 +676,12 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	
 	public function cleanMissingSeqsFromSchedule() {
 		$result = $this->queryLogs("SELECT message, name, offset, time_of_day, sent WHERE message='scheduleSequence'");
-		$valid_seq_names = $this->getProjectSetting('sequence');
+		
+		$valid_seq_names = array_merge(
+			$this->getProjectSetting('sequence'),
+			$this->getProjectSetting('kcat_sequence')
+		);
+		
 		while ($row = db_fetch_array($result)) {
 			$seq_name = $row['name'];
 			if (array_search($seq_name, $valid_seq_names, true) === false) {
@@ -829,13 +856,27 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$links = [];
 			$base_url = $this->getUrl("interview.php") . "&NOAUTH&sid=$sid";
 			foreach ($invitations_to_send as $invitation) {
+				$this->llog('handling invitation: ' . print_r($invitation, true));
 				$seq_name = $invitation->sequence;
 				$seq_date = date("Y-m-d H:i", $invitation->sched_dt);
 				$month_day_only = date("m/d", strtotime($seq_date));
-				$seq_url = $base_url . "&sequence=" . urlencode($seq_name) . "&sched_dt=" . urlencode($seq_date);
-				$seq_link = "<a href=\"$seq_url\">CAT-MH Interview - $seq_name ($month_day_only)</a>";
-				$urls[] = $seq_url;
-				$links[] = $seq_link;
+				
+				// handle K-CAT interviews differently, generate two links, not just one
+				if ($invitation->kcat) {
+					$prim_seq_url = $base_url . "&sequence=" . urlencode($seq_name) . "&sched_dt=" . urlencode($seq_date) . "&kcat=primary";
+					$prim_seq_link = "<a href=\"$prim_seq_url\">CAT-MH Interview - $seq_name ($month_day_only) - Child</a>";
+					$sec_seq_url = $base_url . "&sequence=" . urlencode($seq_name) . "&sched_dt=" . urlencode($seq_date) . "&kcat=secondary";
+					$sec_seq_link = "<a href=\"$sec_seq_url\">CAT-MH Interview - $seq_name ($month_day_only) - Parent</a>";
+					$urls[] = $prim_seq_url;
+					$urls[] = $sec_seq_url;
+					$links[] = $prim_seq_link;
+					$links[] = $sec_seq_link;
+				} else {
+					$seq_url = $base_url . "&sequence=" . urlencode($seq_name) . "&sched_dt=" . urlencode($seq_date);
+					$seq_link = "<a href=\"$seq_url\">CAT-MH Interview - $seq_name ($month_day_only)</a>";
+					$urls[] = $seq_url;
+					$links[] = $seq_link;
+				}
 			}
 			
 			// prepare email body by replacing [interview-links] and [interview-urls] (or appending)
@@ -899,6 +940,14 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				continue;
 			}
 			
+			// is this sequence a K-CAT sequence? If so, create both interviews now
+			$kcat = false;
+			if ($this->getKCATSequenceIndex($name) !== false) {
+				$kcat = true;
+				$sid = $this->getSubjectID($rid);
+				$interviews = $this->makeKCATInterviews($sid, $name, date("Y-m-d H:i", $first_sched_time));
+			}
+			
 			// if no invitation sent, send one
 			$sent_count = $this->countLogs("message=? AND record=? AND sequence=? AND offset=? AND time_of_day=?", [
 				'invitationSent',
@@ -915,10 +964,10 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$invitation->offset = $offset;
 			$invitation->time_of_day = $time_of_day;
 			$invitation->sched_dt = $first_sched_time;
+			$invitation->kcat = $kcat;
 			
 			if ($sched_time <= $current_time && $sent_count === 0) {
 				$invites["$name $first_sched_time"] = $invitation;
-				// $this->llog("record $rid - invitation due: " . print_r($invitation, true));
 			}
 			
 			// send reminders if applicable
@@ -942,7 +991,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 						$invitation->offset = $this_offset;
 						$invitation->reminder = true;
 						$invites["$name $first_sched_time"] = $invitation;
-						// $this->llog("record $rid - invitation due (reminder): " . print_r($invitation, true));
 					}
 				}
 			}
@@ -954,7 +1002,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	// CAT-MH API methods
 	public function createInterview($args) {
 		// args needed: applicationid, organizationid, subjectID, language, tests[]
-		$this->llog("createInterview args: " . print_r($args, true));
 		$out = [];
 		
 		// build request headers and body
@@ -1018,7 +1065,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		// validate sequence is KCAT
 		$seq_index = $this->getKCATSequenceIndex($sequence_name);
-		if (!$seq_index)
+		if ($seq_index === false)
 			throw new \Exception("Cannot create a new interview pair since this sequence ($sequence_name) isn't configured to be a paired interview.");
 		
 		// validate subjectID
@@ -1040,7 +1087,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			"Accept: application/json",
 			"Content-Type: application/json"
 		];
-		$curlArgs['body'] = json_encode([
+		$curlArgs['body'] = [
 			"organizationID" => intval($orgID),
 			"userFirstName" => "Automated",
 			"userLastName" => "Creation",
@@ -1048,14 +1095,16 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			"language" => 1,
 			"pairType" => 1,
 			"primaryTests" => []
-		]);
+		];
 		
-		// append optional test if configured
+		// will this interview need optional primary test?
 		if ($this->getProjectSetting('include_css')[$seq_index]) {
 			$optional_test = new \stdClass();
 			$optional_test->type = 'c/ss';
 			$curlArgs['body']['primaryTests'][] = $optional_test;
 		}
+		
+		$curlArgs['body'] = json_encode($curlArgs['body']);
 		
 		$curlArgs['post'] = true;
 		$curlArgs['address'] = "https://" . $this->api_host_name . "/portal/secure/interview/create-pair";
@@ -1072,31 +1121,22 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		try {
 			// extract json
 			$response = json_decode($curl['body']);
+			$this->llog("creating interviwe pair, catmh response: " . print_r($response, true));
+			
 			$primary = new \stdClass();
-			$primary->interviewID = $json->primaryInterviewID;
-			$primary->identifier = $json->primaryIdentifer;
-			$primary->signature = $json->primarySignature;
-			$primary = new \stdClass();
-			$secondary->interviewID = $json->secondaryInterviewID;
-			$secondary->identifier = $json->secondaryIdentifer;
-			$secondary->signature = $json->secondarySignature;
+			$primary->interviewID = $response->primaryInterviewID;
+			$primary->identifier = $response->primaryIdentifier;
+			$primary->signature = $response->primarySignature;
 			
-			$out['primary'] = $primary;
-			$out['secondary'] = $secondary;
+			$secondary = new \stdClass();
+			$secondary->interviewID = $response->secondaryInterviewID;
+			$secondary->identifier = $response->secondaryIdentifier;
+			$secondary->signature = $response->secondarySignature;
 			
-			// $out['interviewID'] = $json['interviews'][0]['interviewID'];
-			// $out['identifier'] = $json['interviews'][0]['identifier'];
-			// $out['signature'] = $json['interviews'][0]['signature'];
-			
-			// create types and labels arrays
-			$out['types'] = [];
-			$out['labels'] = [];
-			foreach ($args['tests'] as $arr) {
-				$out['types'][] = $arr['type'];
-				$out['labels'][] = $this->getTestLabel($_GET['sequence'], $arr['type']);
-			}
-			
-			$out['success'] = true;
+			return [
+				'primary' => $primary,
+				'secondary' => $secondary
+			];
 		} catch (\Exception $e) {
 			$out['moduleError'] = true;
 			$out['moduleMessage'] = "REDCap couldn't get interview information from CAT-MH API." . "<br />\n" . $e;
@@ -1152,7 +1192,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		try {
 			$authValues = $this->getAuthValues($args);
-			$this->llog("authValues: " . print_r($authValues, true));
 			if (!isset($authValues['jsessionid']) or !isset($authValues['awselb'])) {
 				throw new \Exception("Auth values not set.");
 			}
@@ -1240,7 +1279,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		} catch (\Exception $e) {
 			$out['moduleError'] = true;
 			$out['moduleMessage'] = "REDCap failed to retrieve the next question from the CAT-MH API server. Please refresh the page in a few moments to try again.";
-			$this->llog("exception in getQuestion: $e");
 		}
 		return $out;
 	}

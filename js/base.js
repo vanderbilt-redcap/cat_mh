@@ -17,6 +17,10 @@ catmh.init = function() {
 			$("#interviewResults").fadeIn(100);
 		});
 	}
+	
+	if (catmh.kcat_error) {
+		catmh.showError(catmh.kcat_error)
+	}
 }
 
 catmh.setAnswerOptions = function(answers) {
