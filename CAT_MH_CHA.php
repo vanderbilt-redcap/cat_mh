@@ -37,6 +37,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'psy-s' => "Psychosis - Self-Report"
 	];
 	public $kcat_primary_tests = [
+		'c/age' => "Child/Age",
 		'c/anx' => "Child/Anxiety",
 		'c/mania' => "Child/Mania",
 		'c/odd' => "Child/Opp. Defiant Disorder",
@@ -48,6 +49,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'c/ss' => "Child/Suicide Scale"
 	];
 	public $kcat_secondary_tests = [
+		'p/info' => "Parent/Info",
 		'p/anx' => "Parent/Anxiety",
 		'p/mania' => "Parent/Mania",
 		'p/odd' => "Parent/Opp. Defiant Disorder",
@@ -285,8 +287,28 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		return false;
 	}
 	
+	public function getKCATTestLabel($seq_name, $test) {
+		$index = $this->getKCATSequenceIndex($seq_name);
+		$test_underscore = str_replace('/', '_', $test);
+		if (!empty($alt_label = $this->getProjectSetting($test_underscore . '_label')[$index]))
+			return $alt_label;
+		
+		$labels = array_merge(
+			$this->kcat_primary_tests,
+			$this->kcat_optional_primary_tests,
+			$this->kcat_secondary_tests
+		);
+		return $labels[$test];
+	}
+	
 	public function getTestLabel($seq_name, $test) {
-		$test = strtolower(preg_replace("[\W]", "", $test));
+		$test = strtolower($test);
+		
+		if ($this->getKCATSequenceIndex($seq_name) !== false)
+			return $this->getKCATTestLabel($seq_name, $test);
+		
+		$test = preg_replace("[\W]", "", $test);
+		
 		$abbrev = $this->convertTestAbbreviation[$test];
 		
 		$index = $this->getSequenceIndex($seq_name);
