@@ -159,23 +159,22 @@ foreach($data as $rid => $record) {
 			$row[] = $seq_name . ' ' . ($seq['kcat'] == 'primary' ? '(Child)' : '(Parent)');
 		}
 		
-		// Completed column
+		// Completed column	# priority: green (completed) > blue (acknowledged) > yellow (started) > gray/red (incomplete/delinquent)
 		$completed_icon = null;
-		if ($interview_acknowledged_delinquent) {		// acknowledged delinquent, blue circle icon
-			$blue_icon_url = $module->getUrl("images/circle_blue.png");
+		if ($interview->status == 4) {			// append green circle (which itself, is a link to filtered results report)
+			$img = "<img src='{$module->interviewStatusIconURLs['green']}' class='fstatus' data-color='green' style='width:16px;margin-right:6px;' alt=''>";
+			$link = $module->getUrl('resultsReport.php') . "&record=$rid&seq=" . urlencode($seq_name) . "&sched_dt=" . urlencode($seq_date);
+			$completed_icon = "<a href='$link'>$img</a>";
+		} elseif ($interview_acknowledged_delinquent) {		// acknowledged delinquent, blue circle icon
 			$completed_icon = "<img src='{$module->interviewStatusIconURLs['blue']}' class='fstatus' data-color='blue' style='width:16px;margin-right:6px;' alt=''>";
-		} elseif (empty($interview) or $interview->status == false or $interview->status == 1) {
+		} elseif ($interview->status > 1) {			// started but not completed, append yellow circle img
+			$completed_icon = "<img src='{$module->interviewStatusIconURLs['yellow']}' class='fstatus' data-color='yellow' style='width:16px;margin-right:6px;' alt=''>";
+		} else {
 			if ($completed_within_window == 'N') {		// not started or completed, AND overdue/delinquent: red circle icon
 				$completed_icon = "<img src='{$module->interviewStatusIconURLs['red']}' class='fstatus' data-color='red' style='width:16px;margin-right:6px;' alt=''>";
 			} else {									// not started or completed, append gray circle img
 				$completed_icon = "<img src='{$module->interviewStatusIconURLs['gray']}' class='fstatus' data-color='gray' style='width:16px;margin-right:6px;' alt=''>";
 			}
-		} elseif ($interview->status != 4) {			// started but not completed, append yellow circle img
-			$completed_icon = "<img src='{$module->interviewStatusIconURLs['yellow']}' class='fstatus' data-color='yellow' style='width:16px;margin-right:6px;' alt=''>";
-		} elseif ($interview->status == 4) {			// append green circle (which itself, is a link to filtered results report)
-			$img = "<img src='{$module->interviewStatusIconURLs['green']}' class='fstatus' data-color='green' style='width:16px;margin-right:6px;' alt=''>";
-			$link = $module->getUrl('resultsReport.php') . "&record=$rid&seq=" . urlencode($seq_name) . "&sched_dt=" . urlencode($seq_date);
-			$completed_icon = "<a href='$link'>$img</a>";
 		}
 		$row[] = $completed_icon;
 		

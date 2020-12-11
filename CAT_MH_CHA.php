@@ -554,18 +554,11 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	public function getSequence($sequence, $scheduled_datetime, $subjectID, $kcat=null) {
 		if (!empty($kcat)) {
 			$result = $this->queryLogs("SELECT interview WHERE message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ? AND kcat = ?", [
-				'catmh_interview',
-				"sequence" => $sequence,
-				"scheduled_datetime" => $scheduled_datetime,
-				"subjectID" => $subjectID,
-				"kcat" => $kcat
+				'catmh_interview', $sequence, $scheduled_datetime, $subjectID, $kcat
 			]);
 		} else {
 			$result = $this->queryLogs("SELECT interview WHERE message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ?", [
-				'catmh_interview',
-				"sequence" => $sequence,
-				"scheduled_datetime" => $scheduled_datetime,
-				"subjectID" => $subjectID
+				'catmh_interview', $sequence, $scheduled_datetime, $subjectID
 			]);
 		}
 		
@@ -1306,6 +1299,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// send request via curl
 		$curl = $this->curl($curlArgs);
 		$out['curl'] = ["body" => $curl["body"]];
+		$this->llog('curl body: ' . $curl['body']);
 		
 		// handle response
 		try {
@@ -1316,6 +1310,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				$out['needResults'] = true;
 			}
 		} catch (\Exception $e) {
+			$this->llog('exception in getQuestion: ' . $e);
 			$out['moduleError'] = true;
 			$out['moduleMessage'] = "REDCap failed to retrieve the next question from the CAT-MH API server. Please refresh the page in a few moments to try again.";
 		}
@@ -1616,6 +1611,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
 	$catmh = new CAT_MH_CHA();
 	$json = json_decode(file_get_contents("php://input"), true);
+	// $this->llog("json: " . print_r($json, true));
 	if (isset($json['args']['interviewID'])) $json['args']['interviewID'] = db_escape($json['args']['interviewID']);
 	if (isset($json['args']['subjectID'])) $json['args']['subjectID'] = db_escape($json['args']['subjectID']);
 	if (isset($json['args']['instrument'])) $json['args']['instrument'] = db_escape($json['args']['instrument']);

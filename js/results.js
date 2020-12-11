@@ -8,7 +8,11 @@ $(function() {
 	}
 	
 	CATMH.datatable = $("#results").DataTable({
-		dom: "Bfrtip",
+		dom: "Blfrtip",
+		lengthMenu: [
+			[10, 50, 100, -1],
+			[10, 25, 50, "All"]
+		],
 		buttons: [
 			'copy', 'csv', 'excel', 'print'
 		],

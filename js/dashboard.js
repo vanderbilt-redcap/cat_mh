@@ -104,13 +104,12 @@ $(document).ready(
 					// console.log('reviewInterview ajax returned successfully. responseText:', response.responseText)
 					if (response.responseJSON) {
 						var data = response.responseJSON
-						// console.log('response data:', data)
+						console.log('response data:', data)
 						if (data.error) {
 							alert(data.error)
 						} else if (data.success) {
-							// update status icon color
-							row.find('img.fstatus').attr('src', CATMH.icon_urls[data.color])
-							row.find('img.fstatus').attr('data-color', data.color)
+							// update status icon
+							row.find('img.fstatus').replaceWith(data.icon)
 						}
 					}
 				},

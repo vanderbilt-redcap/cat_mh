@@ -57,12 +57,6 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 		
 		foreach($interviews as $i => $interview) {
 			$sequence_name = $interview->sequence;
-			
-			// k-cat support
-			// if ($kcat_index = $module->getKCATSequenceIndex($sequence_name) !== false) {
-				// $kcat = ;
-			// }
-			
 			$sequence_datetime = $interview->scheduled_datetime;
 			$seq_ok = (empty($seqFilter) or $seqFilter == $sequence_name);
 			$sched_ok = (empty($schedFilter) or $schedFilter == $sequence_datetime);
@@ -71,7 +65,27 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 				foreach($interview->results->tests as $j => $test) {
 					// make reviewed checkbox
 					$test_name = $test->label;
-					$test_reviewed = $test->reviewed ? 'true' : 'false';
+					
+					// k-cat support
+					if ($interview->kcat) {
+						$test_reviewed = $module->countLogs("message = ? AND subjectid = ? AND sequence = ? AND scheduled_datetime = ? AND test_name = ? AND kcat = ?", [
+							'reviewed_test',
+							$sid,
+							$sequence_name,
+							$sequence_datetime,
+							$test_name,
+							$interview->kcat
+						]);
+					} else {
+						$test_reviewed = $module->countLogs("message = ? AND subjectid = ? AND sequence = ? AND scheduled_datetime = ? AND test_name = ?", [
+							'reviewed_test',
+							$sid,
+							$sequence_name,
+							$sequence_datetime,
+							$test_name
+						]);
+					}
+					
 					$reviewed_cbox = "<input type='checkbox' class='reviewed_cbox' data-test='$test_name' data-sid='$sid' data-seq='$sequence_name' data-date='$sequence_datetime' data-kcat='{$interview->kcat}' data-checked='$test_reviewed'>";
 					
 					echo("
