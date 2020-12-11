@@ -40,6 +40,7 @@ $(function() {
 			seq: $(this).attr('data-seq'),
 			date: $(this).attr('data-date'),
 			test: $(this).attr('data-test'),
+			kcat: $(this).attr('data-kcat'),
 			reviewed: $(this).prop('checked')
 		}
 		

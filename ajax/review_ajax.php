@@ -5,12 +5,17 @@ $pid = $module->getProjectId();
 $sid = $_POST['sid'];
 $reviewed = $_POST['reviewed'];
 $seq = $_POST['seq'];
+$kcat = $_POST['kcat'];
 $sched_dt = $_POST['date'];
 $test_name = $_POST['test'];
 $time_now = time();
 
 // get matching interview
-$interview = $module->getSequence($seq, $sched_dt, $sid);
+if (empty($kcat)) {
+	$interview = $module->getSequence($seq, $sched_dt, $sid);
+} else {
+	$interview = $module->getSequence($seq, $sched_dt, $sid, $kcat);
+}
 
 if (empty($interview))
 	$json->error = "The CAT-MH module wasn't able to find the interview for this record using the supplied datetime ($sched_dt) and sequence name ($seq).";

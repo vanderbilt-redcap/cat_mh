@@ -363,9 +363,9 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		if (gettype($seq_name) != "string")
 			throw new \Exception("getKCATSequenceIndex first argument must be a string, was type: " . gettype($seq_name));
 		
-		$this->llog("\$this->kcat_seq_names: " . print_r($this->kcat_seq_names, true));
+		// $this->llog("\$this->kcat_seq_names: " . print_r($this->kcat_seq_names, true));
 		$index = array_search($seq_name, $this->kcat_seq_names, true);
-		$this->llog("\$index: " . print_r($index, true));
+		// $this->llog("\$index: " . print_r($index, true));
 		if ($index === false)
 			return false;
 		return $index;
@@ -451,7 +451,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$result = $this->createInterviewPair($sid, $sequence);
 		$time_now = time();
 		
-		$this->llog('createInterviewPair ersult: ' . print_r($result, true));
+		// $this->llog('createInterviewPair ersult: ' . print_r($result, true));
 		
 		// make primary interview object
 		$primary = $result['primary'];
@@ -485,11 +485,17 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		];
 	}
 	
-	public function getSequenceStatus($record, $seq_name, $datetime) {
+	public function getSequenceStatus($record, $seq_name, $datetime, $kcat=null) {
 		$interviews = $this->getInterviewsByRecordID($record);
 		foreach ($interviews as $i => $interview) {
-			if ($interview->sequence == $seq_name and $interview->scheduled_datetime == $datetime) {
-				return $interview->status;
+			if (empty($kcat)) {
+				if ($interview->sequence == $seq_name and $interview->scheduled_datetime == $datetime) {
+					return $interview->status;
+				}
+			} else {
+				if ($interview->sequence == $seq_name and $interview->scheduled_datetime == $datetime and $interview->kcat == $kcat) {
+					return $interview->status;
+				}
 			}
 		}
 		return false;
@@ -517,23 +523,24 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		if ($this->log_ran) {
 			file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
 		} else {
-			file_put_contents("C:/vumc/log.txt", "starting CAT_MH_CHA log:\n$text\n");
+			file_put_contents("C:/vumc/log.txt", date('c') . "\n" . "starting CAT_MH_CHA log:\n$text\n");
 			$this->log_ran = true;
 		}
 	}
 	
 	// interview data object/log functions
-	public function getSequence($sequence, $scheduled_datetime, $subjectID, $kcat=null) {	// change to fetchInterview? or getOrMakeInterview?
-		// queryLogs, convert interview object to array
+	public function getSequence($sequence, $scheduled_datetime, $subjectID, $kcat=null) {
 		if (!empty($kcat)) {
-			$result = $this->queryLogs("SELECT interview WHERE sequence = ? AND scheduled_datetime = ? AND subjectID = ? AND kcat = ?", [
+			$result = $this->queryLogs("SELECT interview WHERE message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ? AND kcat = ?", [
+				'catmh_interview',
 				"sequence" => $sequence,
 				"scheduled_datetime" => $scheduled_datetime,
 				"subjectID" => $subjectID,
 				"kcat" => $kcat
 			]);
 		} else {
-			$result = $this->queryLogs("SELECT interview WHERE sequence = ? AND scheduled_datetime = ? AND subjectID = ?", [
+			$result = $this->queryLogs("SELECT interview WHERE message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ?", [
+				'catmh_interview',
 				"sequence" => $sequence,
 				"scheduled_datetime" => $scheduled_datetime,
 				"subjectID" => $subjectID
@@ -671,7 +678,11 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	
 	public function unscheduleSequence($seq_name, $offset, $time_of_day) {
 		// removes associated invitations AND reminders
-		return $this->removeLogs("name='$seq_name' AND offset='$offset' AND time_of_day='$time_of_day'");
+		return $this->removeLogs("name = ? AND offset = ? AND time_of_day = ?", [
+			$seq_name,
+			$offset,
+			$time_of_day
+		]);
 	}
 	
 	public function cleanMissingSeqsFromSchedule() {
@@ -686,7 +697,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$seq_name = $row['name'];
 			if (array_search($seq_name, $valid_seq_names, true) === false) {
 				// this is no longer a valid sequence to be scheduled since it was taken out of configuration
-				$this->removeLogs("message='scheduleSequence' AND name='$seq_name'");
+				$this->removeLogs("message='scheduleSequence' AND name = ?", [$seq_name]);
 			}
 		}
 	}
@@ -856,7 +867,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$links = [];
 			$base_url = $this->getUrl("interview.php") . "&NOAUTH&sid=$sid";
 			foreach ($invitations_to_send as $invitation) {
-				$this->llog('handling invitation: ' . print_r($invitation, true));
+				// $this->llog('handling invitation: ' . print_r($invitation, true));
 				$seq_name = $invitation->sequence;
 				$seq_date = date("Y-m-d H:i", $invitation->sched_dt);
 				$month_day_only = date("m/d", strtotime($seq_date));
@@ -940,9 +951,15 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				continue;
 			}
 			
-			// is this sequence a K-CAT sequence? If so, create both interviews now
+			// is this sequence a K-CAT sequence? If so, create both interviews now if not yet created
 			$kcat = false;
-			if ($this->getKCATSequenceIndex($name) !== false) {
+			$existingKCAT = $this->countLogs("message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ?", [
+				'catmh_interview',
+				$name,
+				date("Y-m-d H:i", $first_sched_time),
+				$this->getSubjectID($rid)
+			]);
+			if ($this->getKCATSequenceIndex($name) !== false and !$existingKCAT) {
 				$kcat = true;
 				$sid = $this->getSubjectID($rid);
 				$interviews = $this->makeKCATInterviews($sid, $name, date("Y-m-d H:i", $first_sched_time));
@@ -1121,7 +1138,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		try {
 			// extract json
 			$response = json_decode($curl['body']);
-			$this->llog("creating interviwe pair, catmh response: " . print_r($response, true));
+			// $this->llog("creating interviwe pair, catmh response: " . print_r($response, true));
 			
 			$primary = new \stdClass();
 			$primary->interviewID = $response->primaryInterviewID;

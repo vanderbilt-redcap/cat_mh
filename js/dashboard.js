@@ -91,6 +91,7 @@ $(document).ready(
 				rid: $(this).attr('data-rid'),
 				seq: $(this).attr('data-seq'),
 				date: $(this).attr('data-date'),
+				kcat: $(this).attr('data-kcat'),
 				acknowledged: $(this).prop('checked')
 			}
 			var row = $(this).closest('tr')

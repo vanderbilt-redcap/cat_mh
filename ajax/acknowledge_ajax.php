@@ -5,6 +5,7 @@ $pid = $module->getProjectId();
 $rid = $_POST['rid'];
 $acknowledged = $_POST['acknowledged'];
 $seq = $_POST['seq'];
+$kcat = $_POST['kcat'];
 $sched_dt = $_POST['date'];
 $time_now = time();
 if (isset($_GET['dash_time'])) {
@@ -20,7 +21,8 @@ if (empty($sid)) {
 }
 
 // count any existing acks for this specific sequence
-$existing_ack_count = $module->countLogs("message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ?", ["acknowledged_delinquent", $seq, $sched_dt, $sid]);
+$existing_ack_count = $module->countLogs("message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ? AND kcat = ?", ["acknowledged_delinquent", $seq, $sched_dt, $sid, $kcat]);
+$module->llog("existing_ack_count: $existing_ack_count");
 
 $color_to_return = 'blue';
 if ($acknowledged === 'true') {
@@ -30,7 +32,8 @@ if ($acknowledged === 'true') {
 		$success = $module->log("acknowledged_delinquent", [
 			"sequence" => $seq,
 			"scheduled_datetime" => $sched_dt,
-			"subjectID" => $sid
+			"subjectID" => $sid,
+			'kcat' => $kcat
 		]);
 	}
 } else {
@@ -39,7 +42,7 @@ if ($acknowledged === 'true') {
 		$success = true;
 	} else {
 		$module->llog("removing existing ack");
-		$success = $module->removeLogs("message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ?", ["acknowledged_delinquent", $seq, $sched_dt, $sid]);
+		$success = $module->removeLogs("message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ? AND kcat = ?", ["acknowledged_delinquent", $seq, $sched_dt, $sid, $kcat]);
 	}
 	
 	// change color to return based on interview status
@@ -50,7 +53,7 @@ if ($acknowledged === 'true') {
 		$completed_within_window = "N";
 	$interview = $module->getSequence($seq, $sched_dt, $sid);
 	$module->llog('interview on ack off: '  . print_r($interview, true));
-	if (empty($interview) or ($interview->status == false)) {
+	if (empty($interview) or ($interview->status == false) or ($interview->status == 1)) {
 		if ($completed_within_window == 'N') {		// not started or completed, AND overdue/delinquent: red circle icon
 			$color_to_return = 'red';
 		} else {									// not started or completed, append gray circle img
