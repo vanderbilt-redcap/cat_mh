@@ -1,5 +1,6 @@
 
 
+
 # REDCap CAT-MH External Module
 
 The CAT-MH module allows administrators to schedule CAT-MH interviews for patients. The interview invitations are delivered via email and scheduled via a user-friendly web interface.
@@ -68,3 +69,11 @@ You must provide the module with both of the following CAT-MH API registration d
 * Organization ID
 
 ![System Configuration Details](/docs/systemLevel.PNG)
+
+### K-CAT Paired Interviews
+
+Version 2.1.0 of the CAT-MH module adds support for K-CAT test types. These are described by Adapative Testing Technologies:
+
+"Our children’s version of the CAT-MH™ has been validated for youth ages 7 to 17. The K-CAT™ includes self-rated and parent/caregiver-rated modules for: depression, anxiety, mania, ADHD, conduct disorder, oppositional defiant disorder, substance use disorder (self-rated), and suicidality (self-rated)."
+
+K-CAT interview sequences are configured similar to normal sequences. Due to the paired nature of the interviews, they can't be mixed in sequences with other test types. Project participants will receive an email with two links, one for a Parent interview and the other pointing to the Child interview.

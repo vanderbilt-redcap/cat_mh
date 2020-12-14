@@ -716,7 +716,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	
 	public function getScheduledSequences() {
 		$this->cleanMissingSeqsFromSchedule();
-		$this->llog('pid from inside getScheduledSequences: ' . $this->getProjectId());
 		$result = $this->queryLogs("SELECT message, name, offset, time_of_day, sent WHERE message='scheduleSequence'");
 		
 		$sequences = [];
@@ -724,7 +723,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$sequences[] = ["<input type='checkbox' class='sequence_cbox'>", $row['name'], $row['offset'], $row['time_of_day']];
 		}
 		
-		$this->sequences = $sequences;
+		return $sequences;
 	}
 	
 	// reminders
