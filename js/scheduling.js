@@ -1,18 +1,15 @@
 CATMH = {}
 
-CATMH.selectCheckbox = "<input type='checkbox' class='sequence_cbox'>"
+// CATMH.selectCheckbox = "<input type='checkbox' class='sequence_cbox'>"
 
-CATMH.addSelectCheckboxes = function() {
-	// add select checkboxes for each #seq_schedule tbody row
-	$("#seq_schedule tbody tr").each(function() {
-		$(this).find('td:first').html(CATMH.selectCheckbox)
-	})
-}
+// CATMH.addSelectCheckboxes = function() {
+	// // add select checkboxes for each #seq_schedule tbody row
+	// $("#seq_schedule tbody tr").each(function() {
+		// $(this).find('td:first').html(CATMH.selectCheckbox)
+	// })
+// }
 
 CATMH.rebuildSequencesTable = function(sequences) {
-	sequences.forEach(function(row, i) {
-		row[0] = CATMH.selectCheckbox
-	})
 	CATMH.schedule.clear()
 	CATMH.schedule.rows.add(sequences)
 	CATMH.schedule.draw()
@@ -81,11 +78,6 @@ $(function() {
 		],
 		order: [[2, 'asc'], [3, 'asc']]
 	})
-	
-	// add select checkboxes for each sequence in table
-	if (CATMH.scheduledSequences.length) {
-		CATMH.addSelectCheckboxes()
-	}
 	
 	// update inputs with reminderSettings given in initial response:
 	CATMH.updateReminderInputs()

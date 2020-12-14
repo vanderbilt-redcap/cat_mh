@@ -67,23 +67,11 @@ $(document).ready(
 				{type: 'completion_status', targets: 2},
 				{targets: 9, orderDataType: 'dom-checkbox'}
 			],
-			initComplete: function() {
-				$('.ack_cbox').each(function(i, val) {
-					if ($(this).attr('data-checked') === 'true') {
-						$(this).prop('checked', true);
-					} else {
-						$(this).prop('checked', false);
-					}
-				})
-				// re-order and re-draw
-				var this_table = this.api();
-				this_table.order([
-					[9, 'asc'],
-					[0, 'asc'],
-					[4, 'asc'],
-				]);
-				this_table.draw();
-			}
+			order: [
+				[9, 'asc'],
+				[0, 'asc'],
+				[4, 'asc']
+			]
 		});
 	
 		$('body').on('change', '.ack_cbox', function() {

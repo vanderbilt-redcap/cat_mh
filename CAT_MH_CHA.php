@@ -725,7 +725,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			
 			$sequences = [];
 			while ($row = db_fetch_array($result)) {
-				$sequences[] = ['', $row['name'], $row['offset'], $row['time_of_day']];
+				$sequences[] = ["<input type='checkbox' class='sequence_cbox'>", $row['name'], $row['offset'], $row['time_of_day']];
 			}
 			
 			$this->sequences = $sequences;
@@ -800,6 +800,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	public function sendInvitations($current_time) {
 		if (empty($enrollment_field_name = $this->getProjectSetting('enrollment_field')))
 			return;
+		
+		$this->cleanMissingSeqsFromSchedule();
 		
 		// fetch all records
 		$params = [

@@ -19,22 +19,10 @@ $(function() {
 		columnDefs: [
 			{targets: 12, orderDataType: 'dom-checkbox'}
 		],
-		initComplete: function() {
-			$('.reviewed_cbox').each(function(i, val) {
-				if ($(this).attr('data-checked') === 'true') {
-					$(this).prop('checked', true);
-				} else {
-					$(this).prop('checked', false);
-				}
-			})
-			// re-order and re-draw
-			var this_table = this.api();
-			this_table.order([
-				[12, 'asc'],
-				[0, 'asc']
-			]);
-			this_table.draw();
-		}
+		order: [
+			[12, 'asc'],
+			[0, 'asc']
+		]
 	});
 	
 	$('body').on('change', '.reviewed_cbox', function() {

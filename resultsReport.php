@@ -85,8 +85,15 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 							$test_name
 						]);
 					}
+					$checked = '';
+					if ($test_reviewed) {
+						$test_reviewed = 'true';
+						$checked = ' checked';
+					} else {
+						$test_reviewed = 'false';
+					}
 					
-					$reviewed_cbox = "<input type='checkbox' class='reviewed_cbox' data-test='$test_name' data-sid='$sid' data-seq='$sequence_name' data-date='$sequence_datetime' data-kcat='{$interview->kcat}' data-checked='$test_reviewed'>";
+					$reviewed_cbox = "<input type='checkbox' class='reviewed_cbox' data-test='$test_name' data-sid='$sid' data-seq='$sequence_name' data-date='$sequence_datetime' data-kcat='{$interview->kcat}' data-checked='$test_reviewed'$checked>";
 					
 					echo("
 					<tr>
