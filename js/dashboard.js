@@ -67,23 +67,11 @@ $(document).ready(
 				{type: 'completion_status', targets: 2},
 				{targets: 9, orderDataType: 'dom-checkbox'}
 			],
-			initComplete: function() {
-				$('.ack_cbox').each(function(i, val) {
-					if ($(this).attr('data-checked') === 'true') {
-						$(this).prop('checked', true);
-					} else {
-						$(this).prop('checked', false);
-					}
-				})
-				// re-order and re-draw
-				var this_table = this.api();
-				this_table.order([
-					[9, 'asc'],
-					[0, 'asc'],
-					[4, 'asc'],
-				]);
-				this_table.draw();
-			}
+			order: [
+				[9, 'asc'],
+				[0, 'asc'],
+				[4, 'asc']
+			]
 		});
 	
 		$('body').on('change', '.ack_cbox', function() {
@@ -91,6 +79,7 @@ $(document).ready(
 				rid: $(this).attr('data-rid'),
 				seq: $(this).attr('data-seq'),
 				date: $(this).attr('data-date'),
+				kcat: $(this).attr('data-kcat'),
 				acknowledged: $(this).prop('checked')
 			}
 			var row = $(this).closest('tr')
@@ -103,13 +92,12 @@ $(document).ready(
 					// console.log('reviewInterview ajax returned successfully. responseText:', response.responseText)
 					if (response.responseJSON) {
 						var data = response.responseJSON
-						// console.log('response data:', data)
+						console.log('response data:', data)
 						if (data.error) {
 							alert(data.error)
 						} else if (data.success) {
-							// update status icon color
-							row.find('img.fstatus').attr('src', CATMH.icon_urls[data.color])
-							row.find('img.fstatus').attr('data-color', data.color)
+							// update status icon
+							row.find('img.fstatus').replaceWith(data.icon)
 						}
 					}
 				},

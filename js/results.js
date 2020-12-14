@@ -8,29 +8,21 @@ $(function() {
 	}
 	
 	CATMH.datatable = $("#results").DataTable({
-		dom: "Bfrtip",
+		dom: "Blfrtip",
+		lengthMenu: [
+			[10, 50, 100, -1],
+			[10, 25, 50, "All"]
+		],
 		buttons: [
 			'copy', 'csv', 'excel', 'print'
 		],
 		columnDefs: [
 			{targets: 12, orderDataType: 'dom-checkbox'}
 		],
-		initComplete: function() {
-			$('.reviewed_cbox').each(function(i, val) {
-				if ($(this).attr('data-checked') === 'true') {
-					$(this).prop('checked', true);
-				} else {
-					$(this).prop('checked', false);
-				}
-			})
-			// re-order and re-draw
-			var this_table = this.api();
-			this_table.order([
-				[12, 'asc'],
-				[0, 'asc']
-			]);
-			this_table.draw();
-		}
+		order: [
+			[12, 'asc'],
+			[0, 'asc']
+		]
 	});
 	
 	$('body').on('change', '.reviewed_cbox', function() {
@@ -40,6 +32,7 @@ $(function() {
 			seq: $(this).attr('data-seq'),
 			date: $(this).attr('data-date'),
 			test: $(this).attr('data-test'),
+			kcat: $(this).attr('data-kcat'),
 			reviewed: $(this).prop('checked')
 		}
 		

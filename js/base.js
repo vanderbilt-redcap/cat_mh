@@ -1,6 +1,7 @@
 var catmh = {};
 catmh.bridgeUrl = window.location.href;
 catmh.bridgeUrl = catmh.bridgeUrl.replace('interview', 'CAT_MH_CHA');
+catmh.auto_take_interview = true;
 
 catmh.init = function() {
 	console.log('catmh.init -- interview.status:', catmh.interview.status);
@@ -16,6 +17,10 @@ catmh.init = function() {
 		$("body > div:visible").fadeOut(100, function() {
 			$("#interviewResults").fadeIn(100);
 		});
+	}
+	
+	if (catmh.kcat_error) {
+		catmh.showError(catmh.kcat_error)
 	}
 }
 
@@ -158,6 +163,12 @@ catmh.getQuestion = function() {
 					$("body > div:visible").fadeOut(100, function() {
 						$("#interviewTest").fadeIn(100);
 					});
+					
+					if (catmh.auto_take_interview) {
+						var answer_index = Math.floor(Math.random()*$('.answerSelector').length);
+						$('.answerSelector').eq(answer_index).trigger('mousedown');
+						catmh.submitAnswer();
+					}
 				}
 			} else {
 				catmh.showError(catmh.lastResponse.moduleMessage);

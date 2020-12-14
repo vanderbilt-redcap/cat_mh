@@ -3,7 +3,10 @@
 $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
 
 // initialize functions/properties
-$sequenceNames = $module->getProjectSetting('sequence');
+$sequenceNames = array_merge(
+	$module->getProjectSetting('sequence'),
+	$module->getProjectSetting('kcat_sequence')
+);
 
 function isValidSequenceName($name) {
 	global $sequenceNames;

@@ -1,18 +1,15 @@
 CATMH = {}
 
-CATMH.selectCheckbox = "<input type='checkbox' class='sequence_cbox'>"
+// CATMH.selectCheckbox = "<input type='checkbox' class='sequence_cbox'>"
 
-CATMH.addSelectCheckboxes = function() {
-	// add select checkboxes for each #seq_schedule tbody row
-	$("#seq_schedule tbody tr").each(function() {
-		$(this).find('td:first').html(CATMH.selectCheckbox)
-	})
-}
+// CATMH.addSelectCheckboxes = function() {
+	// // add select checkboxes for each #seq_schedule tbody row
+	// $("#seq_schedule tbody tr").each(function() {
+		// $(this).find('td:first').html(CATMH.selectCheckbox)
+	// })
+// }
 
 CATMH.rebuildSequencesTable = function(sequences) {
-	sequences.forEach(function(row, i) {
-		row[0] = CATMH.selectCheckbox
-	})
 	CATMH.schedule.clear()
 	CATMH.schedule.rows.add(sequences)
 	CATMH.schedule.draw()
@@ -27,7 +24,7 @@ CATMH.submitReminderSettings = function() {
 		duration: $("#reminder_duration").val(),
 		delay: $("#reminder_delay").val()
 	}
-	console.log('reminder_settings sent', post_data)
+	// console.log('reminder_settings sent', post_data)
 	
 	$.ajax({
 		type: "POST",
@@ -35,12 +32,12 @@ CATMH.submitReminderSettings = function() {
 		data: post_data,
 		success: function(response) {
 			if (CATMH.debug)
-				console.log('scheduleSingle ajax returned successfully', response)
+				// console.log('scheduleSingle ajax returned successfully', response)
 			if (response.error) {
 				alert(response.error)
 			}
 			if (response.reminderSettings) {
-				console.log('reminder_settings RECEIVED', response.reminderSettings)
+				// console.log('reminder_settings RECEIVED', response.reminderSettings)
 				CATMH.reminderSettings = response.reminderSettings
 				CATMH.updateReminderInputs()
 			}
@@ -82,11 +79,6 @@ $(function() {
 		order: [[2, 'asc'], [3, 'asc']]
 	})
 	
-	// add select checkboxes for each sequence in table
-	if (CATMH.scheduledSequences.length) {
-		CATMH.addSelectCheckboxes()
-	}
-	
 	// update inputs with reminderSettings given in initial response:
 	CATMH.updateReminderInputs()
 })
@@ -102,7 +94,7 @@ $('body').on('click', '.dropdown-menu a', function() {
 // send user's single scheduling request to the server
 $('body').on('click', '#scheduleSingle', function() {
 	if (CATMH.debug)
-		console.log('scheduleSingle')
+		// console.log('scheduleSingle')
 	
 	if (!CATMH.selectedSequence) {
 		alert('Please select a sequence')
@@ -123,7 +115,7 @@ $('body').on('click', '#scheduleSingle', function() {
 		data: post_data,
 		success: function(response) {
 			// if (CATMH.debug)
-				console.log('scheduleSingle ajax returned successfully', response)
+				// console.log('scheduleSingle ajax returned successfully', response)
 			if (response.error) {
 				alert(response.error)
 			}
@@ -138,7 +130,7 @@ $('body').on('click', '#scheduleSingle', function() {
 // send user's interval scheduling request to the server
 $('body').on('click', '#scheduleInterval', function() {
 	if (CATMH.debug)
-		console.log('scheduleInterval')
+		// console.log('scheduleInterval')
 	
 	if (!CATMH.selectedSequence) {
 		alert('Please select a sequence')
@@ -153,7 +145,7 @@ $('body').on('click', '#scheduleInterval', function() {
 		delay: $("#delay").val(),
 		time_of_day: $("#time_of_day").val()
 	}
-	console.log("post_data", post_data)
+	// console.log("post_data", post_data)
 	
 	$.ajax({
 		type: "POST",
@@ -161,7 +153,7 @@ $('body').on('click', '#scheduleInterval', function() {
 		data: post_data,
 		success: function(response) {
 			if (CATMH.debug)
-				console.log('scheduleInterval ajax returned successfully', response)
+				// console.log('scheduleInterval ajax returned successfully', response)
 			if (response.error) {
 				alert(response.error)
 			}
@@ -203,7 +195,7 @@ $('body').on('click', '#deleteScheduledSequence', function() {
 		post_data.sequencesToDelete.push(seq)
 	})
 	
-	console.log("post_data", post_data)
+	// console.log("post_data", post_data)
 	
 	$.ajax({
 		type: "POST",
@@ -211,7 +203,7 @@ $('body').on('click', '#deleteScheduledSequence', function() {
 		data: post_data,
 		success: function(response) {
 			if (CATMH.debug)
-				console.log('deleteScheduledSequence ajax returned successfully', response)
+				// console.log('deleteScheduledSequence ajax returned successfully', response)
 			if (response.error) {
 				alert(response.error)
 			}

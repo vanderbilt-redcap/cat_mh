@@ -3,9 +3,16 @@ $sequence = $_GET['sequence'];
 $sched_dt = $_GET['sched_dt'];
 $sid = $_GET['sid'];
 $sid = preg_replace("/\W|_/", '', $sid);
-$interview = $module->getSequence($sequence, $sched_dt, $sid);
+$kcat = $_GET['kcat'];
+$module->llog("\$module->getSequence($sequence, $sched_dt, $sid, $kcat)");
+$interview = $module->getSequence($sequence, $sched_dt, $sid, $kcat);
 if (empty($interview)) {
-	$interview = $module->makeInterview();
+	if (empty($kcat)) {
+		$interview = $module->makeInterview();
+	} else {
+		// K-CAT paired interviews must be created at invite time (or at least some time before interiew.php)
+		$kcat_error = "The CAT-MH module couldn't find the K-CAT interview requested. Please contact your program administrator with this message.";
+	}
 }
 
 if (!empty($interview->results->tests)) {
@@ -79,6 +86,10 @@ if (!empty($interview->results->tests)) {
 		$('body > div').css('display', 'flex');
 		$('body > div').css('display', 'none');
 		$('#interviewSelect').css('display', 'flex');
+		
+		catmh.kcat_error = \"" . strval($kcat_error) . "\";
+		if (catmh.kcat_error)
+			catmh.showError(catmh.kcat_error)
 		
 		catmh.interview = " . json_encode($interview) . ";
 		if (typeof(catmh.interview) == 'object') {
