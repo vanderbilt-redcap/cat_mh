@@ -143,10 +143,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		foreach($this->framework->getProjectsWithModuleEnabled() as $localProjectId) {
 			$_GET['pid'] = $localProjectId;
 			
-			if (empty($current_time))
-				$current_time = time();
-			
-			$this->sendInvitations($current_time);
+			$this->sendInvitations(time());
 			
 			$result = $this->queryLogs("SELECT timestamp WHERE message='cron_ran_today'");
 			$cron_ran_today = null;
@@ -718,20 +715,16 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	public function getScheduledSequences() {
-		if (!$this->sequences) {
-			$this->cleanMissingSeqsFromSchedule();
-			
-			$result = $this->queryLogs("SELECT message, name, offset, time_of_day, sent WHERE message='scheduleSequence'");
-			
-			$sequences = [];
-			while ($row = db_fetch_array($result)) {
-				$sequences[] = ["<input type='checkbox' class='sequence_cbox'>", $row['name'], $row['offset'], $row['time_of_day']];
-			}
-			
-			$this->sequences = $sequences;
+		$this->cleanMissingSeqsFromSchedule();
+		$this->llog('pid from inside getScheduledSequences: ' . $this->getProjectId());
+		$result = $this->queryLogs("SELECT message, name, offset, time_of_day, sent WHERE message='scheduleSequence'");
+		
+		$sequences = [];
+		while ($row = db_fetch_array($result)) {
+			$sequences[] = ["<input type='checkbox' class='sequence_cbox'>", $row['name'], $row['offset'], $row['time_of_day']];
 		}
 		
-		return $this->sequences;
+		$this->sequences = $sequences;
 	}
 	
 	// reminders
@@ -924,7 +917,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			
 			$success = $email->send();
 			if ($success) {
-				$result_log_message .= "Record $rid: Sent interview invitation email\n";
+				$result_log_message .= "Record $rid: Sent interview invitation email to address: " . $record->catmh_email . "\n";
 				foreach($invitations_to_send as $invitation) {
 					$this->log('invitationSent', (array) $invitation);
 				}
