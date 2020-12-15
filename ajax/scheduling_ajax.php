@@ -3,10 +3,16 @@
 $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
 
 // initialize functions/properties
-$sequenceNames = array_merge(
-	$module->getProjectSetting('sequence'),
-	$module->getProjectSetting('kcat_sequence')
-);
+// first, determine array of valid sequence names (k-cat and non-kcat)
+$kcat_seq_names = $module->getProjectSetting('kcat_sequence');
+if (!empty($kcat_seq_names)) {
+	$sequenceNames = array_merge(
+		$module->getProjectSetting('sequence'),
+		$kcat_seq_names
+	);
+} else {
+	$sequenceNames = $module->getProjectSetting('sequence');
+}
 
 function isValidSequenceName($name) {
 	global $sequenceNames;
