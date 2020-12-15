@@ -377,17 +377,16 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 
 	// K-CAT methods
 	public function getKCATSequenceIndex($seq_name) {	// or return false if not a kcat sequence
-		if (empty($this->kcat_seq_names))
+		if (empty($this->kcat_seq_names)) {
 			$this->kcat_seq_names = $this->getProjectSetting('kcat_sequence');
+			if (gettype($this->kcat_seq_names) != 'array')
+				$this->kcat_seq_names = [];
+		}
 		if (gettype($seq_name) != "string")
 			throw new \Exception("getKCATSequenceIndex first argument must be a string, was type: " . gettype($seq_name));
 		
 		// $this->llog("\$this->kcat_seq_names: " . print_r($this->kcat_seq_names, true));
-		$index = array_search($seq_name, $this->kcat_seq_names, true);
-		// $this->llog("\$index: " . print_r($index, true));
-		if ($index === false)
-			return false;
-		return $index;
+		return array_search($seq_name, $this->kcat_seq_names, true);
 	}
 	
 	public function getKCATTests($seq_name, $which_of_pair) {
