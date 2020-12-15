@@ -1,7 +1,7 @@
 var catmh = {};
 catmh.bridgeUrl = window.location.href;
 catmh.bridgeUrl = catmh.bridgeUrl.replace('interview', 'CAT_MH_CHA');
-catmh.auto_take_interview = true;
+// catmh.auto_take_interview = true;
 
 catmh.init = function() {
 	console.log('catmh.init -- interview.status:', catmh.interview.status);
