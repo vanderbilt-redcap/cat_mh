@@ -33,13 +33,15 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 			// non-kcat sequences
 			$seq_names = $module->getProjectSetting('sequence');
 			foreach ($seq_names as $i => $name) {
-				echo "<a class=\"dropdown-item\" href=\"#\">$name</a>";
+				if (!empty($name))
+					echo "<a class=\"dropdown-item\" href=\"#\">$name</a>";
 			}
 			
 			// kcat
 			$seq_names = $module->getProjectSetting('kcat_sequence');
 			foreach ($seq_names as $i => $name) {
-				echo "<a class=\"dropdown-item\" href=\"#\">$name</a>";
+				if (!empty($name))
+					echo "<a class=\"dropdown-item\" href=\"#\">$name</a>";
 			}
 			?>
 		</div>

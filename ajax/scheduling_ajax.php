@@ -17,7 +17,7 @@ if (!empty($kcat_seq_names)) {
 function isValidSequenceName($name) {
 	global $sequenceNames;
 	foreach ($sequenceNames as $i => $seq_name) {
-		if ($name == $seq_name)
+		if ($name == $seq_name and !empty($name))
 			return true;
 	}
 	return false;

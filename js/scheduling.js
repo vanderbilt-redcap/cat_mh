@@ -93,10 +93,7 @@ $('body').on('click', '.dropdown-menu a', function() {
 
 // send user's single scheduling request to the server
 $('body').on('click', '#scheduleSingle', function() {
-	if (CATMH.debug)
-		// console.log('scheduleSingle')
-	
-	if (!CATMH.selectedSequence) {
+	if (!CATMH.selectedSequence || CATMH.selectedSequence == '') {
 		alert('Please select a sequence')
 		return
 	}
@@ -129,10 +126,7 @@ $('body').on('click', '#scheduleSingle', function() {
 
 // send user's interval scheduling request to the server
 $('body').on('click', '#scheduleInterval', function() {
-	if (CATMH.debug)
-		// console.log('scheduleInterval')
-	
-	if (!CATMH.selectedSequence) {
+	if (!CATMH.selectedSequence || CATMH.selectedSequence == '') {
 		alert('Please select a sequence')
 		return
 	}
