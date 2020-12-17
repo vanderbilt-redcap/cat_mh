@@ -56,6 +56,11 @@
 
 	"project-settings": [
 		{
+			"key": "disable_invites",
+			"name": "Disable automatic interview invitation and reminder emails",
+			"type": "checkbox"
+		},
+		{
 			"key": "enrollment_field",
 			"name": "Choose an Enrollment Date/Time field -- participants will start receiving interview invitations after enrollment",
 			"required": true,
@@ -78,14 +83,30 @@
 			"type": "rich-text"
 		},
 		{
+			"key": "participant_email_field",
+			"name": "Field that holds participant email address to send interview invitations and reminders to",
+			"type": "field-list"
+		},
+		{
 			"key": "send-provider-emails",
 			"name": "Automatically send email to patient's provider upon interview completion",
 			"type": "checkbox"
 		},
 		{
+			"key": "invite-on-survey-complete",
+			"name": "Invite participant to complete first scheduled sequence upon survey completion",
+			"type": "form-list",
+			"repeatable": true
+		},
+		{
+			"key": "filter-fields",
+			"name": "Withold all invitations and reminders if this field is empty for a participant's record",
+			"repeatable": true,
+			"type": "field-list"
+		},
+		{
          "key": "catmh_options",
          "name": "CAT-MH Interview Options",
-         "required": false,
          "type": "sub_settings",
          "repeatable":true,
          "sub_settings":[
@@ -165,14 +186,12 @@
 		{
          "key": "kcat_sequences",
          "name": "K-CAT Sequences",
-         "required": false,
          "type": "sub_settings",
          "repeatable":true,
          "sub_settings":[
             {
 				"key": "kcat_sequence",
 				"name": "Name for this sequence of K-CAT CAT-MH tests",
-				"required": true,
 				"type": "text"
 			},
             {
@@ -231,8 +250,4 @@
 	},
 	
 	"framework-version": 5,
-	
-	"versions": {
-		"0.1.1": "Fixed issue where interview URLs sent via cron task had missing subject IDs. Updated logging to be more helpful for scheduled emails (cronEmail)."
-	}
 }

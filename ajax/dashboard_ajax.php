@@ -101,7 +101,7 @@ foreach($data as $rid => $record) {
 		}
 	}
 	
-	$module->llog('sequences: ' . print_r($sequences, true));
+	// $module->llog('sequences: ' . print_r($sequences, true));
 	
 	// append icon/links for each sequence
 	foreach ($sequences as $i => $seq) {

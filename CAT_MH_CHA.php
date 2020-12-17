@@ -94,47 +94,73 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	
 	// hooks
 	public function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
-		/* NOTE: this functionality is obsolete until a scheduled_datetime parameter can be correctly appended to the link below
-		// to figure that out, we need to understand how module admins will expect this to work
+		$on_complete_surveys = $this->getProjectSetting('invite-on-survey-complete');
+		$filter_fields = $this->getProjectSetting('filter_fields');
+		$rid_field_name = $this->getRecordIdField();
 		
-		// if user did not consent, then do not forward to interview, instead notify them that they were rejected and that they may now close this window
-		$userConsent = \REDCap::getData($project_id, 'array', $record, 'consent')[$record][$event_id]['consent'];
-		if ($userConsent != 1) {
-			echo("You did not consent to the adaptive testing interview and may now close this tab/window.");
+		if (empty($record)) {
 			return;
 		}
 		
-		$subjectID = $this->generateSubjectID();
+		// check to see if this is a survey configured to auto-invite participants upon completion
+		$survey_index = array_search($on_complete_surveys, $instrument, true);
+		if ($survey_index === false) {
+			// it's not
+			return;
+		}
+		// it is
 		
-		// save newly created subjectID
-		$data = [
-			$record => [
-				$event_id => [
-					"subjectid" => $subjectID,
-					"cat_mh_data" => json_encode([
-						"interviews" => []
-					])
-				]
-			]
+		if (empty($enrollment_field_name = $this->getProjectSetting('enrollment_field'))) {
+			return;
+		}
+		
+		$param_fields = [
+			$rid_field_name,
+			$enrollment_field_name,
+			'subjectid'
 		];
-		\REDCap::saveData($project_id, 'array', $data);
-		
-		// If no sequence given in url parameters, default to first sequence configured
-		$sequence = $_GET['sequence'];
-		if (!isset($sequence)) {
-			$projectSettings = $this->getProjectSettings();
-			$sequence = $projectSettings['sequence']['value'][0];
+			
+		// check to see if any of this record's filter fields are non-empty -- if so, do not invite to first scheduled interview
+		if (!empty($filter_fields)) {
+			$param_fields = array_merge($param_fields, $filter_fields);
 		}
-		if ($sequence == NULL) {
-			echo("REDCap's CAT-MH module couldn't find the configured ($sequence) interview for you. Please contact your program administrator.");
+		
+		$data = json_decode(\REDCap::getData($project_id, 'json', $record, $param_fields));
+		$record_obj = $data[0];
+		foreach ($filter_fields as $fieldname) {
+			if (empty($record_obj->$fieldname)) {
+				return;
+			}
+		}
+		
+		// get or make subjectid
+		if (empty($subjectid = $record_obj->subjectid))
+			$subjectid = $this->initRecord($record_obj);
+		if (empty($subjectid)) {
 			return;
 		}
 		
-		// finally redirect survey participant
-		$page = $this->getUrl("interview.php") . "&NOAUTH&sid=" . $subjectID . "&sequence=$sequence";
-		header('Location: ' . $page, true, 302);
-		$this->exitAfterHook();
-		*/
+		// checks passed: invite participant to take interview
+		$sequences = $this->getScheduledSequences();
+		$first_seq = $sequences[0];
+		if (empty($first_seq)) {
+			return;
+		}
+		$seq_name = $first_seq[1];
+		
+		// make link to first scheduled sequence
+		$enrollment_timestamp = strtotime($record_obj->$enrollment_field_name);
+		if (empty($enrollment_timestamp)) {
+			return;
+		}
+		$enroll_date = date("Y-m-d", $enrollment_timestamp);
+		$enroll_and_time = "$enroll_date " . $time_of_day;
+		$sched_time = strtotime("+$offset days", strtotime($enroll_and_time));
+		$first_sched_datetime = date("Y-m-d H:i", $sched_time);
+		$interview_url = $this->getUrl("interview.php") . "&NOAUTH&sid=$subjectid&sequence=" . urlencode($seq_name) . "&sched_dt=" . urlencode($first_sched_datetime);
+		echo "<br><br><h5>You may now take the first scheduled interview of the program by following the link below:</h5><br>";
+		echo "<a href='$interview_url' style='font-size: 16px;'>CAT-MH Interview $seq_name</a>";
+		echo "<br><br><h6>Alternatively you may visit the URL directly:</h6><br><span>$interview_url</span>";
 	}
 	
 	// crons
@@ -529,6 +555,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$data = json_encode([$record]);
 		$save_results = \REDCap::saveData($this->getProjectId(), 'json', $data, 'overwrite');
 		\REDCap::logEvent("CAT-MH External Module", "Initialized CAT-MH subjectID for record: $rid", NULL, NULL, NULL, $this->getProjectId());
+		return $record->subjectid;
 	}
 	
 	public function llog($text) {
@@ -792,20 +819,36 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		if (empty($enrollment_field_name = $this->getProjectSetting('enrollment_field')))
 			return;
 		
+		$this->llog("sendInvitations:");
+		if ($this->getProjectSetting('disable_invites'))
+			return;
+		
+		$this->llog("passed disable_invites check");
 		$this->cleanMissingSeqsFromSchedule();
 		
+		$catmh_email_field_name = $this->getProjectSetting('participant_email_field');
+		if (empty($catmh_email_field_name))
+			$catmh_email_field_name = 'catmh_email';
+		
 		// fetch all records
+		$param_fields = [
+			$this->getRecordIdField(),
+			"$enrollment_field_name",
+			'subjectid',
+			$catmh_email_field_name
+		];
+		
+		// add filter_fields to getData request
+		if (!empty($filter_fields = $this->getProjectSetting('filter-fields')))
+			$param_fields = array_merge($param_fields, $filter_fields);
+		
 		$params = [
 			'project_id' => $this->getProjectId(),
 			'return_format' => 'json',
-			'fields' => [
-				$this->getRecordIdField(),
-				"$enrollment_field_name",
-				'subjectid',
-				'catmh_email'
-			]
+			'fields' => $param_fields
 		];
 		$data = json_decode(\REDCap::getData($params));
+		$this->llog("fetched record data (" . count($data) . " records)");
 		
 		// prepare email invitation using project settings
 		$from_address = $this->getProjectSetting('email-from');
@@ -813,6 +856,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			global $project_contact_email;
 			$from_address = $project_contact_email;
 		}
+		
+		// validation
 		if (empty($from_address)) {
 			// TODO: also add alert to scheduling page
 			\REDCap::logEvent("CAT-MH External Module", "Can't send invitations without configuring a 'from' email address for the module", NULL, NULL, NULL, $this->getProjectId());
@@ -827,6 +872,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		if (strpos($email_body, "[interview-urls]") === false)
 			$append_urls = true;
 		
+		$this->llog("passed email configuration validation");
 		$email = new \Message();
 		$email->setFrom($from_address);
 		$email->setSubject($email_subject);
@@ -840,18 +886,35 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// iterate over records, sending email invitations
 		foreach ($data as $record) {
 			// TODO: possible to iterate over more than just records here? repeatable forms, other events?
+			$rid_name = $this->getRecordIdField();
+			$record_id = $record->$rid_name;
 			
 			// validate record values
-			if (empty($record->catmh_email)) {
-				$result_log_message .= "No emails sent -- empty [catmh_email] field.";
+			$empty_filter_field = false;
+			foreach ($filter_fields as $fieldname) {	// check that this record's filter fields are true or abort
+				if (empty($record->$fieldname)) {
+					$empty_filter_field = $fieldname;
+					break;
+				}
+			}
+			if ($empty_filter_field) {
+				$this->llog("record $record_id empty filter field $empty_filter_field");
+				$result_log_message .= "Record '$record_id' - No emails sent, filter_field [$empty_filter_field] is empty.";
+				continue;
+			}
+			if (empty($record->$catmh_email_field_name)) {
+				$this->llog("Record '$record_id' - No emails sent -- empty [$catmh_email_field_name] field.");
+				$result_log_message .= "Record '$record_id' - No emails sent -- empty [$catmh_email_field_name] field.";
 				continue;
 			}
 			if (empty($rid = $record->{$this->getRecordIdField()})) {
-				$result_log_message .= "No emails sent -- missing Record ID.";
+				$this->llog("Record '$record_id' - No emails sent -- missing Record ID.");
+				$result_log_message .= "Record '$record_id' - No emails sent -- missing Record ID.";
 				continue;
 			}
 			if (!$enrollment_timestamp = strtotime($record->{$enrollment_field_name})) {
-				$result_log_message .= "No emails sent -- Couldn't convert enrollment date/time to a valid timestamp integer. Enrollment Date/Time: " . json_encode($record->{$enrollment_field_name});
+				$this->llog("Record '$record_id' - No emails sent -- Couldn't convert enrollment date/time to a valid timestamp integer. Enrollment Date/Time: " . json_encode($record->{$enrollment_field_name}));
+				$result_log_message .= "Record '$record_id' - No emails sent -- Couldn't convert enrollment date/time to a valid timestamp integer. Enrollment Date/Time: " . json_encode($record->{$enrollment_field_name});
 				continue;
 			}
 			if (empty($sid = $record->subjectid)) {
@@ -864,6 +927,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$invitations_to_send = $this->getInvitationsDue($record, $current_time);
 			if (empty($invitations_to_send)) {
 				// $result_log_message .= "No emails sent -- no invitations due."; // trivial case
+				$this->llog("no invites due");
 				continue;
 			}
 			
@@ -911,16 +975,16 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				$participant_email_body = str_replace("[interview-urls]", implode($urls, "<br>"), $participant_email_body);
 			}
 			$email->setBody($participant_email_body);
-			$email->setTo($record->catmh_email);
+			$email->setTo($record->$catmh_email_field_name);
 			
 			$success = $email->send();
 			if ($success) {
-				$result_log_message .= "Record $rid: Sent interview invitation email to address: " . $record->catmh_email . "\n";
+				$result_log_message .= "Record '$record_id' - Sent interview invitation email to address: " . $record->$catmh_email_field_name . "\n";
 				foreach($invitations_to_send as $invitation) {
 					$this->log('invitationSent', (array) $invitation);
 				}
 			} else {
-				$result_log_message .= "Record $rid: Failed to send email (" . $email->ErrorInfo . ")\n";
+				$result_log_message .= "Record '$record_id' - Failed to send email (" . $email->ErrorInfo . ")\n";
 			}
 		}
 		
