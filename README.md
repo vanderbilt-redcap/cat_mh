@@ -1,6 +1,7 @@
 
 
 
+
 # REDCap CAT-MH External Module
 
 The CAT-MH module allows administrators to schedule CAT-MH interviews for patients. The interview invitations are delivered via email and scheduled via a user-friendly web interface.
@@ -15,7 +16,7 @@ The prerequisites for using this module are:
 
 The following fields must exist in instruments/forms in the project
 
-* [catmh_email] (of type 'Text Box') -- This is the patient's email address. It is required in order to send them scheduled invitations and reminder invitations.
+* [catmh_email] (of type 'Text Box') -- This is the patient's email address. It is required in order to send them scheduled invitations and reminder invitations. You may specify an alternative participant email field in the module configuration.
 
 * [subjectid] (of type 'Text Box') -- It is recommended that this field have the @HIDDEN action tag.
 
@@ -30,6 +31,10 @@ You can configure any number of CAT-MH sequences. Each sequence consists of a se
 To do so, go to the "External Modules" page and click "Configure" for the CAT-MH module. You can select any number of tests for a sequence and select whether the interviewee should see the results at the end of their test.
 You may enable/disable the provider email feature here.
 You may also specify scheduled invitation and reminder email subject and body texts here. The module will replace`[interview-links]` and `[interview-urls]` with the actual patient-specific interview link/URLs at the time the emails are sent.
+
+You may also configure the module to automatically invite participants who complete a selected survey to continue to their first scheduled interview.
+
+Finally, you can specify any number of 'filter fields'. These fields will prevent the module from sending invite/reminder emails to participants if the given field is empty for the patient's associated record.
 
 ##### Alternate Labels
 You may also configure an alternate label for any sequence. This alternate label will be shown as the test name to the participant during the interview. 
