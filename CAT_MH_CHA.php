@@ -154,6 +154,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			return;
 		}
 		$seq_name = $first_seq[1];
+		$seq_offset = $first_seq[2];
+		$seq_time_of_day = $first_seq[3];
 		
 		// make link to first scheduled sequence
 		$enrollment_timestamp = strtotime($record_obj->$enrollment_field_name);
@@ -162,9 +164,13 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			return;
 		}
 		$enroll_date = date("Y-m-d", $enrollment_timestamp);
-		$enroll_and_time = "$enroll_date " . $time_of_day;
-		$sched_time = strtotime("+$offset days", strtotime($enroll_and_time));
+		$this->llog("enroll_date: $enroll_date");
+		$enroll_and_time = "$enroll_date " . $seq_time_of_day;
+		$this->llog("enroll_and_time: $enroll_and_time");
+		$sched_time = strtotime("+$seq_offset days", strtotime($enroll_and_time));
+		$this->llog("sched_time: $sched_time");
 		$first_sched_datetime = date("Y-m-d H:i", $sched_time);
+		$this->llog("first_sched_datetime: $first_sched_datetime");
 		$interview_url = $this->getUrl("interview.php") . "&NOAUTH&sid=$subjectid&sequence=" . urlencode($seq_name) . "&sched_dt=" . urlencode($first_sched_datetime);
 		
 		// redirect
@@ -578,12 +584,12 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		// $this->log_ran = true;
 		
-		if ($this->log_ran) {
+		// if ($this->log_ran) {
 			file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
-		} else {
-			file_put_contents("C:/vumc/log.txt", date('c') . "\n" . "starting CAT_MH_CHA log:\n$text\n");
-			$this->log_ran = true;
-		}
+		// } else {
+			// file_put_contents("C:/vumc/log.txt", date('c') . "\n" . "starting CAT_MH_CHA log:\n$text\n");
+			// $this->log_ran = true;
+		// }
 	}
 	
 	// interview data object/log functions
