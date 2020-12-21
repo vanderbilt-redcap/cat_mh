@@ -98,6 +98,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$filter_fields = $this->getProjectSetting('filter_fields');
 		$rid_field_name = $this->getRecordIdField();
 		
+		$this->llog("cat-mh redcap_survey_complete called with args:\n" . print_r(func_get_args(), true));
 		if (empty($record)) {
 			return;
 		}
@@ -106,11 +107,13 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$survey_index = array_search($on_complete_surveys, $instrument, true);
 		if ($survey_index === false) {
 			// it's not
+			$this->llog("cat-mh redcap_survey_complete -- returning early: not a configured instrument");
 			return;
 		}
 		// it is
 		
 		if (empty($enrollment_field_name = $this->getProjectSetting('enrollment_field'))) {
+			$this->llog("cat-mh redcap_survey_complete -- returning early: no enrollment_field configured");
 			return;
 		}
 		
@@ -129,6 +132,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$record_obj = $data[0];
 		foreach ($filter_fields as $fieldname) {
 			if (empty($record_obj->$fieldname)) {
+				$this->llog("cat-mh redcap_survey_complete -- returning early: detected empty filter_field $fieldname");
 				return;
 			}
 		}
@@ -137,6 +141,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		if (empty($subjectid = $record_obj->subjectid))
 			$subjectid = $this->initRecord($record_obj);
 		if (empty($subjectid)) {
+			$this->llog("cat-mh redcap_survey_complete -- returning early: couldn't establish subjectid");
 			return;
 		}
 		
@@ -144,6 +149,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$sequences = $this->getScheduledSequences();
 		$first_seq = $sequences[0];
 		if (empty($first_seq)) {
+			$this->llog("cat-mh redcap_survey_complete -- returning early: couldn't determine first scheduled sequence\n");
+			$this->llog("scheduled seqs: " . print_r($sequences, true));
 			return;
 		}
 		$seq_name = $first_seq[1];
@@ -151,6 +158,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// make link to first scheduled sequence
 		$enrollment_timestamp = strtotime($record_obj->$enrollment_field_name);
 		if (empty($enrollment_timestamp)) {
+			$this->llog("cat-mh redcap_survey_complete -- returning early: couldn't determine first scheduled sequence");
 			return;
 		}
 		$enroll_date = date("Y-m-d", $enrollment_timestamp);
@@ -158,9 +166,14 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$sched_time = strtotime("+$offset days", strtotime($enroll_and_time));
 		$first_sched_datetime = date("Y-m-d H:i", $sched_time);
 		$interview_url = $this->getUrl("interview.php") . "&NOAUTH&sid=$subjectid&sequence=" . urlencode($seq_name) . "&sched_dt=" . urlencode($first_sched_datetime);
-		echo "<br><br><h5>You may now take the first scheduled interview of the program by following the link below:</h5><br>";
-		echo "<a href='$interview_url' style='font-size: 16px;'>CAT-MH Interview $seq_name</a>";
-		echo "<br><br><h6>Alternatively you may visit the URL directly:</h6><br><span>$interview_url</span>";
+		
+		// redirect
+		header('Location: ' . $interview_url, true, 302);
+		$this->exitAfterHook();
+		
+		// echo "<br><br><h5>You may now take the first scheduled interview of the program by following the link below:</h5><br>";
+		// echo "<a href='$interview_url' style='font-size: 16px;'>CAT-MH Interview $seq_name</a>";
+		// echo "<br><br><h6>Alternatively you may visit the URL directly:</h6><br><span>$interview_url</span>";
 	}
 	
 	// crons
