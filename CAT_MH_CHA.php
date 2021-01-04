@@ -633,7 +633,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		if (gettype($interview) == 'array')
 			$interview = (object) $interview;
 		
-		$this->llog('updating interview:  ' . print_r($interview, true));
+		// $this->llog('updating interview:  ' . print_r($interview, true));
 		
 		// build parameters array
 		$rid = $this->getRecordIDBySID($interview->subjectID);
@@ -838,11 +838,11 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		if (empty($enrollment_field_name = $this->getProjectSetting('enrollment_field')))
 			return;
 		
-		$this->llog("sendInvitations:");
+		// $this->llog("sendInvitations:");
 		if ($this->getProjectSetting('disable_invites'))
 			return;
 		
-		$this->llog("passed disable_invites check");
+		// $this->llog("passed disable_invites check");
 		$this->cleanMissingSeqsFromSchedule();
 		
 		$catmh_email_field_name = $this->getProjectSetting('participant_email_field');
@@ -867,7 +867,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			'fields' => $param_fields
 		];
 		$data = json_decode(\REDCap::getData($params));
-		$this->llog("fetched record data (" . count($data) . " records)");
+		// $this->llog("fetched record data (" . count($data) . " records)");
 		
 		// prepare email invitation using project settings
 		$from_address = $this->getProjectSetting('email-from');
@@ -891,7 +891,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		if (strpos($email_body, "[interview-urls]") === false)
 			$append_urls = true;
 		
-		$this->llog("passed email configuration validation");
+		// $this->llog("passed email configuration validation");
 		$email = new \Message();
 		$email->setFrom($from_address);
 		$email->setSubject($email_subject);
@@ -917,22 +917,22 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				}
 			}
 			if ($empty_filter_field) {
-				$this->llog("record $record_id empty filter field $empty_filter_field");
+				// $this->llog("record $record_id empty filter field $empty_filter_field");
 				$result_log_message .= "Record '$record_id' - No emails sent, filter_field [$empty_filter_field] is empty.";
 				continue;
 			}
 			if (empty($record->$catmh_email_field_name)) {
-				$this->llog("Record '$record_id' - No emails sent -- empty [$catmh_email_field_name] field.");
+				// $this->llog("Record '$record_id' - No emails sent -- empty [$catmh_email_field_name] field.");
 				$result_log_message .= "Record '$record_id' - No emails sent -- empty [$catmh_email_field_name] field.";
 				continue;
 			}
 			if (empty($rid = $record->{$this->getRecordIdField()})) {
-				$this->llog("Record '$record_id' - No emails sent -- missing Record ID.");
+				// $this->llog("Record '$record_id' - No emails sent -- missing Record ID.");
 				$result_log_message .= "Record '$record_id' - No emails sent -- missing Record ID.";
 				continue;
 			}
 			if (!$enrollment_timestamp = strtotime($record->{$enrollment_field_name})) {
-				$this->llog("Record '$record_id' - No emails sent -- Couldn't convert enrollment date/time to a valid timestamp integer. Enrollment Date/Time: " . json_encode($record->{$enrollment_field_name}));
+				// $this->llog("Record '$record_id' - No emails sent -- Couldn't convert enrollment date/time to a valid timestamp integer. Enrollment Date/Time: " . json_encode($record->{$enrollment_field_name}));
 				$result_log_message .= "Record '$record_id' - No emails sent -- Couldn't convert enrollment date/time to a valid timestamp integer. Enrollment Date/Time: " . json_encode($record->{$enrollment_field_name});
 				continue;
 			}
@@ -946,7 +946,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$invitations_to_send = $this->getInvitationsDue($record, $current_time);
 			if (empty($invitations_to_send)) {
 				// $result_log_message .= "No emails sent -- no invitations due."; // trivial case
-				$this->llog("no invites due");
+				// $this->llog("no invites due");
 				continue;
 			}
 			
