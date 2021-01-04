@@ -73,7 +73,8 @@ $(document).ready(
 				[4, 'asc']
 			]
 		});
-	
+		
+		// when user clicks "Acknowledged" checkbox in an interview table row
 		$('body').on('change', '.ack_cbox', function() {
 			var data = {
 				rid: $(this).attr('data-rid'),
@@ -103,6 +104,19 @@ $(document).ready(
 				},
 				dataType: 'json'
 			})
+		})
+		
+		// when user clicks "show future dates" checkbox
+		$('body').on('change', '#show_future_seqs', function() {
+			var checked = $(this).prop('checked');
+			var url = window.location.href
+			// remove existing param value(s)
+			url = url.replace(/&show_future_seqs=true/g, '');
+			url = url.replace(/&show_future_seqs=false/g, '');
+			
+			// add param value
+			url = url + '&show_future_seqs=' + encodeURIComponent(checked);
+			window.location.href = url;
 		})
 	}
 );

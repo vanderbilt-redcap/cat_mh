@@ -585,7 +585,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// $this->log_ran = true;
 		
 		// if ($this->log_ran) {
-			file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
+			// file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
 		// } else {
 			// file_put_contents("C:/vumc/log.txt", date('c') . "\n" . "starting CAT_MH_CHA log:\n$text\n");
 			// $this->log_ran = true;

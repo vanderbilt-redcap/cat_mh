@@ -1,5 +1,21 @@
 <?php
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
+
+session_start();
+
+// support 'show_future_seqs' checkbox
+if (!isset($_SESSION['show_future_seqs'])) {
+	$_SESSION['show_future_seqs'] = false;
+}
+if ($_GET['show_future_seqs'] === 'true') {
+	$_SESSION['show_future_seqs'] = true;
+	$module->llog('show_future_seqs setting to true');
+}
+if ($_GET['show_future_seqs'] === 'false') {
+	$_SESSION['show_future_seqs'] = false;
+	$module->llog('show_future_seqs setting to false');
+}
+
 ?>
 
 <link rel="stylesheet" type="text/css" href="<?php echo $module->getUrl('css/dashboard.css'); ?>">
@@ -29,6 +45,9 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 </div>';
 	}
 ?>
+
+<input type='checkbox' id='show_future_seqs'<?php if ($_SESSION['show_future_seqs']) {echo ' checked';} ?>>
+<label for='show_future_seqs'> Show Future Sequences</label><br>
 
 <table id="records" class="display compact nowrap">
     <thead>

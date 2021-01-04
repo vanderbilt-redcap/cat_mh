@@ -113,7 +113,7 @@ foreach($data as $rid => $record) {
 		$kcat_seq_index = $module->getKCATSequenceIndex($seq_name);
 		
 		// skip if not scheduled to take yet (invite not sent)
-		if ($time_now < strtotime($seq_date))
+		if ($time_now < strtotime($seq_date) && !$_SESSION['show_future_seqs'])
 			continue;
 		
 		// get actual interview if it exists
