@@ -427,8 +427,10 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			if (gettype($this->kcat_seq_names) != 'array')
 				$this->kcat_seq_names = [];
 		}
-		if (gettype($seq_name) != "string")
-			throw new \Exception("getKCATSequenceIndex first argument must be a string, was type: " . gettype($seq_name));
+		if (gettype($seq_name) != "string") {
+			return false;
+			// throw new \Exception("getKCATSequenceIndex first argument must be a string, was type: " . gettype($seq_name));
+		}
 		
 		// $this->llog("\$this->kcat_seq_names: " . print_r($this->kcat_seq_names, true));
 		return array_search($seq_name, $this->kcat_seq_names, true);
