@@ -29,6 +29,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 					<th>Precision</th>
 					<th>Probability</th>
 					<th>Percentile</th>
+					<th>PHQ-9 Equivalency</th>
 					<th>Reviewed</th>
 				</tr>
 			</thead>
@@ -93,6 +94,12 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 						$test_reviewed = 'false';
 					}
 					
+					$phq9 = '';
+					if ($test->type == 'DEP' and is_float($test->severity)) {
+						$phq9 = 3.57 + 0.29 * ($test->severity);
+						// $test->severity = strval($test->severity) . " (PHQ-9: $phq9)";
+					}
+					
 					$reviewed_cbox = "<input type='checkbox' class='reviewed_cbox' data-test='$test_name' data-sid='$sid' data-seq='$sequence_name' data-date='$sequence_datetime' data-kcat='{$interview->kcat}' data-checked='$test_reviewed'$checked>";
 					
 					echo("
@@ -109,6 +116,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 						<td>{$test->precision}</td>
 						<td>{$test->prob}</td>
 						<td>{$test->percentile}</td>
+						<td>$phq9</td>
 						<td>$reviewed_cbox</td>
 					</tr>");
 				}

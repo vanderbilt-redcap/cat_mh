@@ -17,10 +17,10 @@ $(function() {
 			'copy', 'csv', 'excel', 'print'
 		],
 		columnDefs: [
-			{targets: 12, orderDataType: 'dom-checkbox'}
+			{targets: 13, orderDataType: 'dom-checkbox'}
 		],
 		order: [
-			[12, 'asc'],
+			[13, 'asc'],
 			[0, 'asc']
 		]
 	});
