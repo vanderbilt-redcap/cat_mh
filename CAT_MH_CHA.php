@@ -586,12 +586,12 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		// $this->log_ran = true;
 		
-		// if ($this->log_ran) {
-			// file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
-		// } else {
-			// file_put_contents("C:/vumc/log.txt", date('c') . "\n" . "starting CAT_MH_CHA log:\n$text\n");
-			// $this->log_ran = true;
-		// }
+		if ($this->log_ran) {
+			file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
+		} else {
+			file_put_contents("C:/vumc/log.txt", date('c') . "\n" . "starting CAT_MH_CHA log:\n$text\n");
+			$this->log_ran = true;
+		}
 	}
 	
 	// interview data object/log functions
@@ -920,22 +920,22 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			}
 			if ($empty_filter_field) {
 				// $this->llog("record $record_id empty filter field $empty_filter_field");
-				$result_log_message .= "Record '$record_id' - No emails sent, filter_field [$empty_filter_field] is empty.";
+				$result_log_message .= "Record '$record_id' - No emails sent, filter_field [$empty_filter_field] is empty.\n";
 				continue;
 			}
 			if (empty($record->$catmh_email_field_name)) {
 				// $this->llog("Record '$record_id' - No emails sent -- empty [$catmh_email_field_name] field.");
-				$result_log_message .= "Record '$record_id' - No emails sent -- empty [$catmh_email_field_name] field.";
+				$result_log_message .= "Record '$record_id' - No emails sent -- empty [$catmh_email_field_name] field.\n";
 				continue;
 			}
 			if (empty($rid = $record->{$this->getRecordIdField()})) {
 				// $this->llog("Record '$record_id' - No emails sent -- missing Record ID.");
-				$result_log_message .= "Record '$record_id' - No emails sent -- missing Record ID.";
+				$result_log_message .= "Record '$record_id' - No emails sent -- missing Record ID.\n";
 				continue;
 			}
 			if (!$enrollment_timestamp = strtotime($record->{$enrollment_field_name})) {
 				// $this->llog("Record '$record_id' - No emails sent -- Couldn't convert enrollment date/time to a valid timestamp integer. Enrollment Date/Time: " . json_encode($record->{$enrollment_field_name}));
-				$result_log_message .= "Record '$record_id' - No emails sent -- Couldn't convert enrollment date/time to a valid timestamp integer. Enrollment Date/Time: " . json_encode($record->{$enrollment_field_name});
+				$result_log_message .= "Record '$record_id' - No emails sent -- invalid timestamp: " . json_encode($record->{$enrollment_field_name}) . "\n";
 				continue;
 			}
 			if (empty($sid = $record->subjectid)) {
@@ -947,7 +947,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			
 			$invitations_to_send = $this->getInvitationsDue($record, $current_time);
 			if (empty($invitations_to_send)) {
-				// $result_log_message .= "No emails sent -- no invitations due."; // trivial case
+				// $result_log_message .= "No emails sent -- no invitations due.\n"; // trivial case
 				// $this->llog("no invites due");
 				continue;
 			}
@@ -1015,8 +1015,9 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	public function getInvitationsDue($record, $current_time) {
-		$rid = $record->{$this->getRecordIdField()};
 		// return an array with sequence names as keys, values as scheduled_datetimes
+		
+		$rid = $record->{$this->getRecordIdField()};
 		$enrollment_timestamp = strtotime($record->{$this->getProjectSetting('enrollment_field')});
 		
 		// determine which sequence invitations and reminders we need to email to this participant
@@ -1036,6 +1037,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			// check scheduled event
 			$enroll_date = date("Y-m-d", $enrollment_timestamp);
 			$enroll_and_time = "$enroll_date " . $time_of_day;
+			$this->llog("enroll_and_time: $enroll_and_time");
 			$sched_time = strtotime("+$offset days", strtotime($enroll_and_time));
 			$first_sched_time = $sched_time;
 			
@@ -1088,7 +1090,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				for ($reminder_offset = $delay; $reminder_offset <= $delay + $duration - 1; $reminder_offset += $frequency) {
 					// recalculate timestamp with reminder offset, to see if current time is after it
 					$this_offset = $reminder_offset + $offset;
-					// $this->llog("this_offset: $this_offset");
+					$this->llog("this_offset: $this_offset");
 					$sched_time = strtotime("+$this_offset days", strtotime($enroll_and_time));
 					$sent_count = $this->countLogs("message=? AND record=? AND sequence=? AND offset=? AND time_of_day=?", [
 						'invitationSent',
