@@ -14,6 +14,20 @@ foreach($sequences as $seq) {
 
 echo "\n\n";
 echo "Reminder settings: " . print_r($reminder_settings, true) . "\n\n";
+$offset = 0;
+if ($reminder_settings->enabled) {
+	$frequency = (int) $reminder_settings->frequency;
+	$duration = (int) $reminder_settings->duration;
+	$delay = (int) $reminder_settings->delay;
+	echo "frequency: $frequency, delay: $delay, duration: $duration\n";
+	for ($reminder_offset = $delay; $reminder_offset <= $delay + $duration - 1; $reminder_offset += $frequency) {
+		// recalculate timestamp with reminder offset, to see if current time is after it
+		$this_offset = $reminder_offset + $offset;
+		echo "this_offset: $this_offset\n";
+	}
+} else {
+	echo "reminders disabled!\n";
+}
 
 $record_ids = ['1', '58', '59', '60'];
 $enrollment_field_name = $module->getProjectSetting('enrollment_field');
@@ -35,10 +49,10 @@ $params = [
 ];
 $data = json_decode(\REDCap::getData($params));
 
-$in_360_days = strtotime("+360 days", time());
-$in_360_days_date = date('Y-m-d H:i', $in_360_days);
-echo "360 days from now: $in_360_days_date\n";
-echo "in_360_days (timestamp): $in_360_days\n";
+$in_90_days = strtotime("+90 days", time());
+$in_90_days_date = date('Y-m-d H:i', $in_90_days);
+echo "90 days from now: $in_90_days_date\n";
+echo "in_90_days (timestamp): $in_90_days\n";
 
 echo "</pre>";
 
@@ -57,7 +71,7 @@ echo "<table id='invites'>
 	<tbody>";
 	
 foreach ($data as $record) {
-	$invites = $module->getInvitationsDue($record, $in_360_days);
+	$invites = $module->getInvitationsDue($record, $in_90_days);
 	$rid_field_name = $module->getRecordIdField();
 	$rid = $record->$rid_field_name;
 	$enroll_date = $record->$enrollment_field_name;
@@ -77,8 +91,6 @@ foreach ($data as $record) {
 };
 echo "</tbody>
 	</table><br><br>";
-
-echo "Printing all project settings: <pre>" . print_r($module->getProjectSettings(), true) . "</pre>\n\n";
 
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';
 ?>
