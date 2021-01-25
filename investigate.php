@@ -30,22 +30,62 @@ if (!empty($filter_fields = $module->getProjectSetting('filter-fields')))
 $params = [
 	'project_id' => $module->getProjectId(),
 	'return_format' => 'json',
-	'fields' => $param_fields,
-	'records' => $record_ids
+	'fields' => $param_fields
+	// 'records' => $record_ids
 ];
 $data = json_decode(\REDCap::getData($params));
 
-$in_30_days = strtotime("+30 days", time());
-$in_30_days_date = date('Y-m-d H:i', $in_30_days);
-echo "30 days from now: $in_30_days_date\n";
-echo "in_30_days (timestamp): $in_30_days\n";
-foreach ($data as $record) {
-	$invites = $module->getInvitationsDue($record, $in_30_days);
-	echo "Invitations due for record $record: \n" . print_r($invites, true) . "\n";
-};
-
-echo "Printing all project settings: " . print_r($module->getProjectSettings(), true) . "\n\n";
+$in_360_days = strtotime("+360 days", time());
+$in_360_days_date = date('Y-m-d H:i', $in_360_days);
+echo "360 days from now: $in_360_days_date\n";
+echo "in_360_days (timestamp): $in_360_days\n";
 
 echo "</pre>";
+
+echo "<br>";
+echo "<table id='invites'>
+	<thead>
+		<tr>
+			<th>Record ID</th>
+			<th>Enrollment Date</th>
+			<th>Invite Interview Name</th>
+			<th>Invite DateTime</th>
+			<th>Invite Offset</th>
+			<th>Invite Time of Day</th>
+		</tr>
+	</thead>
+	<tbody>";
+	
+foreach ($data as $record) {
+	$invites = $module->getInvitationsDue($record, $in_360_days);
+	$rid_field_name = $module->getRecordIdField();
+	$rid = $record->$rid_field_name;
+	$enroll_date = $record->$enrollment_field_name;
+	
+	foreach ($invites as $invite) {
+		if (empty($enroll_date))
+			continue;
+		echo "<tr>
+			<td>$rid</td>
+			<td>$enroll_date</td>
+			<td>{$invite->sequence}</td>
+			<td>" . date("Y-m-d H:i", $invite->sched_dt) . "</td>
+			<td>{$invite->offset}</td>
+			<td>{$invite->time_of_day}</td>
+		</tr>";
+	}
+};
+echo "</tbody>
+	</table><br><br>";
+
+echo "Printing all project settings: <pre>" . print_r($module->getProjectSettings(), true) . "</pre>\n\n";
+
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';
 ?>
+<script type='text/javascript' src='//cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js'></script>
+<script type='text/javascript'>
+	$(document).ready(function() {
+		$('head').append('<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css">');
+		var invites_dt = $('#invites').DataTable();
+	});
+</script>
