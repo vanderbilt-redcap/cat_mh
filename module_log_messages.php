@@ -6,7 +6,7 @@ echo "<pre>";
 
 $pid = $module->getProjectId();
 
-$result = $module->queryLogs("SELECT message, timestamp, sequence, subjectID, scheduled_datetime, record, offset, time_of_day, reminder WHERE message=?",
+$result = $module->queryLogs("SELECT message, timestamp, sequence, subjectID, scheduled_datetime, record, offset, time_of_day, reminder, sched_dt WHERE message=?",
 	['invitationSent']
 );
 while ($row = db_fetch_assoc($result)) {
