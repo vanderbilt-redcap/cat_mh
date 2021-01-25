@@ -204,6 +204,9 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				\REDCap::logEvent("CAT-MH External Module", "Ran 'emailer_cron' method today", NULL, NULL, NULL, $this->getProjectId());
 				$this->log("cron_ran_today");
 			}
+			
+			// clear reminderSettings cache
+			unset($this->reminderSettings);
 		}
 		$_GET['pid'] = $originalPid;
 	}
