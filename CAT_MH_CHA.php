@@ -583,8 +583,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	public function llog($text) {
-		if (!$this->local_env)
-			return;
+		// if (!$this->local_env)
+			// return;
 		// echo "<pre>$text\n</pre>";
 		
 		// $this->log_ran = true;
@@ -1043,7 +1043,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$first_sched_time = $sched_time;
 			
 			// check if interview is completed
-			if ($this->getSequenceStatus($rid, $name, $sched_time) == 4) {
+			if ($this->getSequenceStatus($rid, $name, date("Y-m-d H:i", $sched_time)) == 4) {
 				continue;
 			}
 			
@@ -1070,6 +1070,13 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				$time_of_day
 			]);
 			
+			$reminders_sent = $this->countLogs("message=? AND record=? AND sequence=? AND sched_dt = ? AND reminder='1'", [
+				'invitationSent',
+				$rid,
+				$name,
+				$first_sched_time
+			]);
+			
 			// create invitation object
 			$invitation = new \stdClass();
 			$invitation->record = $rid;
@@ -1079,7 +1086,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$invitation->sched_dt = $first_sched_time;
 			$invitation->kcat = $kcat;
 			
-			if ($sched_time <= $current_time && $sent_count === 0) {
+			if ($sched_time <= $current_time && $sent_count == 0 && $reminders_sent == 0) {
 				$invites["$name $first_sched_time"] = $invitation;
 			}
 			
@@ -1088,11 +1095,26 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				$frequency = (int) $reminder_settings->frequency;
 				$duration = (int) $reminder_settings->duration;
 				$delay = (int) $reminder_settings->delay;
-				for ($reminder_offset = $delay; $reminder_offset <= $delay + $duration - 1; $reminder_offset += $frequency) {
+				
+				$reminder_sent = false;
+					
+				// iterate over possible reminders from largest offset to smallest
+				// log older reminders as ignored (ignoreReminder log message) if newer reminders get sent
+				// this ensures that multiple reminders don't get sent repeatedly (like when an admin changes reminder settings)
+				for ($reminder_offset = $delay + $duration - 1; $reminder_offset >= $delay; $reminder_offset -= $frequency) {
 					// recalculate timestamp with reminder offset, to see if current time is after it
 					$this_offset = $reminder_offset + $offset;
-					// $this->llog("this_offset: $this_offset");
 					$sched_time = strtotime("+$this_offset days", strtotime($enroll_and_time));
+					
+					// log message to indicate to the module that a reminder with a larger offset has already been sent
+					if ($reminder_sent) {
+						$reminder_invitation = clone $invitation;
+						$reminder_invitation->offset = $this_offset;
+						$reminder_invitation->reminder = true;
+						$this->log('ignoreReminder', (array) $reminder_invitation);
+						continue;
+					}
+					
 					$sent_count = $this->countLogs("message=? AND record=? AND sequence=? AND offset=? AND time_of_day=?", [
 						'invitationSent',
 						$rid,
@@ -1100,10 +1122,23 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 						$this_offset,
 						$time_of_day
 					]);
-					if ($sched_time <= $current_time && $sent_count === 0) {
-						$invitation->offset = $this_offset;
-						$invitation->reminder = true;
-						$invites["$name $first_sched_time"] = $invitation;
+					
+					$ignore_count = $this->countLogs("message=? AND record=? AND sequence=? AND offset=? AND time_of_day=?", [
+						'ignoreReminder',
+						$rid,
+						$name,
+						$this_offset,
+						$time_of_day
+					]);
+					
+					if ($sched_time <= $current_time && $sent_count == 0 && $ignore_count == 0 && !$reminder_sent) {
+						$reminder_invitation = clone $invitation;
+						$reminder_invitation->offset = $this_offset;
+						$reminder_invitation->reminder = true;
+						$invites["$name $first_sched_time"] = $reminder_invitation;
+						
+						// setting to true will make module ignore all reminders with lower offsets
+						$reminder_sent = true;
 					}
 				}
 			}
