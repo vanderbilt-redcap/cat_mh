@@ -78,6 +78,15 @@ if (!empty($interview->results->tests)) {
 		</div>
 		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 		<?php
+			// determine if this interview should hide question numbers
+			$seq_name = urldecode($_GET['sequence']);
+			$seq_index = array_search($seq_name, $module->getProjectSetting('sequence'));
+			$hide_this_seq = $module->getProjectSetting('hide_question_number')[$seq_index];
+			if (empty($hide_this_seq)) {
+				$hide_this_seq = 'false';
+			} else {
+				$hide_this_seq = 'true';
+			}
 			
 			// give js this info
 			echo "
@@ -93,6 +102,7 @@ if (!empty($interview->results->tests)) {
 		
 		catmh.interview = " . json_encode($interview) . ";
 		if (typeof(catmh.interview) == 'object') {
+			catmh.interview.hide_question_number = $hide_this_seq;
 			catmh.init();
 			// catmh.setInterviewOptions();
 		}

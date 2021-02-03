@@ -155,7 +155,12 @@ catmh.getQuestion = function() {
 					catmh.currentQuestion = JSON.parse(catmh.lastResponse.curl.body);
 					
 					// set question text
-					$(".question").text(catmh.currentQuestion.questionNumber + '. ' + catmh.currentQuestion.questionDescription);
+					var question_text = catmh.currentQuestion.questionDescription;
+					if (catmh.interview.hide_question_number == false) {
+						question_text = catmh.currentQuestion.questionNumber + '. ' + question_text;
+					}
+					$(".question").text(question_text);
+					// $(".question").text(catmh.currentQuestion.questionNumber + '. ' + catmh.currentQuestion.questionDescription);
 					
 					// set answer options
 					catmh.setAnswerOptions(catmh.currentQuestion.questionAnswers);

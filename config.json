@@ -126,6 +126,11 @@
 					{"value": "2", "name": "Spanish"}
 			   ]
             },
+			{
+				"type": "checkbox",
+				"key": "hide_question_number",
+				"name": "Hide question numbers during interview"
+			},
             {
 				"key": "expected_complete",
 				"name": "Expected number of days to complete interview",
