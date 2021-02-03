@@ -127,6 +127,20 @@
 			   ]
             },
 			{
+				"type": "dropdown",
+				"key": "timeframe",
+				"name": "Sequence timeframe",
+				"choices": [
+					{"value": "1", "name": "Past hour"},
+					{"value": "2", "name": "Past day"},
+					{"value": "3", "name": "Past week"},
+					{"value": "4", "name": "Past 2 weeks"},
+					{"value": "5", "name": "Past 30 days"},
+					{"value": "6", "name": "Past 12 months"},
+					{"value": "7", "name": "Lifetime"}
+				]
+			},
+			{
 				"type": "checkbox",
 				"key": "hide_question_number",
 				"name": "Hide question numbers during interview"

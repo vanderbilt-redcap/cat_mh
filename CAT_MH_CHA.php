@@ -383,6 +383,13 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		}
 		$args['subjectID'] = $sid;
 		
+		// determine timeframeID
+		$seq_index = array_search($seq_name, $this->getProjectSetting('sequence'));
+		$timeframeID = $this->getProjectSetting('timeframe')[$seq_index];
+		if (!empty($timeframeID)) {
+			$args['timeframeID'] = $timeframeID;
+		}
+		
 		// determine sequence tests and language
 		foreach ($projectSettings['sequence'] as $i => $seq) {
 			if ($seq == $sequence) {
@@ -1149,8 +1156,10 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	
 	// CAT-MH API methods
 	public function createInterview($args) {
-		// args needed: applicationid, organizationid, subjectID, language, tests[]
+		// args needed: applicationid, organizationid, subjectID, language, timeframeID, tests[]
 		$out = [];
+		
+		$this->llog("args used to create interview: " . print_r($args, true));
 		
 		// build request headers and body
 		$curlArgs = [];
@@ -1167,6 +1176,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			"numberOfInterviews" => 1,
 			// "numberOfInterviews" => sizeof($interviewConfig['tests']),
 			"language" => intval($args['language']),
+			"timeframeID" => $args['timeframeID'],
 			"tests" => $args['tests']
 		]);
 		$curlArgs['post'] = true;
