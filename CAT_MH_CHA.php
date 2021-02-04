@@ -98,7 +98,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$filter_fields = $this->getProjectSetting('filter_fields');
 		$rid_field_name = $this->getRecordIdField();
 		
-		$this->llog("cat-mh redcap_survey_complete called with args:\n" . print_r(func_get_args(), true));
+		// $this->llog("cat-mh redcap_survey_complete called with args:\n" . print_r(func_get_args(), true));
 		if (empty($record)) {
 			return;
 		}
@@ -107,13 +107,13 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$survey_index = array_search($on_complete_surveys, $instrument, true);
 		if ($survey_index === false) {
 			// it's not
-			$this->llog("cat-mh redcap_survey_complete -- returning early: not a configured instrument");
+			// $this->llog("cat-mh redcap_survey_complete -- returning early: not a configured instrument");
 			return;
 		}
 		// it is
 		
 		if (empty($enrollment_field_name = $this->getProjectSetting('enrollment_field'))) {
-			$this->llog("cat-mh redcap_survey_complete -- returning early: no enrollment_field configured");
+			// $this->llog("cat-mh redcap_survey_complete -- returning early: no enrollment_field configured");
 			return;
 		}
 		
@@ -132,7 +132,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$record_obj = $data[0];
 		foreach ($filter_fields as $fieldname) {
 			if (empty($record_obj->$fieldname)) {
-				$this->llog("cat-mh redcap_survey_complete -- returning early: detected empty filter_field $fieldname");
+				// $this->llog("cat-mh redcap_survey_complete -- returning early: detected empty filter_field $fieldname");
 				return;
 			}
 		}
@@ -141,7 +141,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		if (empty($subjectid = $record_obj->subjectid))
 			$subjectid = $this->initRecord($record_obj);
 		if (empty($subjectid)) {
-			$this->llog("cat-mh redcap_survey_complete -- returning early: couldn't establish subjectid");
+			// $this->llog("cat-mh redcap_survey_complete -- returning early: couldn't establish subjectid");
 			return;
 		}
 		
@@ -149,8 +149,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$sequences = $this->getScheduledSequences();
 		$first_seq = $sequences[0];
 		if (empty($first_seq)) {
-			$this->llog("cat-mh redcap_survey_complete -- returning early: couldn't determine first scheduled sequence\n");
-			$this->llog("scheduled seqs: " . print_r($sequences, true));
+			// $this->llog("cat-mh redcap_survey_complete -- returning early: couldn't determine first scheduled sequence\n");
+			// $this->llog("scheduled seqs: " . print_r($sequences, true));
 			return;
 		}
 		$seq_name = $first_seq[1];
@@ -160,17 +160,17 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// make link to first scheduled sequence
 		$enrollment_timestamp = strtotime($record_obj->$enrollment_field_name);
 		if (empty($enrollment_timestamp)) {
-			$this->llog("cat-mh redcap_survey_complete -- returning early: couldn't determine first scheduled sequence");
+			// $this->llog("cat-mh redcap_survey_complete -- returning early: couldn't determine first scheduled sequence");
 			return;
 		}
 		$enroll_date = date("Y-m-d", $enrollment_timestamp);
-		$this->llog("enroll_date: $enroll_date");
+		// $this->llog("enroll_date: $enroll_date");
 		$enroll_and_time = "$enroll_date " . $seq_time_of_day;
-		$this->llog("enroll_and_time: $enroll_and_time");
+		// $this->llog("enroll_and_time: $enroll_and_time");
 		$sched_time = strtotime("+$seq_offset days", strtotime($enroll_and_time));
-		$this->llog("sched_time: $sched_time");
+		// $this->llog("sched_time: $sched_time");
 		$first_sched_datetime = date("Y-m-d H:i", $sched_time);
-		$this->llog("first_sched_datetime: $first_sched_datetime");
+		// $this->llog("first_sched_datetime: $first_sched_datetime");
 		$interview_url = $this->getUrl("interview.php") . "&NOAUTH&sid=$subjectid&sequence=" . urlencode($seq_name) . "&sched_dt=" . urlencode($first_sched_datetime);
 		
 		// redirect
@@ -1159,7 +1159,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// args needed: applicationid, organizationid, subjectID, language, timeframeID, tests[]
 		$out = [];
 		
-		$this->llog("args used to create interview: " . print_r($args, true));
+		// $this->llog("args used to create interview: " . print_r($args, true));
 		
 		// build request headers and body
 		$curlArgs = [];
@@ -1425,7 +1425,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// send request via curl
 		$curl = $this->curl($curlArgs);
 		$out['curl'] = ["body" => $curl["body"]];
-		$this->llog('curl body: ' . $curl['body']);
+		// $this->llog('curl body: ' . $curl['body']);
 		
 		// handle response
 		try {
@@ -1436,7 +1436,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				$out['needResults'] = true;
 			}
 		} catch (\Exception $e) {
-			$this->llog('exception in getQuestion: ' . $e);
+			// $this->llog('exception in getQuestion: ' . $e);
 			$out['moduleError'] = true;
 			$out['moduleMessage'] = "REDCap failed to retrieve the next question from the CAT-MH API server. Please refresh the page in a few moments to try again.";
 		}
