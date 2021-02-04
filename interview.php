@@ -47,6 +47,7 @@ if (!empty($interview->results->tests)) {
 			<button id='beginInterview' style='display: none;' type='button' class='submit' onMouseDown='catmh.authInterview()'>Begin</button>
 		</div>
 		<div id='interviewTest'>
+			<div id='questionNote'></div>
 			<span class='question'></span>
 			<button id='submitAnswer' type='button' class='disabled submit'>Submit</button>
 		</div>

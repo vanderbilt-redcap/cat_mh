@@ -3,7 +3,7 @@ body > div {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  margin-top: 100px;
+  margin-top: 64px;
   color: #5A5A5A;
 }
 body > div * {
@@ -60,6 +60,15 @@ span.loadText {
   font-weight: 450;
   font-size: 36px;
   margin-bottom: 50px;
+}
+
+div#questionNote {
+	background-color: #afdfff6f;
+	padding: 16px;
+	margin: 0px 0px 16px 0px;
+}
+
+div#questionNote span {
 }
 
 .question {

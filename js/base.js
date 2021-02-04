@@ -154,6 +154,18 @@ catmh.getQuestion = function() {
 				} else {
 					catmh.currentQuestion = JSON.parse(catmh.lastResponse.curl.body);
 					
+					// set question note (timeframe text)
+					if (typeof(catmh.currentQuestion.questionNote) == 'string') {
+						$("div#questionNote").empty();
+						$("div#questionNote").append("<span>" + catmh.currentQuestion.questionNote + "</span>");
+					}
+					// hide div if no question note present
+					if ($("div#questionNote").is(":empty")) {
+						$("div#questionNote").hide();
+					} else {
+						$("div#questionNote").show();
+					}
+					
 					// set question text
 					var question_text = catmh.currentQuestion.questionDescription;
 					if (catmh.interview.hide_question_number == false) {
