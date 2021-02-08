@@ -10,7 +10,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'pdep' => "p-dep",
 		'panx' => "p-anx",
 		'pmhm' => "p-m/hm",
-		'sa' => "sa",
+		'sud' => "sud",
 		'ptsd' => "ptsd",
 		'cssrs' => "c-ssrs",
 		'ss' => "ss",
@@ -27,7 +27,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'p-dep' => "Depression (Perinatal)",
 		'p-anx' => "Anxiety Disorder (Perinatal)",
 		'p-m/hm' => "Mania/Hypomania (Perinatal)",
-		'sa' => "Substance Abuse",
+		'sud' => "Substance Use Disorder",
 		'ptsd' => "Post-Traumatic Stress Disorder",
 		'c-ssrs' => "C-SSRS Suicide Screen",
 		'ss' => "Suicide Scale",
@@ -281,7 +281,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	
 	public function getAuthValues($args) {
 		// args should have: subjectID, interviewID, identifier, signature
-		
+		// $this->llog("getAuthValues: calling with arguments: " . print_r($args, true));
 		$interview = $this->getInterview($args['subjectID'], $args['interviewID'], $args['identifier'], $args['signature']);
 		if (empty($interview)) {
 			echo("REDCap couldn't get authorization values from logged interview data -- please contact REDCap administrator.");
@@ -429,7 +429,36 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			return $new_interview;
 		}
 	}
-
+	
+	public function buildQuestionTestMap() {
+		$this->questionTestMap = [];
+		$file_path = $this->getModulePath() . "data/questionID_testType.csv";
+		$file = fopen($file_path, 'r');
+		if ($file === false) {
+			throw new \Exception("The CAT-MH module couldn't open questionID_testType.csv to construct a question/test map array.");
+		}
+		while ($line = fgetcsv($file)) {
+			$questionID = $line[0];
+			$test_short_name = strtolower($line[1]);
+			$this->questionTestMap[$questionID] = [$test_short_name];
+			
+			// adhd and a/adhd questions get pulled from same item bank
+			// same for p-anx, p-dep, p-m/hm, they get pulled from the general test item banks
+			if ($test_short_name == 'c/adhd') {
+				$this->questionTestMap[$questionID][] = 'a/adhd';
+			}
+			if ($test_short_name == 'dep') {
+				$this->questionTestMap[$questionID][] = 'p-dep';
+			}
+			if ($test_short_name == 'anx') {
+				$this->questionTestMap[$questionID][] = 'p-anx';
+			}
+			if ($test_short_name == 'm/hm') {
+				$this->questionTestMap[$questionID][] = 'p-m/hm';
+			}
+		}
+	}
+	
 	// K-CAT methods
 	public function getKCATSequenceIndex($seq_name) {	// or return false if not a kcat sequence
 		if (empty($this->kcat_seq_names)) {
@@ -590,14 +619,14 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	public function llog($text) {
-		// if (!$this->local_env)
-			// return;
+		if (!$this->local_env)
+			return;
 		// echo "<pre>$text\n</pre>";
 		
 		// $this->log_ran = true;
 		
 		// if ($this->log_ran) {
-			// file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
+			file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
 		// } else {
 			// file_put_contents("C:/vumc/log.txt", date('c') . "\n" . "starting CAT_MH_CHA log:\n$text\n");
 			// $this->log_ran = true;
@@ -635,6 +664,11 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			]);
 		}
 		$db_result = db_fetch_assoc($result);
+		
+		if (empty($db_result))
+			return false;
+		// $this->llog("getInterview: fetched db_result: " . print_r($db_result, true));
+		
 		$interview = json_decode($db_result['interview']);
 		$interview->db_timestamp = $db_result['timestamp'];
 		
@@ -644,6 +678,12 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	public function updateInterview($interview) {
 		if (gettype($interview) == 'array')
 			$interview = (object) $interview;
+		
+		if (empty($interview->update_id)) {
+			$interview->update_id = 1;
+		} else {
+			$interview->update_id = $interview->update_id + 1;
+		}
 		
 		// $this->llog('updating interview:  ' . print_r($interview, true));
 		
@@ -656,7 +696,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			"identifier" => $interview->identifier,
 			"signature" => $interview->signature,
 			"scheduled_datetime" => $interview->scheduled_datetime,
-			"interview" => json_encode($interview)
+			"interview" => json_encode($interview),
+			"update_id" => $interview->update_id
 		];
 		$parameters["record_id"] = $rid;
 		if ($interview->kcat)
@@ -673,6 +714,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		// log with message 'catmh_interview'
 		$log_id = $this->log('catmh_interview', $parameters);
+		// $this->llog("updateInterview: added catmh_interview module log message (log_id: $log_id)");
 		
 		// success:
 			// remove old interview data
@@ -681,14 +723,22 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			// logEvent, revert, return false
 		if (!empty($log_id)) {
 			if ($existing_interview) {
-				$this->removeLogs("message = ? AND subjectID = ? AND interviewID = ? AND identifier = ? AND signature = ? AND timestamp = ?", [
+				$this->removeLogs("message = ? AND subjectID = ? AND interviewID = ? AND identifier = ? AND signature = ? AND update_id < ? or update_id is NULL", [
 					'catmh_interview',
 					$existing_interview->subjectID,
 					$existing_interview->interviewID,
 					$existing_interview->identifier,
 					$existing_interview->signature,
-					$existing_interview->db_timestamp
+					$interview->update_id	// this is what ensures previous intervew objects are removed
 				]);
+				// $this->llog("updateInterview: called removeLogs with args " . print_r([
+					// 'catmh_interview',
+					// $existing_interview->subjectID,
+					// $existing_interview->interviewID,
+					// $existing_interview->identifier,
+					// $existing_interview->signature,
+					// $existing_interview->update_id
+				// ], true));
 			}
 			return $log_id;
 		}
@@ -1323,11 +1373,12 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// send request via curl
 		$curl = $this->curl($curlArgs);
 		
-		if (isset($curl['cookies']['JSESSIONID']) and isset($curl['cookies']['AWSELB'])) {
+		if (!empty($curl['cookies']['JSESSIONID']) and !empty($curl['cookies']['AWSELB'])) {
 			// update security values in interview object
 			$interview = $this->getInterview($args['subjectID'], $args['interviewID'], $args['identifier'], $args['signature']);
 			$interview->jsessionid = $curl['cookies']['JSESSIONID'];
 			$interview->awselb = $curl['cookies']['AWSELB'];
+			// $this->llog("authInterview: updating interview: " . print_r($interview, true));
 			$result = $this->updateInterview($interview);
 			
 			if (empty($result)) {
@@ -1405,9 +1456,11 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$out = [];
 		
 		try {
+			// $this->llog("getQuestion: getting authvalues in getQuestion");
 			$authValues = $this->getAuthValues($args);
-			if (!isset($authValues['jsessionid']) or !isset($authValues['awselb'])) {
-				throw new \Exception("Auth values not set.");
+			if (empty($authValues['jsessionid']) or empty($authValues['awselb'])) {
+				$out['moduleError'] = true;
+				$out['moduleMessage'] = "REDCap failed to retrieve the interview authorization data. Please refresh the page in a few moments to try again -- if this error persists, please contact the REDCap administrator.";
 			}
 		} catch (\Exception $e) {
 			$out['moduleError'] = true;
@@ -1425,7 +1478,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// send request via curl
 		$curl = $this->curl($curlArgs);
 		$out['curl'] = ["body" => $curl["body"]];
-		// $this->llog('curl body: ' . $curl['body']);
+		// $this->llog('getQuestion response cURL body: ' . $curl['body']);
 		
 		// handle response
 		try {
