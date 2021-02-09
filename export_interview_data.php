@@ -7,8 +7,11 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 $interviews = [];
 $result = $module->queryLogs("SELECT interview WHERE message = ?", ['catmh_interview']);
 while ($row = db_fetch_assoc($result)) {
-	echo $row['interview'];
-	$interviews[] = $row['interview'];
+	$interview = json_decode($row['interview']);
+	unset($interview->jsessionid);
+	unset($interview->awselb);
+	$interviews[] = $interview;
+	echo json_encode($interview);
 }
 ?>
 </textarea>
@@ -17,7 +20,7 @@ while ($row = db_fetch_assoc($result)) {
 <textarea style='min-width: 600px; height: 100%; width:85%;'>
 <?php
 foreach($interviews as $interview) {
-	print_r(json_decode($interview));
+	print_r($interview);
 }
 ?>
 </textarea>
