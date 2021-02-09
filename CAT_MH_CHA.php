@@ -723,7 +723,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			// logEvent, revert, return false
 		if (!empty($log_id)) {
 			if ($existing_interview) {
-				$this->removeLogs("message = ? AND subjectID = ? AND interviewID = ? AND identifier = ? AND signature = ? AND update_id < ? or update_id is NULL", [
+				$this->removeLogs("message = ? AND subjectID = ? AND interviewID = ? AND identifier = ? AND signature = ? AND (update_id < ? OR update_id is NULL)", [
 					'catmh_interview',
 					$existing_interview->subjectID,
 					$existing_interview->interviewID,
