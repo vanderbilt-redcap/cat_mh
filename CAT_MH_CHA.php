@@ -689,6 +689,11 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		// build parameters array
 		$rid = $this->getRecordIDBySID($interview->subjectID);
+		
+		if (!$rid) {
+			throw new \Exception("The CAT-MH module was unabled to get the record ID for a given subject ID.");
+		}
+		
 		$parameters = [
 			"subjectid" => $interview->subjectID,
 			"sequence" => $interview->sequence,
