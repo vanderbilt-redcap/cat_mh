@@ -797,6 +797,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	
 	public function unscheduleSequence($seq_name, $offset, $time_of_day) {
 		// removes associated invitations AND reminders
+		// $this->llog("unscheduleSequence: $seq_name, $offset, $time_of_day");
 		return $this->removeLogs("name = ? AND offset = ? AND time_of_day = ?", [
 			$seq_name,
 			$offset,
@@ -816,6 +817,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$seq_name = $row['name'];
 			if (array_search($seq_name, $valid_seq_names, true) === false) {
 				// this is no longer a valid sequence to be scheduled since it was taken out of configuration
+				// $remove_count = $this->countLogs("message='scheduleSequence' AND name = ?", [$seq_name]);
+				// $this->llog("CLEANING $remove_count MISSING SEQS FROM SCHEDULE");
 				$this->removeLogs("message='scheduleSequence' AND name = ?", [$seq_name]);
 			}
 		}
@@ -1485,8 +1488,15 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$json = json_decode($curl['body'], true);
 			if (gettype($json) != 'array') throw new \Exception("json error");
 			$out['success'] = true;
-			if ($json['questionID'] < 0) {
+			
+			$questionID = $json['questionID'];
+			if ($questionID < 0) {
 				$out['needResults'] = true;
+			} else {
+				// append to response which test type(s) this question belongs to so progress meter can update in the interview interface
+				$this->buildQuestionTestMap();
+				$out['question_test_types'] = $this->questionTestMap[$questionID];
+				$out['qid'] = $questionID;
 			}
 		} catch (\Exception $e) {
 			// $this->llog('exception in getQuestion: ' . $e);

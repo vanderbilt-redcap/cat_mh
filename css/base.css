@@ -3,7 +3,7 @@ body > div {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  margin-top: 64px;
+  margin-top: 24px;
   color: #5A5A5A;
 }
 body > div * {
@@ -60,6 +60,19 @@ span.loadText {
   font-weight: 450;
   font-size: 36px;
   margin-bottom: 50px;
+}
+
+div#interviewProgress {
+	text-align: center;
+	color: #aaa;
+}
+div#progress_meter {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around
+}
+div#progress_meter img {
+	padding: 0px 4px;
 }
 
 div#questionNote {

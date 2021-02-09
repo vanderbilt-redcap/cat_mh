@@ -22,6 +22,13 @@ if (!empty($interview->results->tests)) {
 	}
 }
 
+$circle_images = [
+	"green" => $module->getUrl("images/circle_green.png"),
+	"gray" => $module->getUrl("images/circle_gray.png"),
+	"blue" => $module->getUrl("images/circle_blue.png")
+];
+// $module->llog("interview: " . print_r($interview, true));
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -47,6 +54,31 @@ if (!empty($interview->results->tests)) {
 			<button id='beginInterview' style='display: none;' type='button' class='submit' onMouseDown='catmh.authInterview()'>Begin</button>
 		</div>
 		<div id='interviewTest'>
+			<div id='interviewProgress'>
+				<span>Interview Progress</span>
+				<div id='progress_meter'><?php
+				$interview_types = gettype($interview) == 'array' ? $interview['types'] : $interview->types;
+				foreach ($interview_types as $index => $test) {
+					if (
+						($test == 'a/adhd' and in_array('c/adhd', $interview_types)) OR
+						($test == 'p-dep' and in_array('dep', $interview_types)) OR
+						($test == 'p-anx' and in_array('anx', $interview_types)) OR
+						($test == 'p-m/hm' and in_array('m/hm', $interview_types))
+					) {
+						// a/adhd and c/adhd questions come from same ATT CAT-MH item bank, same for perinatal and non-perinatal questions
+						// so the interview interface can't determine between these test types
+						// therefore, combine them into 1 test icon circle in the progress meter
+						continue;
+					}
+					$module->llog("interview test index $index -> $test");
+					if ($index === 0) {
+						echo "<img src='{$circle_images['blue']}' alt='Test $index progress indicator'>";
+					} else {
+						echo "<img src='{$circle_images['gray']}' alt='Test $index progress indicator'>";
+					}
+				}
+				?></div>
+			</div>
 			<div id='questionNote'></div>
 			<span class='question'></span>
 			<button id='submitAnswer' type='button' class='disabled submit'>Submit</button>
@@ -97,6 +129,12 @@ if (!empty($interview->results->tests)) {
 		$('body > div').css('display', 'none');
 		$('#interviewSelect').css('display', 'flex');
 		
+		catmh.progress_meter_circle_urls = {
+			gray: '{$circle_images['gray']}',
+			green: '{$circle_images['green']}',
+			blue: '{$circle_images['blue']}'
+		}
+		
 		catmh.kcat_error = \"" . strval($kcat_error) . "\";
 		if (catmh.kcat_error)
 			catmh.showError(catmh.kcat_error)
@@ -113,6 +151,8 @@ if (!empty($interview->results->tests)) {
 			$('.answerSelector').removeClass('selected');
 			$(this).addClass('selected');
 		});
+		
+		// catmh.auto_take_interview = true;
 	})
 </script>
 			";

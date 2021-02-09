@@ -22,6 +22,9 @@ catmh.init = function() {
 	if (catmh.kcat_error) {
 		catmh.showError(catmh.kcat_error)
 	}
+	
+	// helps implement progress meter
+	catmh.testTypesSeen = [];
 }
 
 catmh.setAnswerOptions = function(answers) {
@@ -181,6 +184,12 @@ catmh.getQuestion = function() {
 						$("#interviewTest").fadeIn(100);
 					});
 					
+					// update interview progress meter
+					if (typeof(catmh.lastResponse.question_test_types) == 'object') {
+						console.log('question type(s):', JSON.stringify(catmh.lastResponse.question_test_types));
+						catmh.updateProgressMeter();
+					}
+					
 					if (catmh.auto_take_interview) {
 						var answer_index = Math.floor(Math.random()*$('.answerSelector').length);
 						$('.answerSelector').eq(answer_index).trigger('mousedown');
@@ -190,6 +199,27 @@ catmh.getQuestion = function() {
 			} else {
 				catmh.showError(catmh.lastResponse.moduleMessage);
 			}
+		}
+	});
+}
+catmh.updateProgressMeter = function() {
+	var question_tests = JSON.stringify(catmh.lastResponse.question_test_types);
+	var current_test_index = 0;
+	console.log('question_tests', question_tests);
+	
+	if (catmh.testTypesSeen.indexOf(question_tests) < 0) {
+		catmh.testTypesSeen.push(question_tests);
+	}
+	current_test_index = catmh.testTypesSeen.length - 1;
+	
+	console.log('current_test_index', current_test_index);
+	$('div#progress_meter img').each(function(i, icon) {
+		if (i < current_test_index) {
+			$(icon).attr('src', catmh.progress_meter_circle_urls.green);
+		} else if (i == current_test_index) {
+			$(icon).attr('src', catmh.progress_meter_circle_urls.blue);
+		} else {
+			$(icon).attr('src', catmh.progress_meter_circle_urls.gray);
 		}
 	});
 }
