@@ -82,3 +82,10 @@ Version 2.1.0 of the CAT-MH module adds support for K-CAT test types. These are 
 "Our children’s version of the CAT-MH™ has been validated for youth ages 7 to 17. The K-CAT™ includes self-rated and parent/caregiver-rated modules for: depression, anxiety, mania, ADHD, conduct disorder, oppositional defiant disorder, substance use disorder (self-rated), and suicidality (self-rated)."
 
 K-CAT interview sequences are configured similar to normal sequences. Due to the paired nature of the interviews, they can't be mixed in sequences with other test types. Project participants will receive an email with two links, one for a Parent interview and the other pointing to the Child interview.
+
+### Interview Progress Meter
+Version 2.2.0 adds a progress meter to the participant interview page.
+![Interview progress meter](/docs/progress_meter.PNG)
+The number of circle icons indicates how many tests are included in the interview*. Blue circles denote a test being taken currently, green denotes completed tests, and gray denote tests that have yet to be started as part of the interview.
+
+*Note: Due to how the meter is implemented, the progress meter counts 'c/adhd' and 'a/adhd' to be a single test in the interview. This has to do with how the module detects which test a user is currently answering. The same is true for 'dep' and 'p-dep', 'anx' and 'p-anx', and 'm/hm' and 'p-m/hm' test sets. 
