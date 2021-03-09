@@ -4,7 +4,7 @@ $sched_dt = $_GET['sched_dt'];
 $sid = $_GET['sid'];
 $sid = preg_replace("/\W|_/", '', $sid);
 $kcat = $_GET['kcat'];
-$module->llog("\$module->getSequence($sequence, $sched_dt, $sid, $kcat)");
+// $module->llog("\$module->getSequence($sequence, $sched_dt, $sid, $kcat)");
 $interview = $module->getSequence($sequence, $sched_dt, $sid, $kcat);
 if (empty($interview)) {
 	if (empty($kcat)) {

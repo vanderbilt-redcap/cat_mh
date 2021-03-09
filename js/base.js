@@ -4,7 +4,7 @@ catmh.bridgeUrl = catmh.bridgeUrl.replace('interview', 'CAT_MH_CHA');
 // catmh.auto_take_interview = true;
 
 catmh.init = function() {
-	console.log('catmh.init -- interview.status:', catmh.interview.status);
+	// console.log('catmh.init -- interview.status:', catmh.interview.status);
 	if (catmh.interview.status == 1) {
 		catmh.setInterviewOptions();
 	} else if (catmh.interview.status == 2) {
@@ -186,7 +186,7 @@ catmh.getQuestion = function() {
 					
 					// update interview progress meter
 					if (typeof(catmh.lastResponse.question_test_types) == 'object') {
-						console.log('question type(s):', JSON.stringify(catmh.lastResponse.question_test_types));
+						// console.log('question type(s):', JSON.stringify(catmh.lastResponse.question_test_types));
 						catmh.updateProgressMeter();
 					}
 					
@@ -205,14 +205,14 @@ catmh.getQuestion = function() {
 catmh.updateProgressMeter = function() {
 	var question_tests = JSON.stringify(catmh.lastResponse.question_test_types);
 	var current_test_index = 0;
-	console.log('question_tests', question_tests);
+	// console.log('question_tests', question_tests);
 	
 	if (catmh.testTypesSeen.indexOf(question_tests) < 0) {
 		catmh.testTypesSeen.push(question_tests);
 	}
 	current_test_index = catmh.testTypesSeen.length - 1;
 	
-	console.log('current_test_index', current_test_index);
+	// console.log('current_test_index', current_test_index);
 	$('div#progress_meter img').each(function(i, icon) {
 		if (i < current_test_index) {
 			$(icon).attr('src', catmh.progress_meter_circle_urls.green);

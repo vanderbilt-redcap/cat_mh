@@ -11,6 +11,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'panx' => "p-anx",
 		'pmhm' => "p-m/hm",
 		'sud' => "sud",
+		'sa' => 'sa',
 		'ptsd' => "ptsd",
 		'cssrs' => "c-ssrs",
 		'ss' => "ss",
@@ -28,6 +29,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		'p-anx' => "Anxiety Disorder (Perinatal)",
 		'p-m/hm' => "Mania/Hypomania (Perinatal)",
 		'sud' => "Substance Use Disorder",
+		'sa' => "Substance Abuse",
 		'ptsd' => "Post-Traumatic Stress Disorder",
 		'c-ssrs' => "C-SSRS Suicide Screen",
 		'ss' => "Suicide Scale",
@@ -397,7 +399,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				$args['tests'] = [];
 				$testTypeKeys = array_keys($this->convertTestAbbreviation);
 				foreach ($testTypeKeys as $j => $testAbbreviation) {
-					if ($projectSettings[$testAbbreviation][$i] == 1) {
+					// filter 'sa' test types out of args[tests]
+					if ($projectSettings[$testAbbreviation][$i] == 1 and $this->convertTestAbbreviation[$testAbbreviation] != 'sa') {
 						$args['tests'][] = ["type" => $this->convertTestAbbreviation[$testAbbreviation]];
 					}
 				}
