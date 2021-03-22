@@ -1489,12 +1489,20 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// send request via curl
 		$curl = $this->curl($curlArgs);
 		$out['curl'] = ["body" => $curl["body"]];
-		// $this->llog('getQuestion response cURL body: ' . $curl['body']);
 		
 		// handle response
 		try {
 			$json = json_decode($curl['body'], true);
-			if (gettype($json) != 'array') throw new \Exception("json error");
+			if (strpos($curl['body'], "CAT-MH&trade; Timeout Error") === false) {
+				if (gettype($json) != 'array') throw new \Exception("json error");
+			} else {
+				// timed out, need to send another auth request
+				$auth_out = $this->authInterview($args);
+				
+				if ($auth_out['success']) {
+					return $this->getQuestion($args);
+				}
+			}
 			$out['success'] = true;
 			
 			$questionID = $json['questionID'];
