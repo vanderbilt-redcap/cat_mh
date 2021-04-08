@@ -386,7 +386,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$args['subjectID'] = $sid;
 		
 		// determine timeframeID
-		$seq_index = array_search($seq_name, $this->getProjectSetting('sequence'));
+		$seq_index = array_search($_GET['sequence'], $this->getProjectSetting('sequence'));
 		$timeframeID = $this->getProjectSetting('timeframe')[$seq_index];
 		if (!empty($timeframeID)) {
 			$args['timeframeID'] = $timeframeID;

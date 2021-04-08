@@ -3,8 +3,8 @@
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 
 ?>
-<script type='text/javascript' src="//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
-<link rel='stylesheet' href='//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css'>
+<script type='text/javascript' src="//cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+<link rel='stylesheet' href='//cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css'>
 <?php
 	if (empty($module->getProjectSetting('enrollment_field'))) {
 		echo '
