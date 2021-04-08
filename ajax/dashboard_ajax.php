@@ -152,12 +152,15 @@ foreach($data as $rid => $record) {
 		$row[] = "<a href='" . $record_link . $rid . "'>$rid</a>";
 		
 		// Sequence column
+		$base_seq_link = $module->getUrl("interview.php") . "&NOAUTH&sid=$sid";
 		if ($kcat_seq_index === false) {
-			$row[] = $seq_name;
+			$link_display_text = $seq_name;
+			$interview_link_url = $base_seq_link . "&sequence=" . urlencode($seq_name) . "&sched_dt=" . urlencode($seq_date);
 		} else {
-			// $module->llog('$seq[kcat] = ' . $seq['kcat']);
-			$row[] = $seq_name . ' ' . ($seq['kcat'] == 'primary' ? '(Child)' : '(Parent)');
+			$link_display_text = $seq_name . ' ' . ($seq['kcat'] == 'primary' ? '(Child)' : '(Parent)');
+			$interview_link_url = $base_seq_link . "&sequence=" . urlencode($seq_name) . "&sched_dt=" . urlencode($seq_date) . "&kcat=" . $seq['kcat'];
 		}
+		$row[] = "<a href='$interview_link_url'>$link_display_text</a>";
 		
 		// Completed column	# priority: green (completed) > blue (acknowledged) > yellow (started) > gray/red (incomplete/delinquent)
 		$completed_icon = null;
