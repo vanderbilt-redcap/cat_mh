@@ -1229,7 +1229,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			"Accept: application/json",
 			"Content-Type: application/json"
 		];
-		$curlArgs['body'] = json_encode([
+		$curlBody = [
 			"organizationID" => intval($args['organizationid']),
 			"userFirstName" => "Automated",
 			"userLastName" => "Creation",
@@ -1239,7 +1239,13 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			"language" => intval($args['language']),
 			"timeframeID" => $args['timeframeID'],
 			"tests" => $args['tests']
-		]);
+		];
+		// prevent sending 0 as timeframeID
+		if (empty($args['timeframeID'])) {
+			unset ($curlBody['timeframeID']);
+		}
+		
+		$curlArgs['body'] = json_encode($curlBody);
 		$curlArgs['post'] = true;
 		$testAddress = "http://localhost/redcap/redcap_v8.10.2/ExternalModules/?prefix=cat_mh&page=testEndpoint&pid=" . $this->getProjectId() . "&action=" . __FUNCTION__;
 		$curlArgs['address'] = $this->testAPI ? $testAddress : "https://" . $this->api_host_name . "/portal/secure/interview/createInterview";
