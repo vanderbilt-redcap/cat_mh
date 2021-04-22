@@ -109,7 +109,7 @@ $circle_images = [
 			<span class='loadText'>Fetching the next question...</span>
 			<div class='spinner'></div>
 		</div>
-		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 		<?php
 			// determine if this interview should hide question numbers
 			$seq_name = htmlentities(urldecode($_GET['sequence']), ENT_QUOTES, 'UTF-8');
