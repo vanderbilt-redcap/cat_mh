@@ -186,7 +186,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	
 	// crons
 	public function emailer_cron($cronInfo=null, $current_time=null) {
-		$originalPid = $_GET['pid'];
+		$originalPid = htmlentities($_GET['pid'], ENT_QUOTES, 'UTF-8');
 		foreach($this->framework->getProjectsWithModuleEnabled() as $localProjectId) {
 			$_GET['pid'] = $localProjectId;
 			
@@ -371,9 +371,9 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	public function makeInterview() {
 		// If no sequence given in url parameters, default to first sequence configured
 		$projectSettings = $this->getProjectSettings();
-		$sequence = urldecode($_GET['sequence']);
-		$sid = $_GET['sid'];
-		$sched_dt = urldecode($_GET['sched_dt']);
+		$sequence = htmlentities(urldecode($_GET['sequence']), ENT_QUOTES, 'UTF-8');
+		$sid = htmlentities($_GET['sid'], ENT_QUOTES, 'UTF-8');
+		$sched_dt = htmlentities(urldecode($_GET['sched_dt']), ENT_QUOTES, 'UTF-8');
 		
 		// get system configuration details
 		$args = [];
@@ -386,7 +386,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$args['subjectID'] = $sid;
 		
 		// determine timeframeID
-		$seq_index = array_search($_GET['sequence'], $this->getProjectSetting('sequence'));
+		$seq_index = array_search(htmlentities($_GET['sequence'], ENT_QUOTES, 'UTF-8'), $this->getProjectSetting('sequence'));
 		$timeframeID = $this->getProjectSetting('timeframe')[$seq_index];
 		if (!empty($timeframeID)) {
 			$args['timeframeID'] = $timeframeID;
@@ -863,7 +863,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		if (empty($this->getProjectSetting('send-provider-emails')))
 			return false;
 		
-		$sid = $_GET['sid'];
+		$sid = htmlentities($_GET['sid'], ENT_QUOTES, 'UTF-8');
 		$rid = $this->getRecordIDBySID($sid);
 		
 		// get provider email address
@@ -882,8 +882,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		$message_body = "You're receiving this automated message because a patient has completed a CAT-MH interview sequence.<br>";
 		
-		$seq = urlencode($_GET['sequence']);
-		$sched_dt = urlencode($_GET['sched_dt']);
+		$seq = urlencode(htmlentities($_GET['sequence'], ENT_QUOTES, 'UTF-8'));
+		$sched_dt = urlencode(htmlentities($_GET['sched_dt'], ENT_QUOTES, 'UTF-8'));
 		$email = new \Message();
 		$from_address = $this->getProjectSetting('email-from');
 		if (empty($from_address)) {
@@ -1273,7 +1273,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$out['labels'] = [];
 			foreach ($args['tests'] as $arr) {
 				$out['types'][] = $arr['type'];
-				$out['labels'][] = $this->getTestLabel($_GET['sequence'], $arr['type']);
+				$out['labels'][] = $this->getTestLabel(htmlentities($_GET['sequence'], ENT_QUOTES, 'UTF-8'), $arr['type']);
 			}
 			
 			$out['success'] = true;

@@ -1,9 +1,9 @@
 <?php
-$sequence = $_GET['sequence'];
-$sched_dt = $_GET['sched_dt'];
-$sid = $_GET['sid'];
+$sequence = htmlentities($_GET['sequence'], ENT_QUOTES, 'UTF-8');
+$sched_dt = htmlentities($_GET['sched_dt'], ENT_QUOTES, 'UTF-8');
+$sid = htmlentities($_GET['sid'], ENT_QUOTES, 'UTF-8');
 $sid = preg_replace("/\W|_/", '', $sid);
-$kcat = $_GET['kcat'];
+$kcat = htmlentities($_GET['kcat'], ENT_QUOTES, 'UTF-8');
 // $module->llog("\$module->getSequence($sequence, $sched_dt, $sid, $kcat)");
 $interview = $module->getSequence($sequence, $sched_dt, $sid, $kcat);
 if (empty($interview)) {
@@ -16,7 +16,7 @@ if (empty($interview)) {
 }
 
 if (!empty($interview->results->tests)) {
-	$seq = $_GET['sequence'];
+	$seq = htmlentities($_GET['sequence'], ENT_QUOTES, 'UTF-8');
 	foreach ($interview->results->tests as $test) {
 		$test->label = $module->getTestLabel($seq, $test->type);
 	}
@@ -112,7 +112,7 @@ $circle_images = [
 		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 		<?php
 			// determine if this interview should hide question numbers
-			$seq_name = urldecode($_GET['sequence']);
+			$seq_name = htmlentities(urldecode($_GET['sequence']), ENT_QUOTES, 'UTF-8');
 			$seq_index = array_search($seq_name, $module->getProjectSetting('sequence'));
 			$hide_this_seq = $module->getProjectSetting('hide_question_number')[$seq_index];
 			if (empty($hide_this_seq)) {

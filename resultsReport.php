@@ -43,13 +43,13 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 	];
 	
 	// filter by record, sequence, and datetime if applicable
-	$recordFilter = $_GET['record'];
+	$recordFilter = htmlentities($_GET['record'], ENT_QUOTES, 'UTF-8');
 	if (!empty($recordFilter))
 		$params['records'] = $recordFilter;
 	if (isset($_GET['seq']))
-		$seqFilter = $_GET['seq'];
+		$seqFilter = htmlentities($_GET['seq'], ENT_QUOTES, 'UTF-8');
 	if (isset($_GET['sched_dt']))
-		$schedFilter = $_GET['sched_dt'];
+		$schedFilter = htmlentities($_GET['sched_dt'], ENT_QUOTES, 'UTF-8');
 	
 	$data = \REDCap::getData($params);
 	foreach($data as $rid => $record) {
