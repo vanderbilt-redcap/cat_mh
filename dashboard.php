@@ -19,8 +19,8 @@ if ($_GET['show_future_seqs'] === 'false') {
 ?>
 
 <link rel="stylesheet" type="text/css" href="<?php echo $module->getUrl('css/dashboard.css'); ?>">
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
 <script type="text/javascript" charset="utf8">
 	CATMH = {
 		dashboard_ajax_url: <?php echo '"' . $module->getUrl("ajax/dashboard_ajax.php") . '"'; ?>,

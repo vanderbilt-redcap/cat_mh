@@ -9,7 +9,7 @@ $kcat = $_POST['kcat'];
 $sched_dt = $_POST['date'];
 $time_now = time();
 if (isset($_GET['dash_time'])) {
-	$time_now = strtotime($_GET['dash_time']);
+	$time_now = strtotime(htmlentities($_GET['dash_time'], ENT_QUOTES, 'UTF-8'));
 }
 
 // get subjectID for this record
