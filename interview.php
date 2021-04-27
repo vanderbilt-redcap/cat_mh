@@ -1,5 +1,6 @@
 <?php
 $sequence = htmlentities($_GET['sequence'], ENT_QUOTES, 'UTF-8');
+$seq_index = array_search($sequence, $module->getProjectSetting('sequence'));
 $sched_dt = htmlentities($_GET['sched_dt'], ENT_QUOTES, 'UTF-8');
 $sid = htmlentities($_GET['sid'], ENT_QUOTES, 'UTF-8');
 $sid = preg_replace("/\W|_/", '', $sid);
@@ -54,7 +55,12 @@ $circle_images = [
 			<button id='beginInterview' style='display: none;' type='button' class='submit' onMouseDown='catmh.authInterview()'>Begin</button>
 		</div>
 		<div id='interviewTest'>
-			<div id='interviewProgress'>
+
+		        <?php
+		        // Show Progress
+		        if (! $module->getProjectSetting('hide_progress_bar')[$seq_index]) { 
+
+			?><div id='interviewProgress'>
 				<span>Interview Progress</span>
 				<div id='progress_meter'><?php
 				$interview_types = gettype($interview) == 'array' ? $interview['types'] : $interview->types;
@@ -79,6 +85,10 @@ $circle_images = [
 				}
 				?></div>
 			</div>
+			<?php
+			}
+			?>
+
 			<div id='questionNote'></div>
 			<span class='question'></span>
 			<button id='submitAnswer' type='button' class='disabled submit'>Submit</button>

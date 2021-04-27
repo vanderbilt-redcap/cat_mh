@@ -116,6 +116,11 @@
 				"required": true,
 				"type": "text"
 			},
+			{
+				"type": "checkbox",
+				"key": "hide_progress_bar",
+				"name": "Hide progress bar during interview"
+			},
             {
                "key": "language",
                "name": "Interview language",
