@@ -1281,7 +1281,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$out['moduleError'] = true;
 			$out['moduleMessage'] = "REDCap couldn't get interview information from CAT-MH API." . "<br />\n" . $e;
 		}
-		
 		return $out;
 	}
 	
@@ -1854,28 +1853,23 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 		case 'authInterview':
 			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->authInterview($json['args']);
-			echo json_encode($out);
-			break;
+			exit(json_encode($out));
 		case 'startInterview':
 			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->startInterview($json['args']);
-			echo json_encode($out);
-			break;
+			exit(json_encode($out));
 		case 'getQuestion':
 			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->getQuestion($json['args']);
-			echo json_encode($out);
-			break;
+			exit(json_encode($out));
 		case 'submitAnswer':
 			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->submitAnswer($json['args']);
-			echo json_encode($out);
-			break;
+			exit(json_encode($out));
 		case 'endInterview':
 			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->endInterview($json['args']);
-			echo json_encode($out);
-			break;
+			exit(json_encode($out));
 		case 'getResults':
 			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->getResults($json['args']);
@@ -1884,17 +1878,14 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 				$catmh->sendProviderEmail();
 			}
 			
-			echo json_encode($out);
-			break;
+			exit(json_encode($out));
 		case 'getInterviewStatus':
 			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->getInterviewStatus($json['args']);
-			echo json_encode($out);
-			break;
+			exit(json_encode($out));
 		case 'breakLock':
 			$out['receivedJson'] = json_encode($json);
 			$out = $catmh->breakLock($json['args']);
-			echo json_encode($out);
-			break;
+			exit(json_encode($out));
 	}
 }

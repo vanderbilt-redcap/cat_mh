@@ -28,7 +28,6 @@ $circle_images = [
 	"gray" => $module->getUrl("images/circle_gray.png"),
 	"blue" => $module->getUrl("images/circle_blue.png")
 ];
-// $module->llog("interview: " . print_r($interview, true));
 
 ?>
 <!doctype html>
