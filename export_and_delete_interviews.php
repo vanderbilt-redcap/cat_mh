@@ -75,7 +75,6 @@ $delete_url = $module->getUrl('php/delete_interviews.php');
 			months: months
 		}, function(data) {
 			data = JSON.parse(data);
-			console.log('response', data);
 			if (data.success) {
 				alert("Successfully deleted " + Number(data.deleted) + " interviews (" + Number(data.failures) + " failures).");
 			} else {
