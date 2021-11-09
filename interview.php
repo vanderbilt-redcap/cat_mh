@@ -1,4 +1,5 @@
 <?php
+$interview_ajax_url = $module->getUrl('php/interview_ajax.php');
 $sequence = htmlentities($_GET['sequence'], ENT_QUOTES, 'UTF-8');
 $seq_index = array_search($sequence, $module->getProjectSetting('sequence'));
 $sched_dt = htmlentities($_GET['sched_dt'], ENT_QUOTES, 'UTF-8');
@@ -119,6 +120,7 @@ $circle_images = [
 			<div class='spinner'></div>
 		</div>
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<script type="text/javascript" src="<?= $module->getUrl('js/base.js') ?>"></script>
 		<?php
 			// determine if this interview should hide question numbers
 			$seq_name = htmlentities(urldecode($_GET['sequence']), ENT_QUOTES, 'UTF-8');
@@ -137,7 +139,7 @@ $circle_images = [
 		$('body > div').css('display', 'flex');
 		$('body > div').css('display', 'none');
 		$('#interviewSelect').css('display', 'flex');
-		
+		catmh.bridgeUrl = '$interview_ajax_url';
 		catmh.progress_meter_circle_urls = {
 			gray: '{$circle_images['gray']}',
 			green: '{$circle_images['green']}',
@@ -166,6 +168,5 @@ $circle_images = [
 </script>
 			";
 		?>
-		<script type="text/javascript"><?php echo file_get_contents($module->getUrl('js/base.js')); ?></script>
 	</body>
 </html>
