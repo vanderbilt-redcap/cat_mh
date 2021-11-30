@@ -1030,8 +1030,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$urls = [];
 			$links = [];
 			$base_url = $this->getUrl("interview.php") . "&NOAUTH&sid=$sid";
-			foreach ($invitations_to_send as $invitation) {
-				// $this->llog('handling invitation: ' . print_r($invitation, true));
+			foreach ($invitations_to_send as $name_and_time => $invitation) {
 				$seq_name = $invitation->sequence;
 				$seq_date = date("Y-m-d H:i", $invitation->sched_dt);
 				$month_day_only = date("m/d", strtotime($seq_date));
