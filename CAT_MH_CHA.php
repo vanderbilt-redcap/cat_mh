@@ -1116,17 +1116,19 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			}
 			
 			// is this sequence a K-CAT sequence? If so, create both interviews now if not yet created
-			$kcat = false;
-			$existingKCAT = $this->countLogs("message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ?", [
-				'catmh_interview',
-				$name,
-				date("Y-m-d H:i", $first_sched_time),
-				$this->getSubjectID($rid)
-			]);
-			if ($this->getKCATSequenceIndex($name) !== false and !$existingKCAT) {
-				$kcat = true;
+			$kcat = $this->getKCATSequenceIndex($name) !== false;
+			if ($kcat) {
 				$sid = $this->getSubjectID($rid);
-				$interviews = $this->makeKCATInterviews($sid, $name, date("Y-m-d H:i", $first_sched_time));
+				$sched_time_ymd = date("Y-m-d H:i", $first_sched_time);
+				$existingKCAT = $this->countLogs("message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ?", [
+					'catmh_interview',
+					$name,
+					$sched_time_ymd,
+					$sid
+				]);
+				if (!$existingKCAT) {
+					$this->makeKCATInterviews($sid, $name, $sched_time_ymd);
+				}
 			}
 			
 			// if no invitation sent, send one
