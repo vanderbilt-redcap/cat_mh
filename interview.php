@@ -6,7 +6,6 @@ $sched_dt = htmlentities($_GET['sched_dt'], ENT_QUOTES, 'UTF-8');
 $sid = htmlentities($_GET['sid'], ENT_QUOTES, 'UTF-8');
 $sid = preg_replace("/\W|_/", '', $sid);
 $kcat = htmlentities($_GET['kcat'], ENT_QUOTES, 'UTF-8');
-// $module->llog("\$module->getSequence($sequence, $sched_dt, $sid, $kcat)");
 $interview = $module->getSequence($sequence, $sched_dt, $sid, $kcat);
 if (empty($interview)) {
 	if (empty($kcat)) {

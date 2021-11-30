@@ -192,19 +192,11 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			
 			$this->sendInvitations(time());
 			
-			$result = $this->queryLogs("SELECT timestamp WHERE message='cron_ran_today'");
-			$cron_ran_today = null;
-			while ($row = db_fetch_assoc($result)) {
-				$date1 = date("Y-m-d");
-				$date2 = date("Y-m-d", strtotime($row['timestamp']));
-				if ($date1 == $date2) {
-					$cron_ran_today = true;
-					break;
-				}
-			}
-			if (!$cron_ran_today) {
+			$today_ymd = date("Y-m-d");
+			$result = $this->queryLogs("SELECT timestamp WHERE message=? AND date_ymd=?", ['cron_ran_today', $today_ymd]);
+			if ($result && $result->num_rows === 0) {	// make sure we only log this message once a day
 				\REDCap::logEvent("CAT-MH External Module", "Ran 'emailer_cron' method today", NULL, NULL, NULL, $this->getProjectId());
-				$this->log("cron_ran_today");
+				$this->log("cron_ran_today", ['date_ymd' => $today_ymd]);
 			}
 			
 			// clear reminderSettings cache
@@ -284,7 +276,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	public function getAuthValues($args) {
 		// args should have: subjectID, interviewID, identifier, signature
 		// $this->llog("getAuthValues: calling with arguments: " . print_r($args, true));
-		$interview = $this->getInterview($args['subjectID'], $args['interviewID'], $args['identifier'], $args['signature']);
+		$interview = $this->getInterview($args['subjectID'], $args['interviewID'], $args['identifier'], $args['signature'], $args['kcat']);
 		if (empty($interview)) {
 			echo("REDCap couldn't get authorization values from logged interview data -- please contact REDCap administrator.");
 		} else {
@@ -718,7 +710,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		}
 		
 		// fetch existing interview with these parameters (if it exists)
-		$existing_interview = $this->getInterview($interview->subjectID, $interview->interviewID, $interview->identifier, $interview->signature);
+		$existing_interview = $this->getInterview($interview->subjectID, $interview->interviewID, $interview->identifier, $interview->signature, $interview->kcat);
 		
 		// log with message 'catmh_interview'
 		$log_id = $this->log('catmh_interview', $parameters);
@@ -1119,13 +1111,13 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			if ($kcat) {
 				$sid = $this->getSubjectID($rid);
 				$sched_time_ymd = date("Y-m-d H:i", $first_sched_time);
-				$existingKCAT = $this->countLogs("message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ?", [
+				$existingKCAT = $this->countLogs("message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectid = ?", [
 					'catmh_interview',
 					$name,
 					$sched_time_ymd,
 					$sid
 				]);
-				if (!$existingKCAT) {
+				if ($existingKCAT == 0) {
 					$this->makeKCATInterviews($sid, $name, $sched_time_ymd);
 				}
 			}
@@ -1392,7 +1384,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		if (!empty($curl['cookies']['JSESSIONID']) and !empty($curl['cookies']['AWSELB'])) {
 			// update security values in interview object
-			$interview = $this->getInterview($args['subjectID'], $args['interviewID'], $args['identifier'], $args['signature']);
+			$interview = $this->getInterview($args['subjectID'], $args['interviewID'], $args['identifier'], $args['signature'], $args['kcat']);
 			$interview->jsessionid = $curl['cookies']['JSESSIONID'];
 			$interview->awselb = $curl['cookies']['AWSELB'];
 			// $this->llog("authInterview: updating interview: " . print_r($interview, true));
@@ -1444,7 +1436,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			if (gettype($json) != 'array') throw new \Exception("json error");
 			
 			// update timestamp and status for this interview
-			$interview = $this->getInterview($args['subjectID'], $args['interviewID'], $args['identifier'], $args['signature']);
+			$interview = $this->getInterview($args['subjectID'], $args['interviewID'], $args['identifier'], $args['signature'], $args['kcat']);
 			$interview->status = 2;
 			$interview->timestamp = time();
 			$result = $this->updateInterview($interview);
@@ -1664,7 +1656,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$results = json_decode($curl['body'], true);
 		
 		// update redcap record data
-		$interview = $this->getInterview($args['subjectID'], $args['interviewID'], $args['identifier'], $args['signature']);
+		$interview = $this->getInterview($args['subjectID'], $args['interviewID'], $args['identifier'], $args['signature'], $args['kcat']);
 		$interview->results = $results;
 		$interview->status = 4;
 		$interview->timestamp = time();

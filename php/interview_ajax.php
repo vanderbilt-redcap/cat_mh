@@ -14,6 +14,7 @@ if (isset($json['args']['signature'])) $json['args']['signature'] = db_escape($j
 if (isset($json['args']['questionID'])) $json['args']['questionID'] = db_escape($json['args']['questionID']);
 if (isset($json['args']['response'])) $json['args']['response'] = db_escape($json['args']['response']);
 if (isset($json['args']['duration'])) $json['args']['duration'] = db_escape($json['args']['duration']);
+if (isset($json['args']['kcat'])) $json['args']['kcat'] = db_escape($json['args']['kcat']);
 if (isset($json['args']['types'])) {
 	foreach ($json['args']['types'] as &$type) {
 		$type = db_escape($type);
