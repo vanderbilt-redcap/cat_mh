@@ -92,7 +92,6 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		$this->interviewStatusIconURLs['blue'] = $this->getUrl("images/circle_blue.png");
 	}
-
 	
 	// hooks
 	public function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
@@ -631,11 +630,11 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	// interview data object/log functions
 	public function getSequence($sequence, $scheduled_datetime, $subjectID, $kcat=null) {
 		if (!empty($kcat)) {
-			$result = $this->queryLogs("SELECT interview WHERE message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ? AND kcat = ?", [
+			$result = $this->queryLogs("SELECT interview WHERE message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectid = ? AND kcat = ?", [
 				'catmh_interview', $sequence, $scheduled_datetime, $subjectID, $kcat
 			]);
 		} else {
-			$result = $this->queryLogs("SELECT interview WHERE message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ?", [
+			$result = $this->queryLogs("SELECT interview WHERE message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectid = ?", [
 				'catmh_interview', $sequence, $scheduled_datetime, $subjectID
 			]);
 		}
@@ -650,11 +649,11 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	public function getInterview($subjectID, $interviewID, $identifier, $signature, $kcat=null) {
 		// queryLogs, convert interview object to array
 		if (!empty($kcat)) {
-			$result = $this->queryLogs("SELECT interview, timestamp WHERE message='catmh_interview' AND subjectID = ? AND interviewID = ? AND identifier = ? AND signature = ? AND kcat = ?", [
+			$result = $this->queryLogs("SELECT interview, timestamp WHERE message='catmh_interview' AND subjectid = ? AND interviewID = ? AND identifier = ? AND signature = ? AND kcat = ?", [
 				$subjectID, $interviewID, $identifier, $signature, $kcat
 			]);
 		} else {
-			$result = $this->queryLogs("SELECT interview, timestamp WHERE message='catmh_interview' AND subjectID = ? AND interviewID = ? AND identifier = ? AND signature = ?", [
+			$result = $this->queryLogs("SELECT interview, timestamp WHERE message='catmh_interview' AND subjectid = ? AND interviewID = ? AND identifier = ? AND signature = ?", [
 				$subjectID, $interviewID, $identifier, $signature
 			]);
 		}
@@ -723,7 +722,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			// logEvent, revert, return false
 		if (!empty($log_id)) {
 			if ($existing_interview) {
-				$this->removeLogs("message = ? AND subjectID = ? AND interviewID = ? AND identifier = ? AND signature = ? AND (update_id < ? OR update_id is NULL)", [
+				$this->removeLogs("message = ? AND subjectid = ? AND interviewID = ? AND identifier = ? AND signature = ? AND (update_id < ? OR update_id is NULL)", [
 					'catmh_interview',
 					$existing_interview->subjectID,
 					$existing_interview->interviewID,
