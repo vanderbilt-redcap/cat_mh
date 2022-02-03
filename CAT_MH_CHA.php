@@ -1001,10 +1001,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				continue;
 			}
 			if (empty($sid = $record->subjectid)) {
-				// create cat_mh_data and subjectid
-				$this->initRecord($record);
-				if (empty($sid = $record->subjectid))
-					throw new \Exception("Couldn't create [subjectid] field value.");
+				continue;
 			}
 			
 			$invitations_to_send = $this->getInvitationsDue($record, $current_time);
