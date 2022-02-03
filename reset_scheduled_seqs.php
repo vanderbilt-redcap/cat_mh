@@ -7,7 +7,7 @@ echo "<pre>";
 echo "REMOVING ALL SCHEDULED SEQUENCES AND INTERVIEWS";
 
 // $module->removeLogs("message='scheduleSequence'");
-$module->removeLogs("message=? OR message=?", ['scheduleSequence', 'catmh_interview']);
+// $module->removeLogs("message=? OR message=?", ['scheduleSequence', 'catmh_interview']);
 
 echo "\nDONE";
 echo "</pre>";
