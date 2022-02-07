@@ -56,7 +56,8 @@
 
 	"no-auth-pages": [
 		"interview",
-		"CAT_MH_CHA"
+		"CAT_MH_CHA",
+		"php/interview_ajax"
 	],
 
 	"project-settings": [
