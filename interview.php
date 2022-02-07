@@ -138,7 +138,7 @@ $circle_images = [
 		$('body > div').css('display', 'flex');
 		$('body > div').css('display', 'none');
 		$('#interviewSelect').css('display', 'flex');
-		catmh.bridgeUrl = '$interview_ajax_url';
+		catmh.bridgeUrl = '$interview_ajax_url&NOAUTH';
 		catmh.progress_meter_circle_urls = {
 			gray: '{$circle_images['gray']}',
 			green: '{$circle_images['green']}',
