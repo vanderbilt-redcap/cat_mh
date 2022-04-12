@@ -38,12 +38,6 @@ if ($_GET['show_future_seqs'] === 'false') {
 	<p>No participant interview data will be tabulated until an Enrollment Field has been chosen via the External Modules page\'s Configure modal.</p>
 </div>';
 	}
-		if ($module->local_env) {
-		echo '
-<div class="alert alert-info w-50" role="alert">
-	<h5>Local environment variable detected.</h5>
-</div>';
-	}
 ?>
 
 <input type='checkbox' id='show_future_seqs'<?php if ($_SESSION['show_future_seqs']) {echo ' checked';} ?>>

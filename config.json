@@ -62,6 +62,11 @@
 
 	"project-settings": [
 		{
+			"key": "use_test_api",
+			"name": "Use ATT's test API for CAT-MH surveys. (If unchecked, the module will use the production CAT-MH API)",
+			"type": "checkbox"
+		},
+		{
 			"key": "disable_invites",
 			"name": "Disable automatic interview invitation and reminder emails",
 			"type": "checkbox"
