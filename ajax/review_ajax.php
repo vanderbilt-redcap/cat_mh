@@ -1,5 +1,5 @@
 <?php
-$module->llog('post data: ' . print_r($_POST, true));
+// $module->llog('post data: ' . print_r($_POST, true));
 $json = new \stdClass();
 $pid = $module->getProjectId();
 $sid = $_POST['sid'];

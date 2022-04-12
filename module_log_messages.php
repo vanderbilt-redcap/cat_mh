@@ -2,7 +2,7 @@
 
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 
-$module->llog("get: " . print_r($_GET,true));
+// $module->llog("get: " . print_r($_GET,true));
 $extra_params = [];
 foreach($_GET as $key => $value) {
 	if (strlen($key) <= 3 and substr($key, 0, 1) == 'p' and $key != 'pid') {

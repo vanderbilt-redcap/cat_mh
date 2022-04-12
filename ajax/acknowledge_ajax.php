@@ -1,5 +1,4 @@
 <?php
-$module->llog('post data: ' . print_r($_POST, true));
 $json = new \stdClass();
 $pid = $module->getProjectId();
 $rid = $_POST['rid'];
@@ -22,7 +21,7 @@ if (empty($sid)) {
 
 // count any existing acks for this specific sequence
 $existing_ack_count = $module->countLogs("message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ? AND kcat = ?", ["acknowledged_delinquent", $seq, $sched_dt, $sid, $kcat]);
-$module->llog("existing_ack_count: $existing_ack_count");
+// $module->llog("existing_ack_count: $existing_ack_count");
 
 if ($acknowledged === 'true') {
 	if ($existing_ack_count) {
@@ -39,10 +38,10 @@ if ($acknowledged === 'true') {
 	$completed_icon = "<img src='{$module->interviewStatusIconURLs['blue']}' class='fstatus' data-color='blue' style='width:16px;margin-right:6px;' alt=''>";
 } else {
 	if (!$existing_ack_count) {
-		$module->llog("no existing ack");
+		// $module->llog("no existing ack");
 		$success = true;
 	} else {
-		$module->llog("removing existing ack");
+		// $module->llog("removing existing ack");
 		$success = $module->removeLogs("message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ? AND kcat = ?", ["acknowledged_delinquent", $seq, $sched_dt, $sid, $kcat]);
 	}
 	
