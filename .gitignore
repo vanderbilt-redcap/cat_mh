@@ -1,2 +1,6 @@
 ignore/
 able_test.php
+/vendor/
+psalm.xml
+composer.json
+composer.lock

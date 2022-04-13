@@ -365,7 +365,13 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			echo("Cannot create a new interview. Please have the REDCap administrator configure the application and organization IDs for CAT-MH use.");
 			return;
 		}
-		$args['subjectID'] = $sid;
+		
+		if ($valid_sid = $this->validateSubjectId($sid)) {
+			$args['subjectID'] = $valid_sid;
+		} else {
+			echo("Cannot create a new interview due to invalid subjectID! Please have the REDCap administrator configure the application and organization IDs for CAT-MH use.");
+			return;
+		}
 		
 		// determine timeframeID
 		$seq_index = array_search(htmlentities($_GET['sequence'], ENT_QUOTES, 'UTF-8'), $this->getProjectSetting('sequence'));
@@ -391,7 +397,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		}
 		
 		$interview = $this->createInterview($args);
-		$interview['subjectID'] = $sid;
+		$interview['subjectID'] = $valid_sid;
 		
 		$new_interview = [
 			"sequence" => $sequence,
@@ -403,7 +409,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			"labels" => $interview['labels'],
 			"status" => 1,
 			"timestamp" => time(),
-			"subjectID" => $sid
+			"subjectID" => $valid_sid
 		];
 		$log_id = $this->updateInterview($new_interview);
 		
@@ -1202,6 +1208,29 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		} else {
 			return "https://www.cat-mh.com";
 		}
+	}
+	
+	public function validateSubjectId($sid) {
+		// remove non-alphanumeric characters
+		$sid = preg_replace("/\W|_/", "", $sid);
+		
+		// check for an existing, matching subjectid
+		$get_params = [
+			"project_id" => $this->getProjectId(),
+			"return_format" => "json",
+			"fields" => "subjectid",
+			"filterLogic" => "[subjectid] = '$sid'"
+		];
+		$data = json_decode(\REDCap::getData($get_params));
+		$found_sid = $data[0]->subjectid;
+		
+		// if it matches the given subjectid, return the retrieved subjectid
+		if ($found_sid === $sid) {
+			return $found_sid;
+		}
+		
+		// otherwise return false
+		return false;
 	}
 	
 	public function createInterview($args) {
