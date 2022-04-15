@@ -1437,7 +1437,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			}
 		} catch (\Exception $e) {
 			$out['moduleError'] = true;
-			$out['moduleMessage'] = "REDCap couldn't get authorization values from logged interview data -- please contact REDCap administrator.\n<br />$e";
+			$out['moduleMessage'] = "REDCap couldn't get authorization values from logged interview data -- please contact REDCap administrator.\n<br />";
 			return $out;
 		}
 		
@@ -1494,7 +1494,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			}
 		} catch (\Exception $e) {
 			$out['moduleError'] = true;
-			$out['moduleMessage'] = "REDCap couldn't get authorization values from logged interview data -- please contact REDCap administrator.\n<br />$e";
+			$out['moduleMessage'] = "REDCap couldn't get authorization values from logged interview data -- please contact REDCap administrator.\n<br />";
 		}
 		
 		$curlArgs = [];
@@ -1551,7 +1551,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			}
 		} catch (\Exception $e) {
 			$out['moduleError'] = true;
-			$out['moduleMessage'] = "REDCap couldn't get authorization values from logged interview data -- please contact REDCap administrator.\n<br />$e";
+			$out['moduleMessage'] = "REDCap couldn't get authorization values from logged interview data -- please contact REDCap administrator.\n<br />";
 		}
 		
 		// build request headers and body
@@ -1598,7 +1598,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			}
 		} catch (\Exception $e) {
 			$out['moduleError'] = true;
-			$out['moduleMessage'] = "REDCap couldn't get authorization values from logged interview data -- please contact REDCap administrator.\n<br />$e";
+			$out['moduleMessage'] = "REDCap couldn't get authorization values from logged interview data -- please contact REDCap administrator.\n<br />";
 		}
 		
 		$curlArgs = [];
@@ -1655,7 +1655,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			}
 		} catch (\Exception $e) {
 			$out['moduleError'] = true;
-			$out['moduleMessage'] = "REDCap couldn't get authorization values from logged interview data -- please contact REDCap administrator.\n<br />$e";
+			$out['moduleMessage'] = "REDCap couldn't get authorization values from logged interview data -- please contact REDCap administrator.\n<br />";
 		}
 		
 		$curlArgs = [];
@@ -1785,7 +1785,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			}
 		} catch (\Exception $e) {
 			$out['moduleError'] = true;
-			$out['moduleMessage'] = "REDCap couldn't get authorization values from logged interview data -- please contact REDCap administrator.\n<br />$e";
+			$out['moduleMessage'] = "REDCap couldn't get authorization values from logged interview data -- please contact REDCap administrator.\n<br />";
 		}
 		
 		// build request headers and body
