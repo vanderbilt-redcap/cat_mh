@@ -167,6 +167,11 @@
 				"type": "text"
 			},
             {
+				"key": "redirect_url",
+				"name": "If specified, the patient will be redirected to this URL upon clicking 'Continue' after completing this sequence",
+				"type": "text"
+			},
+            {
 			   "key": "tests",
 			   "name": "Tests included in interview",
 			   "type": "descriptive"
