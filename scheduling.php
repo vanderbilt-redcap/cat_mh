@@ -151,8 +151,8 @@ echo "<script type='text/javascript'>
 	CATMH.scheduling_ajax_url = '$sched_ajax_url'
 	CATMH.dashboard_ajax_url = '$dash_ajax_url'
 	CATMH.debug = false;
-	CATMH.scheduledSequences = JSON.parse(JSON.stringify($scheduled))
-	CATMH.reminderSettings = JSON.parse(JSON.stringify($reminderSettings))
+	CATMH.scheduledSequences = $scheduled;
+	CATMH.reminderSettings = $reminderSettings;
 </script>";
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';
 ?>

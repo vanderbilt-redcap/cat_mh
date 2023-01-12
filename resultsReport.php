@@ -100,25 +100,31 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 						// $test->severity = strval($test->severity) . " (PHQ-9: $phq9)";
 					}
 					
-					$reviewed_cbox = "<input type='checkbox' class='reviewed_cbox' data-test='$test_name' data-sid='$sid' data-seq='$sequence_name' data-date='$sequence_datetime' data-kcat='{$interview->kcat}' data-checked='$test_reviewed'$checked>";
-					
-					echo("
+					$reviewed_cbox = "<input type='checkbox' class='reviewed_cbox'
+					        data-test='".htmlspecialchars($test_name, ENT_QUOTES)."'
+					        data-sid='".htmlspecialchars($sid, ENT_QUOTES)."'
+					        data-seq='".htmlspecialchars($sequence_name, ENT_QUOTES)."'
+					        data-date='".htmlspecialchars($sequence_datetime, ENT_QUOTES)."'
+					        data-kcat='".htmlspecialchars($interview->kcat, ENT_QUOTES)."'
+					        data-checked='$test_reviewed'$checked>";
+					?>
 					<tr>
-						<td>{$rid}</td>
-						<td>$sequence_datetime</td>
+						<td><?=htmlspecialchars($rid, ENT_QUOTES)?></td>
+						<td><?=htmlspecialchars($sequence_datetime, ENT_QUOTES)?></td>
 						<td>" . date("Y-m-d H:i", $interview->timestamp) . "</td>
-						<td>$sequence_name</td>
-						<td>$test_name</td>
-						<td>{$test->diagnosis}</td>
-						<td>{$test->confidence}</td>
-						<td>{$test->severity}</td>
-						<td>{$test->category}</td>
-						<td>{$test->precision}</td>
-						<td>{$test->prob}</td>
-						<td>{$test->percentile}</td>
+						<td><?=htmlspecialchars($sequence_name, ENT_QUOTES)?></td>
+						<td><?=htmlspecialchars($test_name, ENT_QUOTES)?></td>
+						<td><?=htmlspecialchars($test->diagnosis, ENT_QUOTES)?></td>
+						<td><?=htmlspecialchars($test->confidence, ENT_QUOTES)?></td>
+						<td><?=htmlspecialchars($test->severity, ENT_QUOTES)?></td>
+						<td><?=htmlspecialchars($test->category, ENT_QUOTES)?></td>
+						<td><?=htmlspecialchars($test->precision, ENT_QUOTES)?></td>
+						<td><?=htmlspecialchars($test->prob, ENT_QUOTES)?></td>
+						<td><?=htmlspecialchars($test->percentile, ENT_QUOTES)?></td>
 						<td>$phq9</td>
 						<td>$reviewed_cbox</td>
-					</tr>");
+					</tr>
+                    <?php
 				}
 			}
 		}

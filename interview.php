@@ -77,9 +77,9 @@ $circle_images = [
 					}
 					$module->llog("interview test index $index -> $test");
 					if ($index === 0) {
-						echo "<img src='{$circle_images['blue']}' alt='Test $index progress indicator'>";
+						echo "<img src='{$circle_images['blue']}' alt='Test ".htmlspecialchars($index, ENT_QUOTES)." progress indicator'>";
 					} else {
-						echo "<img src='{$circle_images['gray']}' alt='Test $index progress indicator'>";
+						echo "<img src='{$circle_images['gray']}' alt='Test ".htmlspecialchars($index, ENT_QUOTES)." progress indicator'>";
 					}
 				}
 				?></div>
@@ -145,11 +145,11 @@ $circle_images = [
 			blue: '{$circle_images['blue']}'
 		}
 		
-		catmh.kcat_error = \"" . strval($kcat_error) . "\";
+		catmh.kcat_error = \"" . htmlspecialchars(strval($kcat_error), ENT_QUOTES) . "\";
 		if (catmh.kcat_error)
 			catmh.showError(catmh.kcat_error)
 		
-		catmh.interview = " . json_encode($interview) . ";
+		catmh.interview = " . (json_encode($interview) ?: "false"). ";
 		if (typeof(catmh.interview) == 'object') {
 			catmh.interview.hide_question_number = $hide_this_seq;
 			catmh.init();

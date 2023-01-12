@@ -31,8 +31,13 @@ echo "<pre>";
 $pid = $module->getProjectId();
 
 $result = $module->queryLogs("SELECT message, timestamp, sequence, subjectid, scheduled_datetime, record, offset, time_of_day" . $extra_params);
+
 while ($row = db_fetch_assoc($result)) {
-	print_r($row);
+	$rowOutput = [];
+	foreach($row as $index => $value) {
+		$rowOutput[htmlspecialchars($index,ENT_QUOTES)] = htmlspecialchars($value,ENT_QUOTES);
+	}
+	print_r($rowOutput);
 	echo "\n";
 }
 

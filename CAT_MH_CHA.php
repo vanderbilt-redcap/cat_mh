@@ -826,7 +826,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		$sequences = [];
 		while ($row = db_fetch_array($result)) {
-			$sequences[] = ["<input type='checkbox' class='sequence_cbox'>", $row['name'], $row['offset'], $row['time_of_day']];
+			$sequences[] = ["<input type='checkbox' class='sequence_cbox'>", htmlspecialchars($row['name'], ENT_QUOTES), htmlspecialchars($row['offset'], ENT_QUOTES), htmlspecialchars($row['time_of_day'], ENT_QUOTES)];
 		}
 		
 		return $sequences;
