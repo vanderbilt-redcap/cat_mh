@@ -130,6 +130,21 @@ $circle_images = [
 			} else {
 				$hide_this_seq = 'true';
 			}
+            
+            function cleanJsonArray($array) {
+                if(is_array($array)) {
+					$outputArray = [];
+	                foreach($array as $index => $value) {
+		                $outputArray[htmlspecialchars($index,ENT_QUOTES)] = cleanJsonArray($value);
+					}
+					return $outputArray;
+				}
+                else {
+	                return htmlspecialchars($array, ENT_QUOTES);
+				}
+			}
+            
+            $outputInterview = cleanJsonArray($interview);
 			
 			// give js this info
 			echo "
@@ -149,7 +164,7 @@ $circle_images = [
 		if (catmh.kcat_error)
 			catmh.showError(catmh.kcat_error)
 		
-		catmh.interview = " . (json_encode($interview) ?: "false"). ";
+		catmh.interview = " . (json_encode($outputInterview) ?: "false"). ";
 		if (typeof(catmh.interview) == 'object') {
 			catmh.interview.hide_question_number = $hide_this_seq;
 			catmh.init();
