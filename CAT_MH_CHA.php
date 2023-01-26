@@ -1041,14 +1041,14 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			// prepare email body by replacing [interview-links] and [interview-urls] (or appending)
 			$participant_email_body = $email_body;
 			if ($append_links) {
-				$participant_email_body .= "<br>" . implode($links, "<br>");
+				$participant_email_body .= "<br>" . implode("<br>", $links);
 			} else {
-				$participant_email_body = str_replace("[interview-links]", implode($links, "<br>"), $participant_email_body);
+				$participant_email_body = str_replace("[interview-links]", implode("<br>", $links), $participant_email_body);
 			}
 			if ($append_urls) {
-				$participant_email_body .= "<br>" . implode($urls, "<br>");
+				$participant_email_body .= "<br>" . implode("<br>", $urls);
 			} else {
-				$participant_email_body = str_replace("[interview-urls]", implode($urls, "<br>"), $participant_email_body);
+				$participant_email_body = str_replace("[interview-urls]", implode("<br>", $urls), $participant_email_body);
 			}
 			$email->setBody($participant_email_body);
 			$email->setTo($record->$catmh_email_field_name);

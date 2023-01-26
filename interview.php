@@ -1,4 +1,6 @@
 <?php
+namespace VICTR\REDCAP\CAT_MH_CHA;
+
 $interview_ajax_url = $module->getUrl('php/interview_ajax.php');
 $sequence = htmlentities($_GET['sequence'], ENT_QUOTES, 'UTF-8');
 $seq_index = array_search($sequence, $module->getProjectSetting('sequence'));
