@@ -11,7 +11,7 @@ while ($row = db_fetch_assoc($result)) {
 	unset($interview->jsessionid);
 	unset($interview->awselb);
 	$interviews[] = $interview;
-	echo json_encode($interview);
+	echo htmlspecialchars(json_encode($interview), ENT_QUOTES);
 }
 ?>
 </textarea>
@@ -20,7 +20,11 @@ while ($row = db_fetch_assoc($result)) {
 <textarea style='min-width: 600px; height: 100%; width:85%;'>
 <?php
 foreach($interviews as $interview) {
-	print_r($interview);
+	$interviewOutput = [];
+	foreach($interview as $index => $value) {
+		$interviewOutput[htmlspecialchars($index,ENT_QUOTES)] = htmlspecialchars($value,ENT_QUOTES);
+	}
+	print_r($interviewOutput);
 }
 ?>
 </textarea>

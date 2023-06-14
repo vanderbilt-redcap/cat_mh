@@ -1,4 +1,6 @@
 <?php
+namespace VICTR\REDCAP\CAT_MH_CHA;
+
 // sanitize inputs
 $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
 

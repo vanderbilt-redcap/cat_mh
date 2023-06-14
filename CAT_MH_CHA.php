@@ -826,7 +826,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		$sequences = [];
 		while ($row = db_fetch_array($result)) {
-			$sequences[] = ["<input type='checkbox' class='sequence_cbox'>", $row['name'], $row['offset'], $row['time_of_day']];
+			$sequences[] = ["<input type='checkbox' class='sequence_cbox'>", htmlspecialchars($row['name'], ENT_QUOTES), htmlspecialchars($row['offset'], ENT_QUOTES), htmlspecialchars($row['time_of_day'], ENT_QUOTES)];
 		}
 		
 		return $sequences;
@@ -1041,14 +1041,14 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			// prepare email body by replacing [interview-links] and [interview-urls] (or appending)
 			$participant_email_body = $email_body;
 			if ($append_links) {
-				$participant_email_body .= "<br>" . implode($links, "<br>");
+				$participant_email_body .= "<br>" . implode("<br>", $links);
 			} else {
-				$participant_email_body = str_replace("[interview-links]", implode($links, "<br>"), $participant_email_body);
+				$participant_email_body = str_replace("[interview-links]", implode("<br>", $links), $participant_email_body);
 			}
 			if ($append_urls) {
-				$participant_email_body .= "<br>" . implode($urls, "<br>");
+				$participant_email_body .= "<br>" . implode("<br>", $urls);
 			} else {
-				$participant_email_body = str_replace("[interview-urls]", implode($urls, "<br>"), $participant_email_body);
+				$participant_email_body = str_replace("[interview-urls]", implode("<br>", $urls), $participant_email_body);
 			}
 			$email->setBody($participant_email_body);
 			$email->setTo($record->$catmh_email_field_name);

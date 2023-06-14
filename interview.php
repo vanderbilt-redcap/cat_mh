@@ -1,4 +1,6 @@
 <?php
+namespace VICTR\REDCAP\CAT_MH_CHA;
+
 $interview_ajax_url = $module->getUrl('php/interview_ajax.php');
 $sequence = htmlentities($_GET['sequence'], ENT_QUOTES, 'UTF-8');
 $seq_index = array_search($sequence, $module->getProjectSetting('sequence'));
@@ -77,9 +79,9 @@ $circle_images = [
 					}
 					$module->llog("interview test index $index -> $test");
 					if ($index === 0) {
-						echo "<img src='{$circle_images['blue']}' alt='Test $index progress indicator'>";
+						echo "<img src='{$circle_images['blue']}' alt='Test ".htmlspecialchars($index, ENT_QUOTES)." progress indicator'>";
 					} else {
-						echo "<img src='{$circle_images['gray']}' alt='Test $index progress indicator'>";
+						echo "<img src='{$circle_images['gray']}' alt='Test ".htmlspecialchars($index, ENT_QUOTES)." progress indicator'>";
 					}
 				}
 				?></div>
@@ -130,6 +132,21 @@ $circle_images = [
 			} else {
 				$hide_this_seq = 'true';
 			}
+            
+            function cleanJsonArray($array) {
+                if(is_array($array)) {
+					$outputArray = [];
+	                foreach($array as $index => $value) {
+		                $outputArray[htmlspecialchars($index,ENT_QUOTES)] = cleanJsonArray($value);
+					}
+					return $outputArray;
+				}
+                else {
+	                return htmlspecialchars($array, ENT_QUOTES);
+				}
+			}
+            
+            $outputInterview = cleanJsonArray($interview);
 			
 			// give js this info
 			echo "
@@ -145,11 +162,11 @@ $circle_images = [
 			blue: '{$circle_images['blue']}'
 		}
 		
-		catmh.kcat_error = \"" . strval($kcat_error) . "\";
+		catmh.kcat_error = \"" . htmlspecialchars(strval($kcat_error), ENT_QUOTES) . "\";
 		if (catmh.kcat_error)
 			catmh.showError(catmh.kcat_error)
 		
-		catmh.interview = " . json_encode($interview) . ";
+		catmh.interview = " . (json_encode($outputInterview) ?: "false"). ";
 		if (typeof(catmh.interview) == 'object') {
 			catmh.interview.hide_question_number = $hide_this_seq;
 			catmh.init();
