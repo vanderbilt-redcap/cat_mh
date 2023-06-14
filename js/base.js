@@ -141,6 +141,9 @@ catmh.getQuestion = function() {
 		args: catmh.interview
 	};
 	
+    // Update user to inform them we're trying to find a question instead of showing "can't find interview"
+    catmh.showError("Interview already started, attempting to retrieve next question.");
+
 	// console.log("sending getQuestion request");
 	$.ajax({
 		type: "POST",
