@@ -134,7 +134,7 @@ $circle_images = [
 			}
             
             function cleanJsonArray($array) {
-                if(is_array($array)) {
+                if(is_array($array) || is_object($array)) {
 					$outputArray = [];
 	                foreach($array as $index => $value) {
 		                $outputArray[htmlspecialchars($index,ENT_QUOTES)] = cleanJsonArray($value);
