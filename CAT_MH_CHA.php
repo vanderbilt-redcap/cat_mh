@@ -1535,7 +1535,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		} catch (\Exception $e) {
 			// $this->llog('exception in getQuestion: ' . $e);
 			$out['moduleError'] = true;
-			$out['moduleMessage'] = "REDCap failed to retrieve the next question from the CAT-MH API server. Please refresh the page in a few moments to try again.";
+			$out['moduleMessage'] = "REDCap failed to retrieve the next question from the CAT-MH API server. This interview may have expired.";
 		}
 		return $out;
 	}
