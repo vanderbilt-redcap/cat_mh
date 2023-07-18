@@ -167,7 +167,7 @@ $circle_images = [
 			catmh.showError(catmh.kcat_error)
 		
 		catmh.interview = " . (json_encode($outputInterview) ?: "false"). ";
-		if (typeof(catmh.interview) == 'object') {
+		if (typeof(catmh.interview) == 'object' && catmh.interview !== null) {
 			catmh.interview.hide_question_number = $hide_this_seq;
 			catmh.init();
 			// catmh.setInterviewOptions();
