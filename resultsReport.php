@@ -111,7 +111,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 					<tr>
 						<td><?=htmlspecialchars($rid, ENT_QUOTES)?></td>
 						<td><?=htmlspecialchars($sequence_datetime, ENT_QUOTES)?></td>
-						<td>" . date("Y-m-d H:i", $interview->timestamp) . "</td>
+						<td><?=date("Y-m-d H:i", $interview->timestamp)?></td>
 						<td><?=htmlspecialchars($sequence_name, ENT_QUOTES)?></td>
 						<td><?=htmlspecialchars($test_name, ENT_QUOTES)?></td>
 						<td><?=htmlspecialchars($test->diagnosis, ENT_QUOTES)?></td>
@@ -121,8 +121,8 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 						<td><?=htmlspecialchars($test->precision, ENT_QUOTES)?></td>
 						<td><?=htmlspecialchars($test->prob, ENT_QUOTES)?></td>
 						<td><?=htmlspecialchars($test->percentile, ENT_QUOTES)?></td>
-						<td>$phq9</td>
-						<td>$reviewed_cbox</td>
+						<td><?=$phq9?></td>
+						<td><?=$reviewed_cbox?></td>
 					</tr>
                     <?php
 				}
