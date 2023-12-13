@@ -96,7 +96,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		}
 		
 		// check to see if this is a survey configured to auto-invite participants upon completion
-		$survey_index = array_search($on_complete_surveys, $instrument, true);
+		$survey_index = array_search($instrument, $on_complete_surveys, true);
 		if ($survey_index === false) {
 			// it's not
 			// $this->llog("cat-mh redcap_survey_complete -- returning early: not a configured instrument");
