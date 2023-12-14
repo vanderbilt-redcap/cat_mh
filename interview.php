@@ -112,6 +112,12 @@ $circle_images = [
 				</table>
 			</div>
 			<span>Your test results have been stored in the REDCap database. You may now close this window or tab.</span>
+			<?php
+			$redirect_url = $module->getProjectSetting('redirect_url')[$seq_index];
+			if ($redirect_url) {
+				echo "<br><button id='redirect_on_complete' type='button' class='click' onMouseDown='window.location = \"$redirect_url\";'>Continue</button>";
+			}
+			?>
 		</div>
 		<div id='error'>
 			<span></span>
