@@ -79,9 +79,15 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// blue added in __construct
 	];
 	
-	public function __construct() {
-		parent::__construct();
-		$this->interviewStatusIconURLs['blue'] = $this->getUrl("images/circle_blue.png");
+	public function getInterviewStatusIconURLs($color) {
+		if(!array_key_exists('blue',$this->interviewStatusIconURLs)) {
+			$this->interviewStatusIconURLs['blue'] = $this->getUrl("images/circle_blue.png");
+		}
+		
+		if(array_key_exists($color, $this->interviewStatusIconURLs)) {
+			return $this->interviewStatusIconURLs[$color];
+		}
+		return NULL;
 	}
 	
 	// hooks
@@ -96,7 +102,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		}
 		
 		// check to see if this is a survey configured to auto-invite participants upon completion
-		$survey_index = array_search($on_complete_surveys, $instrument, true);
+		$survey_index = array_search($instrument, $on_complete_surveys, true);
 		if ($survey_index === false) {
 			// it's not
 			// $this->llog("cat-mh redcap_survey_complete -- returning early: not a configured instrument");

@@ -16,6 +16,10 @@ if ($_GET['show_future_seqs'] === 'false') {
 	$module->llog('show_future_seqs setting to false');
 }
 
+## Need to call this once because 'blue' on $module->interviewStatusIconURLs below
+#  isn't set until the function is called
+$module->getInterviewStatusIconURLs('blue');
+
 ?>
 
 <link rel="stylesheet" type="text/css" href="<?php echo $module->getUrl('css/dashboard.css'); ?>">
