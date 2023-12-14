@@ -79,9 +79,15 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// blue added in __construct
 	];
 	
-	public function __construct() {
-		parent::__construct();
-		$this->interviewStatusIconURLs['blue'] = $this->getUrl("images/circle_blue.png");
+	public function getInterviewStatusIconURLs($color) {
+		if(!array_key_exists('blue',$this->interviewStatusIconURLs)) {
+			$this->interviewStatusIconURLs['blue'] = $this->getUrl("images/circle_blue.png");
+		}
+		
+		if(array_key_exists($color, $this->interviewStatusIconURLs)) {
+			return $this->interviewStatusIconURLs[$color];
+		}
+		return NULL;
 	}
 	
 	// hooks
