@@ -399,6 +399,11 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$interview = $this->createInterview($args);
 		$interview['subjectID'] = $valid_sid;
 		
+		if(array_key_exists("moduleError", $interview) && $interview['moduleError']) {
+			echo("CAT-MH encountered an error with the API:<br />" . $interview['moduleMessage']);
+			return false;
+		}
+		
 		$new_interview = [
 			"sequence" => $sequence,
 			"scheduled_datetime" => $sched_dt,
