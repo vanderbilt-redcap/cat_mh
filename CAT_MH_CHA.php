@@ -817,7 +817,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		
 		$valid_seq_names = array_merge(
 			$this->getProjectSetting('sequence'),
-			$this->getProjectSetting('kcat_sequence')
+			$this->getProjectSetting('kcat_sequence') ?? []
 		);
 		
 		while ($row = db_fetch_array($result)) {
