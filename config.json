@@ -270,9 +270,9 @@
 	"crons": [
 		{
 			"cron_name": "emailer_cron",
-			"cron_description": "Cron that runs every minute to send automatic interview invites and reminder emails",
+			"cron_description": "Cron that runs every hour to send automatic interview invites and reminder emails",
 			"method": "emailer_cron",
-			"cron_frequency": "60",
+			"cron_frequency": "3600",
 			"cron_max_run_time": "3540"
 		}
 	],

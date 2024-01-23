@@ -79,6 +79,10 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// blue added in __construct
 	];
 	
+	private $clearedExpiredSeqByProject = [];
+	private $cachedSequences = [];
+	private $cachedInterviews = [];
+	
 	public function getInterviewStatusIconURLs($color) {
 		if(!array_key_exists('blue',$this->interviewStatusIconURLs)) {
 			$this->interviewStatusIconURLs['blue'] = $this->getUrl("images/circle_blue.png");
@@ -766,12 +770,17 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	public function getInterviewsByRecordID($record_id) {
+		if(array_key_exists($record_id,$this->cachedInterviews)) {
+			return $this->cachedInterviews[$record_id];
+		}
 		$interviews = [];
 		
 		$result = $this->queryLogs("SELECT interview WHERE message='catmh_interview' AND record_id = ?", [$record_id]);
 		while ($row = db_fetch_assoc($result)) {
 			$interviews[] = json_decode($row['interview']);
 		}
+		
+		$this->cachedInterviews[$record_id] = $interviews;
 		
 		if (!empty($interviews))
 			return $interviews;
@@ -813,6 +822,10 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	public function cleanMissingSeqsFromSchedule() {
+		## Only run once per project
+		if(array_key_exists("pid", $_GET) && array_key_exists($_GET['pid'], $this->clearedExpiredSeqByProject)) {
+			return;
+		}
 		$result = $this->queryLogs("SELECT message, name, offset, time_of_day, sent WHERE message='scheduleSequence'");
 		
 		$valid_seq_names = array_merge(
@@ -829,15 +842,27 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				$this->removeLogs("message='scheduleSequence' AND name = ?", [$seq_name]);
 			}
 		}
+		## Store completed status
+		if(array_key_exists("pid", $_GET)) {
+			$this->clearedExpiredSeqByProject[$_GET['pid']] = 1;
+		}
 	}
 	
 	public function getScheduledSequences() {
 		$this->cleanMissingSeqsFromSchedule();
+		
+		if(array_key_exists("pid", $_GET) && array_key_exists($_GET['pid'], $this->cachedSequences)) {
+			return $this->cachedSequences[$_GET['pid']];
+		}
 		$result = $this->queryLogs("SELECT message, name, offset, time_of_day, sent WHERE message='scheduleSequence'");
 		
 		$sequences = [];
 		while ($row = db_fetch_array($result)) {
 			$sequences[] = ["<input type='checkbox' class='sequence_cbox'>", htmlspecialchars($row['name'], ENT_QUOTES), htmlspecialchars($row['offset'], ENT_QUOTES), htmlspecialchars($row['time_of_day'], ENT_QUOTES)];
+		}
+		
+		if(array_key_exists("pid", $_GET)) {
+			$this->cachedSequences = $sequences;
 		}
 		
 		return $sequences;
