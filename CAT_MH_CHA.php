@@ -1655,12 +1655,20 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				$rid = array_keys($data)[0];
 				$record = $data[$rid];
 				$eid = array_keys($record)[0];
-				$catmh_data = json_decode($record[$eid], true);
+				if(array_key_exists("cat_mh_data", $record[$eid])) {
+					$catmh_data = json_decode($record[$eid]["cat_mh_data"], true);
+				}
 				
-				foreach($catmh_data['interviews'] as $i => $interview) {
-					if ($interview['interviewID'] == $args['interviewID'] and $interview['signature'] == $args['signature'] and $interview['identifier'] == $args['identifier']) {
-						$interview['status'] = 3;
-						$interview['timestamp'] = time();
+				if(empty($catmh_data)) {
+					$catmh_data = [];
+				}
+				
+				if(array_key_exists("interviews", $catmh_data) && is_array($catmh_data["interviews"])) {
+					foreach($catmh_data['interviews'] as $i => &$interview) {
+						if ($interview['interviewID'] == $args['interviewID'] and $interview['signature'] == $args['signature'] and $interview['identifier'] == $args['identifier']) {
+							$interview['status'] = 3;
+							$interview['timestamp'] = time();
+						}
 					}
 				}
 				
