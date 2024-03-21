@@ -22,9 +22,9 @@ while ($row = db_fetch_assoc($result)) {
 foreach($interviews as $interview) {
 	$interviewOutput = [];
 	foreach($interview as $index => $value) {
-		$interviewOutput[htmlspecialchars($index,ENT_QUOTES)] = htmlspecialchars($value,ENT_QUOTES);
+		$interviewOutput[$index] = $value;
 	}
-	print_r($interviewOutput);
+	echo htmlspecialchars(json_encode($interviewOutput, JSON_PRETTY_PRINT));
 }
 ?>
 </textarea>
