@@ -24,7 +24,7 @@ foreach($interviews as $interview) {
 	foreach($interview as $index => $value) {
 		$interviewOutput[$index] = $value;
 	}
-	echo htmlspecialchars(json_encode($interviewOutput, JSON_PRETTY_PRINT));
+	echo htmlspecialchars(json_encode($interviewOutput, JSON_PRETTY_PRINT), ENT_QUOTES);
 }
 ?>
 </textarea>
