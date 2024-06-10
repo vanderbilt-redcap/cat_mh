@@ -1653,10 +1653,12 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 				// update redcap record data
 				$data = $this->getRecordBySID($args['subjectID']);
 				$rid = array_keys($data)[0];
-				$record = $data[$rid];
-				$eid = array_keys($record)[0];
-				if(array_key_exists("cat_mh_data", $record[$eid])) {
-					$catmh_data = json_decode($record[$eid]["cat_mh_data"], true);
+				if(isset($data[$rid]) && is_array($data[$rid])) {
+					$record = $data[$rid];
+					$eid = array_keys($record)[0];
+					if(is_array($record[$eid]) && array_key_exists("cat_mh_data", $record[$eid])) {
+						$catmh_data = json_decode($record[$eid]["cat_mh_data"], true);
+					}
 				}
 				
 				if(empty($catmh_data)) {
