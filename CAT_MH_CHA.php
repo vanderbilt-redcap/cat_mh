@@ -311,7 +311,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	public function getSubjectID($record_id) {
-		$r = $this->query("SELECT value FROM redcap_data WHERE record = ? AND field_name='subjectid' AND project_id = ?", [
+		$redcap_data_table = $this->framework->getDataTable($this->framework->getProjectId());
+		$r = $this->query("SELECT value FROM $redcap_data_table WHERE record = ? AND field_name='subjectid' AND project_id = ?", [
 			$record_id,
 			$this->getProjectId()
 		]);
