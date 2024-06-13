@@ -1737,6 +1737,14 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// need config to see if we should send results back to user or not
 		$keepResults = [];
 		$projectSettings = $this->getProjectSettings();
+		
+		## Module not configured
+		if(!isset($projectSettings['sequence']['value'])) {
+			$out['moduleError'] = true;
+			$out['moduleMessage'] = "Module not configured with a sequence";
+			return $out;
+		}
+		
 		foreach ($projectSettings['sequence']['value'] as $j => $seqName) {
 			if ($sequence == $seqName) {
 				foreach($testTypes as $testType) {
