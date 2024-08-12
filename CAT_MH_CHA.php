@@ -403,7 +403,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 						$args['tests'][] = ["type" => $this->convertTestAbbreviation[$testAbbreviation]];
 					}
 				}
-				$args['language'] = $projectSettings['language']['value'][$i] == 2 ? 2 : 1;
+				$args['language'] = $projectSettings['language'][$i] == 2 ? 2 : 1;
 			}
 		}
 		
@@ -1740,16 +1740,16 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$projectSettings = $this->getProjectSettings();
 		
 		## Module not configured
-		if(!isset($projectSettings['sequence']['value'])) {
+		if(!isset($projectSettings['sequence'])) {
 			$out['moduleError'] = true;
 			$out['moduleMessage'] = "Module not configured with a sequence";
 			return $out;
 		}
 		
-		foreach ($projectSettings['sequence']['value'] as $j => $seqName) {
+		foreach ($projectSettings['sequence'] as $j => $seqName) {
 			if ($sequence == $seqName) {
 				foreach($testTypes as $testType) {
-					if ($projectSettings[$testType . '_show_results']['value'][$j] == 1) {
+					if ($projectSettings[$testType . '_show_results'][$j] == 1) {
 						$keepResults[$testType] = true;
 					}
 				}
