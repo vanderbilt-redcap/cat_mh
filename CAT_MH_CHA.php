@@ -189,7 +189,9 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		$originalPid = htmlentities($_GET['pid'], ENT_QUOTES, 'UTF-8');
 		foreach($this->framework->getProjectsWithModuleEnabled() as $localProjectId) {
 			$_GET['pid'] = $localProjectId;
-			
+
+			// avoid cross-project contamination
+			$this->cachedInterviews = [];
 			$this->sendInvitations(time());
 			
 			$today_ymd = date("Y-m-d");
@@ -863,7 +865,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		}
 		
 		if(array_key_exists("pid", $_GET)) {
-			$this->cachedSequences = $sequences;
+			$this->cachedSequences[$_GET["pid"]] = $sequences;
 		}
 		
 		return $sequences;
