@@ -206,7 +206,53 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		}
 		$_GET['pid'] = $originalPid;
 	}
-	
+
+	public function interview_to_field_cron($cronInfo=null, $current_time=null) {
+		$originalPid = htmlentities($_GET['pid'], ENT_QUOTES, 'UTF-8');
+		foreach($this->framework->getProjectsWithModuleEnabled() as $localProjectId) {
+			// avoid cross-project contamination
+			$this->cachedInterviews = [];
+
+			$_GET['pid'] = $localProjectId;
+
+			$target_field = $this->getProjectSetting("interview_storage_field", $localProjectId) ?? false;
+			if (!$target_field) { continue; }
+
+			$pk = $this->getRecordIdField();
+			$record_id_arr = \REDCap::getData(
+				[
+					'project_id' => $localProjectId,
+					'return_format' => 'json-array',
+					'fields' => $pk
+				]
+			);
+
+			$record_ids = array_column($record_id_arr, $pk);
+
+			foreach ($record_ids as $record_id) {
+				$interview_data = $this->getInterviewsByRecordID($record_id);
+				$record_data = json_encode(
+					[
+						[
+							$pk => $record_id,
+							$target_field => json_encode($interview_data)
+						]
+					]
+				);
+
+				$resp = \REDCap::saveData(
+					[
+						'project_id' => $localProjectId,
+						'dataFormat' => 'json',
+						'data' => $record_data
+					]
+				);
+			}
+
+		}
+		$_GET['pid'] = $originalPid;
+	}
+
 	//utility
 	public function extractCURLHeaders($headerContent) {
 		// get headers as arrays

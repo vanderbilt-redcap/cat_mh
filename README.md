@@ -29,6 +29,9 @@ The following field is optional, but required to use the automatic provider emai
 You can configure any number of CAT-MH sequences. Each sequence consists of a series of CAT-MH tests that make up a CAT-MH interview.
 
 To do so, go to the "External Modules" page and click "Configure" for the CAT-MH module. You can select any number of tests for a sequence and select whether the interviewee should see the results at the end of their test.
+
+**Interview Storage Field** (optional): select a field to store all interview data for the associated record (interview data is typically stored in the external module log which is not accessible via the API), this field will be updated hourly with the latest data for _all_ interviews associated with the record.
+
 You may enable/disable the provider email feature here.
 You may also specify scheduled invitation and reminder email subject and body texts here. The module will replace`[interview-links]` and `[interview-urls]` with the actual patient-specific interview link/URLs at the time the emails are sent.
 
@@ -88,4 +91,4 @@ Version 2.2.0 adds a progress meter to the participant interview page.
 ![Interview progress meter](/docs/progress_meter.PNG)
 The number of circle icons indicates how many tests are included in the interview*. Blue circles denote a test being taken currently, green denotes completed tests, and gray denote tests that have yet to be started as part of the interview.
 
-*Note: Due to how the meter is implemented, the progress meter counts 'c/adhd' and 'a/adhd' to be a single test in the interview. This has to do with how the module detects which test a user is currently answering. The same is true for 'dep' and 'p-dep', 'anx' and 'p-anx', and 'm/hm' and 'p-m/hm' test sets. 
+*Note: Due to how the meter is implemented, the progress meter counts 'c/adhd' and 'a/adhd' to be a single test in the interview. This has to do with how the module detects which test a user is currently answering. The same is true for 'dep' and 'p-dep', 'anx' and 'p-anx', and 'm/hm' and 'p-m/hm' test sets.
