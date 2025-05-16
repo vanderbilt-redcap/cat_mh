@@ -9,7 +9,12 @@
 
 	"authors": [
 		{
-			"name": "Carl Reed, Kyle McGuffin",
+			"name": "Kyle Chesney",
+			"email": "datacore@vumc.org",
+			"institution": "Vanderbilt University Medical Center"
+		},
+		{
+			"name": "Kyle McGuffin",
 			"email": "datacore@vumc.org",
 			"institution": "Vanderbilt University Medical Center"
 		}
@@ -70,6 +75,11 @@
 			"key": "disable_invites",
 			"name": "Disable automatic interview invitation and reminder emails",
 			"type": "checkbox"
+		},
+		{
+			"key": "interview_storage_field",
+			"name": "Interview Storage Field",
+			"type": "field-list"
 		},
 		{
 			"key": "enrollment_field",
@@ -272,6 +282,13 @@
 			"cron_name": "emailer_cron",
 			"cron_description": "Cron that runs every hour to send automatic interview invites and reminder emails",
 			"method": "emailer_cron",
+			"cron_frequency": "3600",
+			"cron_max_run_time": "3540"
+		},
+		{
+			"cron_name": "interview_to_field_cron",
+			"cron_description": "Cron that runs every hour to inject interview data into a field",
+			"method": "interview_to_field_cron",
 			"cron_frequency": "3600",
 			"cron_max_run_time": "3540"
 		}
