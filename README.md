@@ -92,3 +92,36 @@ Version 2.2.0 adds a progress meter to the participant interview page.
 The number of circle icons indicates how many tests are included in the interview*. Blue circles denote a test being taken currently, green denotes completed tests, and gray denote tests that have yet to be started as part of the interview.
 
 *Note: Due to how the meter is implemented, the progress meter counts 'c/adhd' and 'a/adhd' to be a single test in the interview. This has to do with how the module detects which test a user is currently answering. The same is true for 'dep' and 'p-dep', 'anx' and 'p-anx', and 'm/hm' and 'p-m/hm' test sets.
+
+## API
+
+Interview response data may be fetched via an [EM Framework API endpoint](https://github.com/vanderbilt-redcap/external-module-framework-docs/blob/main/api.md) with the action "get-interview-data". The interview data returned will be identical to what is provided on the "CAT-MH Interview Data Export" page with the record's primary key (e.g. `record_id`) included.
+
+Request query example:
+``` bash
+TOKEN="YOUR_PROJECT_API_TOKEN"
+API_ENDPOINT="https://your_institution.edu/redcap_vX.Y.Z/api/"
+
+curl -F "token=${TOKEN}" \
+     -F "content=externalModule" \
+     -F "prefix=cat_mh" \
+     -F "action=get-interview-data" \
+     -F "format=json" \
+     -F "returnFormat=json" \
+     "${API_ENDPOINT}"
+```
+
+Response example:
+``` json
+[
+  {
+    "<primary_key_field>": "<primary_key_value>",
+    "interview_data": [
+      { <interview_1_data> },
+      ... ,
+      { <interview_n_data> },
+    ],
+  },
+  ...
+]
+```
