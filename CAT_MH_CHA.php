@@ -83,6 +83,48 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	private $cachedSequences = [];
 	private $cachedInterviews = [];
 	
+	public function redcap_module_api($action, $payload, $project_id, $user_id, $format, $returnFormat, $csvDelim) {
+		if ($returnFormat != "json") {
+			return $this->framework->apiErrorResponse("This API only supports JSON as return format!", 400);
+		}
+		switch ($action) {
+			case "get-interview-data": return $this->getInterviewDataForAPI($payload);
+			default:
+				return json_encode(["error" => "unsupported action"]);
+		}
+	}
+
+
+	public function getInterviewDataForAPI($payload) {
+		$project_id = $_GET['pid'];
+
+		$pk = $this->getRecordIdField();
+		$record_pk_arr = \REDCap::getData(
+			[
+				'project_id' => $project_id,
+				'return_format' => 'json-array',
+				'fields' => $pk
+			]
+		);
+
+		$record_pks = array_column($record_pk_arr, $pk);
+
+		$response = [];
+
+		foreach ($record_pks as $record_id) {
+			$interview_data = $this->getInterviewsByRecordID($record_id);
+			$record_data = [
+				$pk => $record_id,
+				"interview_data" => $interview_data
+			];
+
+			$response[] = $record_data;
+		}
+
+		return json_encode($response);
+	}
+
+
 	public function getInterviewStatusIconURLs($color) {
 		if(!array_key_exists('blue',$this->interviewStatusIconURLs)) {
 			$this->interviewStatusIconURLs['blue'] = $this->getUrl("images/circle_blue.png");
