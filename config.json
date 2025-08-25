@@ -300,6 +300,12 @@
 		"redcap-version-min": "",
 		"redcap-version-max": ""
 	},
-	
-	"framework-version": 5
+	"framework-version": 5,
+		"include-authors-in-api-info": true,
+		"api-actions": {
+				"get-interview-data": {
+						"description": "Gets all interview data for each record",
+						"access": ["auth"]
+				}
+		}
 }
