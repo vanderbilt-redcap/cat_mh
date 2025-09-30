@@ -1638,7 +1638,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// handle response
 		try {
 			$json = json_decode($curl['body'], true);
-			if (strpos($curl['body'], "CAT-MH&trade; Timeout Error") === false) {
+			if (strpos($curl['body'], "Timeout Error") === false) {
 				if (gettype($json) != 'array') throw new \Exception("json error");
 			} else {
 				// timed out, need to send another auth request
