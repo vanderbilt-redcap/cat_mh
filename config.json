@@ -121,9 +121,16 @@
 		},
 		{
 			"key": "filter-fields",
-			"name": "Withold all invitations and reminders if this field is empty for a participant's record",
+			"name": "Withold all invitations and reminders if <i>any</i> of these fields are <b>empty</b> for a participant's record",
 			"repeatable": true,
 			"type": "field-list"
+		},
+		{
+			"key": "do-not-send-fields",
+			"name": "Withold all invitations and reminders if <i>any</i> of these fields are <b>populated</b> for a participant's record",
+			"repeatable": true,
+			"type": "field-list",
+			"autocomplete": true
 		},
 		{
          "key": "catmh_options",
