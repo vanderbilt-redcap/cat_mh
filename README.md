@@ -37,7 +37,7 @@ You may also specify scheduled invitation and reminder email subject and body te
 
 You may also configure the module to automatically invite participants who complete a selected survey to continue to their first scheduled interview.
 
-Finally, you can specify any number of 'filter fields'. These fields will prevent the module from sending invite/reminder emails to participants if the given field is empty for the patient's associated record.
+Finally, you can specify any number of 'filter fields' and 'do not send fields'; these fields will prevent the module from sending invite/reminder emails to participants if the given field is empty or populated (respectively) for the patient's associated record.
 
 ##### Alternate Labels
 You may also configure an alternate label for any sequence. This alternate label will be shown as the test name to the participant during the interview. 
