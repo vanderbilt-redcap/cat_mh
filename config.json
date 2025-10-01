@@ -79,13 +79,15 @@
 		{
 			"key": "interview_storage_field",
 			"name": "Interview Storage Field",
-			"type": "field-list"
+			"type": "field-list",
+			"autocomplete": true
 		},
 		{
 			"key": "enrollment_field",
 			"name": "Choose an Enrollment Date/Time field -- participants will start receiving interview invitations after enrollment",
 			"required": true,
-			"type": "field-list"
+			"type": "field-list",
+			"autocomplete": true
 		},
 		{
 			"key": "email-from",
@@ -106,7 +108,8 @@
 		{
 			"key": "participant_email_field",
 			"name": "Field that holds participant email address to send interview invitations and reminders to",
-			"type": "field-list"
+			"type": "field-list",
+			"autocomplete": true
 		},
 		{
 			"key": "send-provider-emails",
@@ -117,13 +120,15 @@
 			"key": "invite-on-survey-complete",
 			"name": "Invite participant to complete first scheduled sequence upon survey completion",
 			"type": "form-list",
-			"repeatable": true
+			"repeatable": true,
+			"autocomplete": true
 		},
 		{
 			"key": "filter-fields",
 			"name": "Withold all invitations and reminders if <i>any</i> of these fields are <b>empty</b> for a participant's record",
 			"repeatable": true,
-			"type": "field-list"
+			"type": "field-list",
+			"autocomplete": true
 		},
 		{
 			"key": "do-not-send-fields",
