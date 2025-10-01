@@ -139,7 +139,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	// hooks
 	public function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
 		$on_complete_surveys = $this->getProjectSetting('invite-on-survey-complete');
-		$filter_fields = $this->getProjectSetting('filter_fields');
+		$filter_fields = $this->getProjectSetting('filter-fields');
 		$rid_field_name = $this->getRecordIdField();
 		
 		// $this->llog("cat-mh redcap_survey_complete called with args:\n" . print_r(func_get_args(), true));
