@@ -139,7 +139,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 	// hooks
 	public function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
 		$on_complete_surveys = $this->getProjectSetting('invite-on-survey-complete');
-		$filter_fields = $this->getProjectSetting('filter_fields');
+		$filter_fields = $this->getProjectSetting('filter-fields');
+		$do_not_send_fields = $this->getProjectSetting('do-not-send-fields');
 		$rid_field_name = $this->getRecordIdField();
 		
 		// $this->llog("cat-mh redcap_survey_complete called with args:\n" . print_r(func_get_args(), true));
@@ -171,12 +172,20 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		if (!empty($filter_fields)) {
 			$param_fields = array_merge($param_fields, $filter_fields);
 		}
+		if (!empty($do_not_send_fields)) {
+			$param_fields = array_merge($param_fields, $do_not_send_fields);
+		}
 		
 		$data = json_decode(\REDCap::getData($project_id, 'json', $record, $param_fields));
 		$record_obj = $data[0];
 		foreach ($filter_fields as $fieldname) {
 			if (empty($record_obj->$fieldname)) {
 				// $this->llog("cat-mh redcap_survey_complete -- returning early: detected empty filter_field $fieldname");
+				return;
+			}
+		}
+		foreach ($do_not_send_fields as $fieldname) {
+			if (!empty($record_obj->$fieldname)) {
 				return;
 			}
 		}
@@ -1048,6 +1057,10 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 		// add filter_fields to getData request
 		if (!empty($filter_fields = $this->getProjectSetting('filter-fields')))
 			$param_fields = array_merge($param_fields, $filter_fields);
+
+		// add do not send fields
+		if (!empty($do_not_send_fields = $this->getProjectSetting('do-not-send-fields')))
+			$param_fields = array_merge($param_fields, $do_not_send_fields);
 		
 		$params = [
 			'project_id' => $this->getProjectId(),
@@ -1097,16 +1110,23 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule {
 			$record_id = $record->$rid_name;
 			
 			// validate record values
-			$empty_filter_field = false;
+			$prevent_send_field = false;
 			foreach ($filter_fields as $fieldname) {	// check that this record's filter fields are true or abort
 				if (empty($record->$fieldname)) {
-					$empty_filter_field = $fieldname;
+					$prevent_send_field = $fieldname;
+					$result_log_message .= "Record '$record_id' - No emails sent, filter_field [$prevent_send_field] is empty.";
 					break;
 				}
 			}
-			if ($empty_filter_field) {
+			foreach ($do_not_send_fields as $fieldname) {	// check that this record's filter fields are true or abort
+				if (!empty($record->$fieldname)) {
+					$prevent_send_field = $fieldname;
+					$result_log_message .= "Record '$record_id' - No emails sent, do not send field: [$prevent_send_field] is populated.";
+					break;
+				}
+			}
+			if ($prevent_send_field) {
 				// $this->llog("record $record_id empty filter field $empty_filter_field");
-				$result_log_message .= "Record '$record_id' - No emails sent, filter_field [$empty_filter_field] is empty.";
 				continue;
 			}
 			if (empty($record->$catmh_email_field_name)) {
