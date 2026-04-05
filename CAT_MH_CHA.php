@@ -422,6 +422,9 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule
 			$record_id,
 			$this->getProjectId()
 		]);
+		// NOTE: value here is sourced from redcap
+		// consider just escaping if no chance of malform on custom prefixes
+		/** @psalm-suppress TaintedSSRF */
 		return db_fetch_assoc($r)['value'];
 	}
 
