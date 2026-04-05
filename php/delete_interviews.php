@@ -1,7 +1,9 @@
 <?php
+
 $months = intval($_POST['months']);
-if ($months < 0)
+if ($months < 0) {
 	$months = 0;
+}
 
 // store interview_ids for interviews that we're going to delete
 // $interview_ids = [];
@@ -22,7 +24,7 @@ while ($row = db_fetch_assoc($result)) {
 	}
 }
 
-\REDCap::logEvent("CAT-MH External Module", "Deleted interview data for $deleted interviews ($failures failures). Months parameter: $months.", NULL, NULL, NULL, $module->getProjectId());
+\REDCap::logEvent("CAT-MH External Module", "Deleted interview data for $deleted interviews ($failures failures). Months parameter: $months.", null, null, null, $module->getProjectId());
 $response = new \stdClass();
 $response->success = true;
 $response->failures = $failures;

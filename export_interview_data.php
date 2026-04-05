@@ -19,9 +19,9 @@ while ($row = db_fetch_assoc($result)) {
 <p>Human Readable Text:</p>
 <textarea style='min-width: 600px; height: 100%; width:85%;'>
 <?php
-foreach($interviews as $interview) {
+foreach ($interviews as $interview) {
 	$interviewOutput = [];
-	foreach($interview as $index => $value) {
+	foreach ($interview as $index => $value) {
 		$interviewOutput[$index] = $value;
 	}
 	echo htmlspecialchars(json_encode($interviewOutput, JSON_PRETTY_PRINT), ENT_QUOTES);

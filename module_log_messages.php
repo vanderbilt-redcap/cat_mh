@@ -8,9 +8,9 @@ $result = $module->query("SELECT
 							DISTINCT name
 							FROM redcap_external_modules_log_parameters
 							INNER JOIN redcap_external_modules_log USING(log_id)
-							WHERE project_id = ?",$project_id);
+							WHERE project_id = ?", $project_id);
 
-$allowed_params = [];							
+$allowed_params = [];
 while ($row = db_fetch_assoc($result)) {
 	$allowed_params[] = $row['name'];
 }
@@ -18,8 +18,8 @@ while ($row = db_fetch_assoc($result)) {
 
 // $module->llog("get: " . print_r($_GET,true));
 $extra_params = [];
-foreach($_GET as $key => $value) {
-	if (strlen($key) <= 3 and substr($key, 0, 1) == 'p' and $key != 'pid' and in_array($key,$allowed_params)) {
+foreach ($_GET as $key => $value) {
+	if (strlen($key) <= 3 and substr($key, 0, 1) == 'p' and $key != 'pid' and in_array($key, $allowed_params)) {
 		$extra_params[] = db_escape(urldecode($value));
 	}
 }
@@ -34,8 +34,8 @@ $result = $module->queryLogs("SELECT message, timestamp, sequence, subjectid, sc
 
 while ($row = db_fetch_assoc($result)) {
 	$rowOutput = [];
-	foreach($row as $index => $value) {
-		$rowOutput[htmlspecialchars($index,ENT_QUOTES)] = htmlspecialchars($value,ENT_QUOTES);
+	foreach ($row as $index => $value) {
+		$rowOutput[htmlspecialchars($index, ENT_QUOTES)] = htmlspecialchars($value, ENT_QUOTES);
 	}
 	print_r($rowOutput);
 	echo "\n";
@@ -43,4 +43,3 @@ while ($row = db_fetch_assoc($result)) {
 
 echo "</pre>";
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';
-?>

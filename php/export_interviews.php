@@ -1,9 +1,11 @@
 <?php
+
 namespace VICTR\REDCAP\CAT_MH_CHA;
 
 $months = intval($_GET['months']);
-if ($months < 0)
+if ($months < 0) {
 	$months = 0;
+}
 
 $interviews = [];
 $result = $module->queryLogs("SELECT interview WHERE message = ?", ['catmh_interview']);
@@ -20,7 +22,7 @@ while ($row = db_fetch_assoc($result)) {
 	unset($interview["awselb"]);
 	if (strtotime($interview["scheduled_datetime"] . " + $months months") < time()) {
 		$outputInterview = [];
-		foreach($interview as $index => $value) {
+		foreach ($interview as $index => $value) {
 			$sanitized_value = recursive_htmlspecialchars($value);
 			$outputInterview[htmlspecialchars($index, ENT_QUOTES)] = $sanitized_value;
 		}

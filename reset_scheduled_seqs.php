@@ -12,4 +12,3 @@ echo "REMOVING ALL SCHEDULED SEQUENCES AND INTERVIEWS";
 echo "\nDONE";
 echo "</pre>";
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';
-?>

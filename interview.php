@@ -1,4 +1,5 @@
 <?php
+
 namespace VICTR\REDCAP\CAT_MH_CHA;
 
 $interview_ajax_url = $module->getUrl('php/interview_ajax.php');
@@ -41,9 +42,9 @@ $circle_images = [
 		
 		<link rel="stylesheet" href="<?php
 			$ref = $module->getUrl('css/base.css');
-			// $ref = str_replace("localhost", "192.168.0.15", $ref);
-			echo($ref);
-		?>">
+// $ref = str_replace("localhost", "192.168.0.15", $ref);
+echo($ref);
+?>">
 		<title>CAT-MH Interview</title>
 	</head>
 	<body>
@@ -58,37 +59,37 @@ $circle_images = [
 		<div id='interviewTest'>
 
 		        <?php
-		        // Show Progress
-		        if (! $module->getProjectSetting('hide_progress_bar')[$seq_index]) { 
+		// Show Progress
+		if (! $module->getProjectSetting('hide_progress_bar')[$seq_index]) {
 
 			?><div id='interviewProgress'>
 				<span>Interview Progress</span>
 				<div id='progress_meter'><?php
 				$interview_types = gettype($interview) == 'array' ? $interview['types'] : $interview->types;
-				foreach ($interview_types as $index => $test) {
-					if (
-						($test == 'a/adhd' and in_array('c/adhd', $interview_types)) OR
-						($test == 'p-dep' and in_array('dep', $interview_types)) OR
-						($test == 'p-anx' and in_array('anx', $interview_types)) OR
-						($test == 'p-m/hm' and in_array('m/hm', $interview_types))
-					) {
-						// a/adhd and c/adhd questions come from same ATT CAT-MH item bank, same for perinatal and non-perinatal questions
-						// so the interview interface can't determine between these test types
-						// therefore, combine them into 1 test icon circle in the progress meter
-						continue;
-					}
-					$module->llog("interview test index $index -> $test");
-					if ($index === 0) {
-						echo "<img src='{$circle_images['blue']}' alt='Test ".htmlspecialchars($index, ENT_QUOTES)." progress indicator'>";
-					} else {
-						echo "<img src='{$circle_images['gray']}' alt='Test ".htmlspecialchars($index, ENT_QUOTES)." progress indicator'>";
-					}
+			foreach ($interview_types as $index => $test) {
+				if (
+					($test == 'a/adhd' and in_array('c/adhd', $interview_types)) or
+					($test == 'p-dep' and in_array('dep', $interview_types)) or
+					($test == 'p-anx' and in_array('anx', $interview_types)) or
+					($test == 'p-m/hm' and in_array('m/hm', $interview_types))
+				) {
+					// a/adhd and c/adhd questions come from same ATT CAT-MH item bank, same for perinatal and non-perinatal questions
+					// so the interview interface can't determine between these test types
+					// therefore, combine them into 1 test icon circle in the progress meter
+					continue;
 				}
-				?></div>
+				$module->llog("interview test index $index -> $test");
+				if ($index === 0) {
+					echo "<img src='{$circle_images['blue']}' alt='Test ".htmlspecialchars($index, ENT_QUOTES)." progress indicator'>";
+				} else {
+					echo "<img src='{$circle_images['gray']}' alt='Test ".htmlspecialchars($index, ENT_QUOTES)." progress indicator'>";
+				}
+			}
+			?></div>
 			</div>
 			<?php
-			}
-			?>
+		}
+?>
 
 			<div id='questionNote'></div>
 			<span class='question'></span>
@@ -123,33 +124,32 @@ $circle_images = [
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 		<script type="text/javascript" src="<?= $module->getUrl('js/base.js') ?>"></script>
 		<?php
-			// determine if this interview should hide question numbers
-			$seq_name = htmlentities(urldecode($_GET['sequence']), ENT_QUOTES, 'UTF-8');
-			$seq_index = array_search($seq_name, $module->getProjectSetting('sequence'));
-			$hide_this_seq = $module->getProjectSetting('hide_question_number')[$seq_index];
-			if (empty($hide_this_seq)) {
-				$hide_this_seq = 'false';
-			} else {
-				$hide_this_seq = 'true';
-			}
-            
-            function cleanJsonArray($array) {
-                if(is_array($array) || is_object($array)) {
-					$outputArray = [];
-	                foreach($array as $index => $value) {
-		                $outputArray[htmlspecialchars($index,ENT_QUOTES)] = cleanJsonArray($value);
-					}
-					return $outputArray;
-				}
-                else {
-	                return htmlspecialchars($array, ENT_QUOTES);
-				}
-			}
-            
-            $outputInterview = cleanJsonArray($interview);
-			
-			// give js this info
-			echo "
+// determine if this interview should hide question numbers
+$seq_name = htmlentities(urldecode($_GET['sequence']), ENT_QUOTES, 'UTF-8');
+$seq_index = array_search($seq_name, $module->getProjectSetting('sequence'));
+$hide_this_seq = $module->getProjectSetting('hide_question_number')[$seq_index];
+if (empty($hide_this_seq)) {
+	$hide_this_seq = 'false';
+} else {
+	$hide_this_seq = 'true';
+}
+
+function cleanJsonArray($array) {
+	if (is_array($array) || is_object($array)) {
+		$outputArray = [];
+		foreach ($array as $index => $value) {
+			$outputArray[htmlspecialchars($index, ENT_QUOTES)] = cleanJsonArray($value);
+		}
+		return $outputArray;
+	} else {
+		return htmlspecialchars($array, ENT_QUOTES);
+	}
+}
+
+$outputInterview = cleanJsonArray($interview);
+
+// give js this info
+echo "
 <script type='text/javascript'>
 	$(function() {
 		$('body > div').css('display', 'flex');
@@ -183,6 +183,6 @@ $circle_images = [
 	})
 </script>
 			";
-		?>
+?>
 	</body>
 </html>
