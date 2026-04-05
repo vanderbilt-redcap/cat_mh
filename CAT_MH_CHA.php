@@ -918,7 +918,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule
 	// scheduling
 	public function scheduleSequence($seq_name, $offset, $time_of_day) {
 		// ensure not duplicate scheduled
-		$result = $this->queryLogs("SELECT message, name, offset, time_of_day WHERE message='scheduleSequence' AND name=? AND offset=? AND time_of_day=?", [
+		$result = $this->queryLogs("SELECT message, name, `offset`, time_of_day WHERE message='scheduleSequence' AND name=? AND `offset`=? AND time_of_day=?", [
 			$seq_name,
 			$offset,
 			$time_of_day
@@ -943,7 +943,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule
 	public function unscheduleSequence($seq_name, $offset, $time_of_day) {
 		// removes associated invitations AND reminders
 		// $this->llog("unscheduleSequence: $seq_name, $offset, $time_of_day");
-		return $this->removeLogs("name = ? AND offset = ? AND time_of_day = ?", [
+		return $this->removeLogs("name = ? AND `offset` = ? AND time_of_day = ?", [
 			$seq_name,
 			$offset,
 			$time_of_day
@@ -955,7 +955,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule
 		if (array_key_exists("pid", $_GET) && array_key_exists($_GET['pid'], $this->clearedExpiredSeqByProject)) {
 			return;
 		}
-		$result = $this->queryLogs("SELECT message, name, offset, time_of_day, sent WHERE message='scheduleSequence'");
+		$result = $this->queryLogs("SELECT message, name, `offset`, time_of_day, sent WHERE message='scheduleSequence'");
 
 		$valid_seq_names = array_merge(
 			$this->getProjectSetting('sequence'),
@@ -983,7 +983,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule
 		if (array_key_exists("pid", $_GET) && array_key_exists($_GET['pid'], $this->cachedSequences)) {
 			return $this->cachedSequences[$_GET['pid']];
 		}
-		$result = $this->queryLogs("SELECT message, name, offset, time_of_day, sent WHERE message='scheduleSequence'");
+		$result = $this->queryLogs("SELECT message, name, `offset`, time_of_day, sent WHERE message='scheduleSequence'");
 
 		$sequences = [];
 		while ($row = db_fetch_array($result)) {
@@ -1301,7 +1301,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule
 			}
 
 			// if no invitation sent, send one
-			$sent_count = $this->countLogs("message=? AND record=? AND sequence=? AND offset=? AND time_of_day=?", [
+			$sent_count = $this->countLogs("message=? AND record=? AND sequence=? AND `offset`=? AND time_of_day=?", [
 				'invitationSent',
 				$rid,
 				$name,
@@ -1354,7 +1354,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule
 						continue;
 					}
 
-					$sent_count = $this->countLogs("message=? AND record=? AND sequence=? AND offset=? AND time_of_day=?", [
+					$sent_count = $this->countLogs("message=? AND record=? AND sequence=? AND `offset`=? AND time_of_day=?", [
 						'invitationSent',
 						$rid,
 						$name,
@@ -1362,7 +1362,7 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule
 						$time_of_day
 					]);
 
-					$ignore_count = $this->countLogs("message=? AND record=? AND sequence=? AND offset=? AND time_of_day=?", [
+					$ignore_count = $this->countLogs("message=? AND record=? AND sequence=? AND `offset`=? AND time_of_day=?", [
 						'ignoreReminder',
 						$rid,
 						$name,
