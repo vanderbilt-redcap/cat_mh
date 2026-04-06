@@ -1,20 +1,41 @@
 <?php
+
 if ($_SERVER['REQUEST_METHOD'] != "POST") {
 	exit();
 }
 
 $json = json_decode(file_get_contents("php://input"), true);
 // escape interview data
-if (isset($json['args']['interviewID'])) $json['args']['interviewID'] = db_escape($json['args']['interviewID']);
-if (isset($json['args']['subjectID'])) $json['args']['subjectID'] = db_escape($json['args']['subjectID']);
-if (isset($json['args']['instrument'])) $json['args']['instrument'] = db_escape($json['args']['instrument']);
-if (isset($json['args']['recordID'])) $json['args']['recordID'] = db_escape($json['args']['recordID']);
-if (isset($json['args']['identifier'])) $json['args']['identifier'] = db_escape($json['args']['identifier']);
-if (isset($json['args']['signature'])) $json['args']['signature'] = db_escape($json['args']['signature']);
-if (isset($json['args']['questionID'])) $json['args']['questionID'] = db_escape($json['args']['questionID']);
-if (isset($json['args']['response'])) $json['args']['response'] = db_escape($json['args']['response']);
-if (isset($json['args']['duration'])) $json['args']['duration'] = db_escape($json['args']['duration']);
-if (isset($json['args']['kcat'])) $json['args']['kcat'] = db_escape($json['args']['kcat']);
+if (isset($json['args']['interviewID'])) {
+	$json['args']['interviewID'] = db_escape($json['args']['interviewID']);
+}
+if (isset($json['args']['subjectID'])) {
+	$json['args']['subjectID'] = db_escape($json['args']['subjectID']);
+}
+if (isset($json['args']['instrument'])) {
+	$json['args']['instrument'] = db_escape($json['args']['instrument']);
+}
+if (isset($json['args']['recordID'])) {
+	$json['args']['recordID'] = db_escape($json['args']['recordID']);
+}
+if (isset($json['args']['identifier'])) {
+	$json['args']['identifier'] = db_escape($json['args']['identifier']);
+}
+if (isset($json['args']['signature'])) {
+	$json['args']['signature'] = db_escape($json['args']['signature']);
+}
+if (isset($json['args']['questionID'])) {
+	$json['args']['questionID'] = db_escape($json['args']['questionID']);
+}
+if (isset($json['args']['response'])) {
+	$json['args']['response'] = db_escape($json['args']['response']);
+}
+if (isset($json['args']['duration'])) {
+	$json['args']['duration'] = db_escape($json['args']['duration']);
+}
+if (isset($json['args']['kcat'])) {
+	$json['args']['kcat'] = db_escape($json['args']['kcat']);
+}
 if (isset($json['args']['types'])) {
 	foreach ($json['args']['types'] as &$type) {
 		$type = db_escape($type);

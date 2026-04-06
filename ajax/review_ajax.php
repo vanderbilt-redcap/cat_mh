@@ -1,4 +1,5 @@
 <?php
+
 // $module->llog('post data: ' . print_r($_POST, true));
 $json = new \stdClass();
 $pid = $module->getProjectId();
@@ -17,7 +18,7 @@ if ($module->getKCATSequenceIndex($seq) === false) {
 		$sched_dt,
 		$test_name
 	]);
-	
+
 	if ($reviewed === 'true') {
 		if ($test_reviewed) {
 			$success = true;
@@ -52,7 +53,7 @@ if ($module->getKCATSequenceIndex($seq) === false) {
 		$test_name,
 		$kcat
 	]);
-	
+
 	if ($reviewed === 'true') {
 		if ($test_reviewed) {
 			$success = true;

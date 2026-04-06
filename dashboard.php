@@ -44,7 +44,9 @@ $module->getInterviewStatusIconURLs('blue');
 	}
 ?>
 
-<input type='checkbox' id='show_future_seqs'<?php if ($_SESSION['show_future_seqs']) {echo ' checked';} ?>>
+<input type='checkbox' id='show_future_seqs'<?php if ($_SESSION['show_future_seqs']) {
+	echo ' checked';
+} ?>>
 <label for='show_future_seqs'> Show Future Sequences</label><br>
 
 <table id="records" class="display compact nowrap">
@@ -52,10 +54,10 @@ $module->getInterviewStatusIconURLs('blue');
         <tr>
 			<?php
 			$cols = $module->dashboardColumns;
-			foreach($cols as $i => $name) {
-				echo "<th>$name</th>\n";
-			}
-			?>
+foreach ($cols as $i => $name) {
+	echo "<th>$name</th>\n";
+}
+?>
         </tr>
     </thead>
     <tbody>

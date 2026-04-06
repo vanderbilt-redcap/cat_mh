@@ -14,12 +14,12 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 	<p>No invitations or reminder emails will be sent to participants until an Enrollment Field has been chosen via the External Modules page\'s Configure modal.</p>
 </div>';
 	}
-	if ($module->getProjectSetting('disable_invites')) {
-		echo '
+if ($module->getProjectSetting('disable_invites')) {
+	echo '
 <div class="alert alert-info w-50" role="alert">
 	<h5>Automatic invitation and reminder emails are disabled in the CAT-MH module configuration</h5>
 </div>';
-	}
+}
 ?>
 <div class="card card-body w-75">
 	<h3>Schedule a Sequence</h3>
@@ -32,18 +32,20 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 			<?php
 			// non-kcat sequences
 			$seq_names = $module->getProjectSetting('sequence');
-			foreach ($seq_names as $i => $name) {
-				if (!empty($name))
-					echo "<a class=\"dropdown-item\" href=\"#\">$name</a>";
-			}
-			
-			// kcat
-			$seq_names = $module->getProjectSetting('kcat_sequence');
-			foreach ($seq_names as $i => $name) {
-				if (!empty($name))
-					echo "<a class=\"dropdown-item\" href=\"#\">$name</a>";
-			}
-			?>
+foreach ($seq_names as $i => $name) {
+	if (!empty($name)) {
+		echo "<a class=\"dropdown-item\" href=\"#\">$name</a>";
+	}
+}
+
+// kcat
+$seq_names = $module->getProjectSetting('kcat_sequence');
+foreach ($seq_names as $i => $name) {
+	if (!empty($name)) {
+		echo "<a class=\"dropdown-item\" href=\"#\">$name</a>";
+	}
+}
+?>
 		</div>
 	</div>
 	<div class='row mt-3'>

@@ -1,4 +1,5 @@
 <?php
+
 $json = new \stdClass();
 $pid = $module->getProjectId();
 $rid = $_POST['rid'];
@@ -34,7 +35,7 @@ if ($acknowledged === 'true') {
 			'kcat' => $kcat
 		]);
 	}
-	
+
 	$completed_icon = "<img src='{$module->getInterviewStatusIconURLs('blue')}' class='fstatus' data-color='blue' style='width:16px;margin-right:6px;' alt=''>";
 } else {
 	if (!$existing_ack_count) {
@@ -44,20 +45,21 @@ if ($acknowledged === 'true') {
 		// $module->llog("removing existing ack");
 		$success = $module->removeLogs("message = ? AND sequence = ? AND scheduled_datetime = ? AND subjectID = ? AND kcat = ?", ["acknowledged_delinquent", $seq, $sched_dt, $sid, $kcat]);
 	}
-	
+
 	// change color to return based on interview status
 	$days_to_complete = $module->getProjectSetting('expected_complete')[$module->getSequenceIndex($seq)];
 	$date_to_complete = date("Y-m-d H:i", strtotime("+$days_to_complete days", strtotime($sched_dt)));
 	$completed_within_window = "";
-	if ($time_now >= strtotime($date_to_complete))
+	if ($time_now >= strtotime($date_to_complete)) {
 		$completed_within_window = "N";
-	
+	}
+
 	if (empty($kcat)) {
 		$interview = $module->getSequence($seq, $sched_dt, $sid);
 	} else {
 		$interview = $module->getSequence($seq, $sched_dt, $sid, $kcat);
 	}
-	
+
 	// Completed column	# priority: green (completed) > blue (acknowledged) > yellow (started) > gray/red (incomplete/delinquent)
 	$completed_icon = null;
 	if ($interview->status == 4) {			// append green circle (which itself, is a link to filtered results report)
