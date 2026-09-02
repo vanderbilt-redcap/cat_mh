@@ -482,8 +482,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule
 
 		// get system configuration details
 		$args = [];
-		$args['organizationid'] = $this->getSystemSetting('organizationid');
-		$args['applicationid'] = $this->getSystemSetting('applicationid');
+		$args['organizationid'] = $this->getProjectSetting('project_organizationid') ?? $this->getSystemSetting('organizationid');
+		$args['applicationid'] = $this->getProjectSetting('project_applicationid') ?? $this->getSystemSetting('applicationid');
 		if (!isset($args['organizationid']) or !isset($args['organizationid'])) {
 			echo("Cannot create a new interview. Please have the REDCap administrator configure the application and organization IDs for CAT-MH use.");
 			return;
@@ -1500,8 +1500,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule
 		}
 
 		// ensure system configured
-		$orgID = $this->getSystemSetting('organizationid');
-		$appID = $this->getSystemSetting('applicationid');
+		$orgID = $this->getProjectSetting('project_organizationid') ?? $this->getSystemSetting('organizationid');
+		$appID = $this->getProjectSetting('project_applicationid') ?? $this->getSystemSetting('applicationid');
 		if (empty($appID) or empty($orgID)) {
 			throw new \Exception("Cannot create a new interview pair. Please have the REDCap administrator configure the system-level application and organization IDs for CAT-MH use.");
 			return;

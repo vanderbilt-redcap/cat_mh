@@ -72,6 +72,16 @@
 			"type": "checkbox"
 		},
 		{
+			"key": "project_applicationid",
+			"name": "Application ID override (optional)",
+			"type": "text"
+		},
+		{
+			"key": "project_organizationid",
+			"name": "Organization ID override (optional)",
+			"type": "text"
+		},
+		{
 			"key": "disable_invites",
 			"name": "Disable automatic interview invitation and reminder emails",
 			"type": "checkbox"
