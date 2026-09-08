@@ -21,14 +21,18 @@ The following fields must exist in instruments/forms in the project
 * [subjectid] (of type 'Text Box') -- It is recommended that this field have the @HIDDEN action tag.
 
 * An enrollment date field -- This field can be named anything, and is selected in the External Modules configuration page.
-	
+
 The following field is optional, but required to use the automatic provider email feature:
 * [catmh_provider_email] (of type 'Text Box') -- This is the patient's provider's email address. It is required to send them notification of interview completion and a link to the results.
-	
+
 #### Project Configuration
 You can configure any number of CAT-MH sequences. Each sequence consists of a series of CAT-MH tests that make up a CAT-MH interview.
 
 To do so, go to the "External Modules" page and click "Configure" for the CAT-MH module. You can select any number of tests for a sequence and select whether the interviewee should see the results at the end of their test.
+
+
+- **Application ID override (optional)**: Application ID to be used for this project, if not populated, the module will use the Application ID set in the [System Configuration](#system-configuration-for-redcap-administrators)
+- **Organization ID override (optional)**: Organization ID to be used for this project, if not populated, the module will use the Organization ID set in the [System Configuration](#system-configuration-for-redcap-administrators)
 
 **Interview Storage Field** (optional): select a field to store all interview data for the associated record (interview data is typically stored in the external module log which is not accessible via the API), this field will be updated hourly with the latest data for _all_ interviews associated with the record.
 
@@ -40,7 +44,7 @@ You may also configure the module to automatically invite participants who compl
 Finally, you can specify any number of 'filter fields' and 'do not send fields'; these fields will prevent the module from sending invite/reminder emails to participants if the given field is empty or populated (respectively) for the patient's associated record.
 
 ##### Alternate Labels
-You may also configure an alternate label for any sequence. This alternate label will be shown as the test name to the participant during the interview. 
+You may also configure an alternate label for any sequence. This alternate label will be shown as the test name to the participant during the interview.
 
 Below is an image of an interview results page showing "Wellness Test" as the alternate label for the CAT-MH 'Depression' test type.
 ![Alternate Label Example](/docs/alternate_test_label_results.PNG)
