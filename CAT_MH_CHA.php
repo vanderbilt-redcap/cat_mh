@@ -145,8 +145,8 @@ class CAT_MH_CHA extends \ExternalModules\AbstractExternalModule
 		// in the event that the config has any empty entries for filter-fields,
 		// this prevents erroneously skip the survey entirely
 		// the online designer does not allow fields to be named "0", so no false positives will be excluded
-		$filter_fields = array_filter($this->getProjectSetting('filter-fields'));
-		$do_not_send_fields = array_filter($this->getProjectSetting('do-not-send-fields'));
+		$filter_fields = array_filter($this->getProjectSetting('filter-fields') ?? []);
+		$do_not_send_fields = array_filter(?$this->getProjectSetting('do-not-send-fields') ?? []);
 		$rid_field_name = $this->getRecordIdField();
 
 		// $this->llog("cat-mh redcap_survey_complete called with args:\n" . print_r(func_get_args(), true));
